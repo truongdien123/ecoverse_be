@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"></head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6;">
+<h2>Xin chào <span th:text="${fullName}">Parent</span>,</h2>
+
+<p>Tài khoản Parent của bạn đã được tạo thành công.</p>
+
+<p><b>Thông tin đăng nhập:</b></p>
+<ul>
+    <li>Email: <span th:text="${email}">email</span></li>
+    <li>Mật khẩu tạm thời: <span th:text="${rawPassword}">password</span></li>
+</ul>
+
+<p>
+    Đăng nhập tại:
+    <a th:href="${loginUrl}" th:text="${loginUrl}">Login</a>
+</p>
+
+<p style="color:#b00;"><b>Lưu ý:</b> Vui lòng đổi mật khẩu ngay sau lần đăng nhập đầu tiên.</p>
+
+<hr/>
+<p style="font-size: 12px; color: #666;">Email tự động, vui lòng không trả lời.</p>
+</body>
+</html>
