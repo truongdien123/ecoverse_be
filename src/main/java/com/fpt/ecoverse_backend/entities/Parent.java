@@ -12,7 +12,6 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Parent extends BaseEntity {
 
     @Column(name = "full_name", nullable = false, length = 255)

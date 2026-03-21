@@ -14,7 +14,6 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class CompetitionLink extends BaseEntity {
 
     @Column(name = "is_custom", nullable = false, columnDefinition = "boolean default false")

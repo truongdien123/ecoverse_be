@@ -1,6 +1,7 @@
 package com.fpt.ecoverse_backend.dtos.requests;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,13 +11,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class StudentRequestDto {
-    @JsonProperty("full_name")
-    private String fullName;
+public class StudentLoginRequestDto {
 
-    @JsonProperty("grade")
-    private String grade;
-
-    @JsonProperty("class_number")
-    private String classNumber;
+    @NotBlank(message = "Student code is required")
+    @JsonProperty("student_code")
+    private String studentCode;
 }

@@ -1,6 +1,6 @@
 package com.fpt.ecoverse_backend.exceptions;
 
-import com.fpt.ecoverse_backend.base.ApiResponse;
+import com.fpt.ecoverse_backend.utils.ResponseUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.MessageSource;
@@ -20,31 +20,31 @@ public class ExceptionHandlerConfig {
     }
 
     @ExceptionHandler(value = {NotFoundException.class})
-    public ResponseEntity<ApiResponse<?>> handleNotFoundException(NotFoundException ex) {
+    public ResponseEntity<?> handleNotFoundException(NotFoundException ex) {
         LOG.error(ex.getMessage(), ex);
         String message = ex.getMessage();
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(message));
+        return ResponseUtil.error(HttpStatus.NOT_FOUND, message);
     }
 
     @ExceptionHandler(value = {BadRequestException.class})
-    public ResponseEntity<ApiResponse<?>> handleBadRequestException(BadRequestException ex) {
+    public ResponseEntity<?> handleBadRequestException(BadRequestException ex) {
         LOG.error(ex.getMessage(), ex);
         String message = ex.getMessage();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error(message));
+        return ResponseUtil.error(HttpStatus.BAD_REQUEST, message);
     }
 
     @ExceptionHandler(value = {ForbiddenException.class})
-    public ResponseEntity<ApiResponse<?>> handleForbiddenException(ForbiddenException ex) {
+    public ResponseEntity<?> handleForbiddenException(ForbiddenException ex) {
         LOG.error(ex.getMessage(), ex);
         String message = ex.getMessage();
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error(message));
+        return ResponseUtil.error(HttpStatus.FORBIDDEN, message);
     }
 
     @ExceptionHandler(value = FileHandlingException.class)
-    public ResponseEntity<ApiResponse<?>> handleFileException(FileHandlingException ex) {
+    public ResponseEntity<?> handleFileException(FileHandlingException ex) {
         LOG.error(ex.getMessage(), ex);
         String message = ex.getMessage();
-        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(ApiResponse.error(message));
+        return ResponseUtil.error(HttpStatus.UNSUPPORTED_MEDIA_TYPE, message);
     }
 }
 

@@ -9,8 +9,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class WasteBinRequestDto {
 
     @JsonProperty("code")

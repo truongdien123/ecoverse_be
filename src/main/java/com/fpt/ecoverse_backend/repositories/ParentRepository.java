@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
 import java.util.Set;
 
 @Repository
@@ -15,6 +16,8 @@ public interface ParentRepository extends JpaRepository<Parent, String> {
 
     @Query("select count(p.id) from Parent p where p.partner.id = :partnerId")
     long countParentsByPartnerId(@Param("partnerId") String partnerId);
+
+    Optional<Parent> findByEmail(String email);
 
     boolean existsByEmail(String email);
     boolean existsByPhoneNumber(String phoneNumber);

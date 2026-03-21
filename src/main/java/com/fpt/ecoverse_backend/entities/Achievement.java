@@ -12,7 +12,6 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Achievement extends BaseEntity {
 
     @Column(name = "name", nullable = false, length = 255)

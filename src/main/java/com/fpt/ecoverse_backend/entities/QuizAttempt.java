@@ -4,6 +4,7 @@ import com.fpt.ecoverse_backend.entities.base.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -13,11 +14,6 @@ import java.util.List;
     @Index(name = "idx_quiz_attempts_template_student", columnList = "quiz_template_id,student_id"),
     @Index(name = "idx_quiz_attempts_completed", columnList = "completed")
 })
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class QuizAttempt extends BaseEntity {
 
     @Column(name = "selected_answers_json", columnDefinition = "text")
@@ -51,4 +47,114 @@ public class QuizAttempt extends BaseEntity {
 
     @OneToMany(mappedBy = "quizAttempt", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<QuizPlacement> quizPlacements;
+
+    public QuizAttempt() {
+    }
+
+    public QuizAttempt(String selectedAnswersJson, Integer score, Integer correctAmount, Integer wrongAmount, Boolean completed, Integer duration, Integer attemptNumber, QuizTemplate quizTemplate, Student student, List<QuizPlacement> quizPlacements) {
+        this.selectedAnswersJson = selectedAnswersJson;
+        this.score = score;
+        this.correctAmount = correctAmount;
+        this.wrongAmount = wrongAmount;
+        this.completed = completed;
+        this.duration = duration;
+        this.attemptNumber = attemptNumber;
+        this.quizTemplate = quizTemplate;
+        this.student = student;
+        this.quizPlacements = quizPlacements;
+    }
+
+    public QuizAttempt(String id, LocalDateTime createdAt, LocalDateTime updatedAt, String selectedAnswersJson, Integer score, Integer correctAmount, Integer wrongAmount, Boolean completed, Integer duration, Integer attemptNumber, QuizTemplate quizTemplate, Student student, List<QuizPlacement> quizPlacements) {
+        super(id, createdAt, updatedAt);
+        this.selectedAnswersJson = selectedAnswersJson;
+        this.score = score;
+        this.correctAmount = correctAmount;
+        this.wrongAmount = wrongAmount;
+        this.completed = completed;
+        this.duration = duration;
+        this.attemptNumber = attemptNumber;
+        this.quizTemplate = quizTemplate;
+        this.student = student;
+        this.quizPlacements = quizPlacements;
+    }
+
+    public String getSelectedAnswersJson() {
+        return selectedAnswersJson;
+    }
+
+    public void setSelectedAnswersJson(String selectedAnswersJson) {
+        this.selectedAnswersJson = selectedAnswersJson;
+    }
+
+    public Integer getScore() {
+        return score;
+    }
+
+    public void setScore(Integer score) {
+        this.score = score;
+    }
+
+    public Integer getCorrectAmount() {
+        return correctAmount;
+    }
+
+    public void setCorrectAmount(Integer correctAmount) {
+        this.correctAmount = correctAmount;
+    }
+
+    public Integer getWrongAmount() {
+        return wrongAmount;
+    }
+
+    public void setWrongAmount(Integer wrongAmount) {
+        this.wrongAmount = wrongAmount;
+    }
+
+    public Boolean getCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(Boolean completed) {
+        this.completed = completed;
+    }
+
+    public Integer getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Integer duration) {
+        this.duration = duration;
+    }
+
+    public Integer getAttemptNumber() {
+        return attemptNumber;
+    }
+
+    public void setAttemptNumber(Integer attemptNumber) {
+        this.attemptNumber = attemptNumber;
+    }
+
+    public QuizTemplate getQuizTemplate() {
+        return quizTemplate;
+    }
+
+    public void setQuizTemplate(QuizTemplate quizTemplate) {
+        this.quizTemplate = quizTemplate;
+    }
+
+    public Student getStudent() {
+        return student;
+    }
+
+    public void setStudent(Student student) {
+        this.student = student;
+    }
+
+    public List<QuizPlacement> getQuizPlacements() {
+        return quizPlacements;
+    }
+
+    public void setQuizPlacements(List<QuizPlacement> quizPlacements) {
+        this.quizPlacements = quizPlacements;
+    }
 }

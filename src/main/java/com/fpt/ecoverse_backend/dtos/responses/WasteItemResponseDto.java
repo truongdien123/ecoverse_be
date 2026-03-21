@@ -9,8 +9,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class WasteItemResponseDto {
 
     @JsonProperty("id")
@@ -30,6 +30,4 @@ public class WasteItemResponseDto {
 
     @JsonProperty("created_by")
     private String createdBy;
-
-
 }

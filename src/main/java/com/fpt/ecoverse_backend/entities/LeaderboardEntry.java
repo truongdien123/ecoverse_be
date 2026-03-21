@@ -11,7 +11,6 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class LeaderboardEntry extends BaseEntity {
 
     @Enumerated(EnumType.STRING)

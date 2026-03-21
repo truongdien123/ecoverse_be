@@ -17,7 +17,6 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class WasteBin extends BaseEntity {
 
     @Enumerated(EnumType.STRING)

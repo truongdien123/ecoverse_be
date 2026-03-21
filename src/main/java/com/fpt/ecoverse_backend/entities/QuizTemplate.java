@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "quiz_templates", indexes = {
@@ -17,7 +16,6 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class QuizTemplate extends BaseEntity {
 
     @Column(name = "title", nullable = false, length = 255)

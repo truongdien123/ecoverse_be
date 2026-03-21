@@ -22,6 +22,7 @@ public interface PartnerMapper {
             @Mapping(target = "address", source = "address"),
             @Mapping(target = "contactPerson", source = "contactPerson")
     })
+
     Partner toPartner(PartnerRegisterRequestDto request, @Context UploadFile uploadFile);
 
     @Mappings({
@@ -47,7 +48,7 @@ public interface PartnerMapper {
     void toPartner(@MappingTarget Partner partner, PartnerUpdateRequestDto request, @Context UploadFile uploadFile);
 
     @Named("convertImg")
-    static String convertImage(MultipartFile multipartFile, @Context UploadFile uploadFile) {
+    static String convertImg(MultipartFile multipartFile, @Context UploadFile uploadFile) {
         if (multipartFile == null) {
             return "";
         }

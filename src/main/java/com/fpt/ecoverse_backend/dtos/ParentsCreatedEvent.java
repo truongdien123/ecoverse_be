@@ -1,12 +1,10 @@
 package com.fpt.ecoverse_backend.dtos;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Value;
 
 import java.util.List;
 
-@Getter
-@AllArgsConstructor
+@Value
 public class ParentsCreatedEvent {
-    private final List<ParentCredentialMail> mails;
+    List<ParentCredentialMail> mails;
 }
