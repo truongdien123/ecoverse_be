@@ -39,4 +39,8 @@ public class WasteItem extends BaseEntity {
 
     @OneToMany(mappedBy = "wasteItem", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GamePlacement> gamePlacements;
+
+    @ManyToOne
+    @JoinColumn(name = "partner_id")
+    private Partner partner;
 }
