@@ -17,4 +17,7 @@ public interface WasteItemRepository extends JpaRepository<WasteItem, String> {
 
     @Query("select w from WasteItem w where w.partner.id = :partnerId")
     Optional<WasteItem> findWasteItemByPartnerId(String partnerId);
+
+    @Query("select w from WasteItem w where w.id in :ids")
+    List<WasteItem> findWasteItemByIds(List<String> ids);
 }
