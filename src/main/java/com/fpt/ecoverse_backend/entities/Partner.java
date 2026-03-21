@@ -63,4 +63,7 @@ public class Partner extends BaseEntity {
 
     @OneToMany(mappedBy = "partner", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Competition> competitions;
+
+    @OneToMany(mappedBy = "partner", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WasteItem> wasteItems;
 }

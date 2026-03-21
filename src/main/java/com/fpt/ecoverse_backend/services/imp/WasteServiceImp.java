@@ -78,9 +78,9 @@ public class WasteServiceImp implements WasteService {
 
     @Override
     public List<WasteItemResponseDto> getWasteItems(String userId) {
-//        Role userRole = getUserRole(userId);
-
-        return List.of();
+        CreatedBy userRole = getUserRole(userId);
+        List<WasteItem> wasteItems = wasteItemRepository.findWasteItems(userRole, userId);
+        return wasteItems.stream().map(wasteItemMapper::toWasteItemResponse).toList();
     }
 
     private CreatedBy getUserRole(String userId) {
