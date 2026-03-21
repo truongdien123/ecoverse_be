@@ -11,13 +11,14 @@ import org.springframework.web.multipart.MultipartFile;
 public interface WasteBinMapper {
 
     @Mappings({
-            @Mapping(target = "code", source = "code"),
-            @Mapping(target = "displayName", source = "displayName"),
-            @Mapping(target = "colorHex", source = "colorHex"),
-            @Mapping(target = "description", source = "description"),
-            @Mapping(target = "iconUrl", source = "icon", qualifiedByName = "convertImg")
+            @Mapping(target = "code", source = "request.code"),
+            @Mapping(target = "displayName", source = "request.displayName"),
+            @Mapping(target = "colorHex", source = "request.colorHex"),
+            @Mapping(target = "description", source = "request.description"),
+            @Mapping(target = "iconUrl", source = "request.icon", qualifiedByName = "convertImg"),
+            @Mapping(target = "id", source = "id")
     })
-    WasteBin toWasteBin(WasteBinRequestDto request, @Context UploadFile uploadFile);
+    WasteBin toWasteBin(WasteBinRequestDto request, String id, @Context UploadFile uploadFile);
 
     @Mappings({
             @Mapping(target = "id", source = "id"),
