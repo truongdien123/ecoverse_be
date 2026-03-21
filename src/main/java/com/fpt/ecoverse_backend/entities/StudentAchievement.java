@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class StudentAchievement extends BaseEntity {
 
     @Column(name = "awarded_at")

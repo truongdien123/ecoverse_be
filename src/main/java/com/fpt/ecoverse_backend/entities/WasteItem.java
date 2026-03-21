@@ -15,7 +15,6 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class WasteItem extends BaseEntity {
 
     @Column(name = "name", nullable = false, length = 255)

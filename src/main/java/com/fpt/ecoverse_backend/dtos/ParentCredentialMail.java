@@ -1,12 +1,10 @@
 package com.fpt.ecoverse_backend.dtos;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Value;
 
-@Getter
-@AllArgsConstructor
+@Value
 public class ParentCredentialMail {
-    private final String email;
-    private final String fullName;
-    private final String rawPassword;
+    String email;
+    String fullName;
+    String rawPassword;
 }

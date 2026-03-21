@@ -1,21 +1,19 @@
 package com.fpt.ecoverse_backend.dtos;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Value;
 
-@Getter
-@AllArgsConstructor
+@Value
 public class RowResult<T> {
-    private final int rowNumber;
-    private final T data;
-    private final boolean success;
-    private final String message;
+    int rowNumber;
+    T data;
+    boolean success;
+    String message;
 
     public static <T> RowResult<T> success(int rowNumber, T data, String message) {
-        return new RowResult<>(rowNumber, data, true, message);
+        return new RowResult<T>(rowNumber, data, true, message);
     }
 
     public static <T> RowResult<T> failed(int rowNumber, T data, String message) {
-        return new RowResult<>(rowNumber, data, false, message);
+        return new RowResult<T>(rowNumber, data, false, message);
     }
 }

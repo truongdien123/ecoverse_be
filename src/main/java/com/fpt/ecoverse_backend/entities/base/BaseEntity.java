@@ -1,15 +1,11 @@
 package com.fpt.ecoverse_backend.entities.base;
 
 import jakarta.persistence.*;
-import lombok.*;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+
 @MappedSuperclass
 public abstract class BaseEntity implements Serializable {
 
@@ -36,5 +32,38 @@ public abstract class BaseEntity implements Serializable {
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public BaseEntity() {
+    }
+
+    public BaseEntity(String id, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

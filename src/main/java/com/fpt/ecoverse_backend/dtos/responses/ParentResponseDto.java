@@ -8,8 +8,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class ParentResponseDto {
 
     @JsonProperty("parent_id")
@@ -26,5 +26,11 @@ public class ParentResponseDto {
 
     @JsonProperty("email")
     private String email;
+
+    @JsonProperty("avatar_url")
+    private String avatarUrl;
+
+    @JsonProperty("active")
+    private Boolean active;
 }
 

@@ -13,7 +13,6 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Partner extends BaseEntity {
 
     @Column(name = "email", nullable = false, length = 255, unique = true)
@@ -22,7 +21,7 @@ public class Partner extends BaseEntity {
     @Column(name = "phone_number", length = 20)
     private String phoneNumber;
 
-    @Column(name = "avatar_url", length = 50)
+    @Column(name = "avatar_url")
     private String avatarUrl;
 
     @Column(name = "password", nullable = false, length = 255)

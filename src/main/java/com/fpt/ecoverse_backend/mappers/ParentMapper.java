@@ -8,7 +8,6 @@ import org.mapstruct.Mappings;
 
 @Mapper(componentModel = "spring")
 public interface ParentMapper {
-
     @Mappings({
             @Mapping(target = "fullName", source = "fullName"),
             @Mapping(target = "phoneNumber", source = "phoneNumber"),

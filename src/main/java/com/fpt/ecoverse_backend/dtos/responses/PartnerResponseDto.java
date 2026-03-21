@@ -51,5 +51,6 @@ public class PartnerResponseDto {
 
     @JsonProperty("statistics")
     private StatisticPartner statistics;
+
 }
 

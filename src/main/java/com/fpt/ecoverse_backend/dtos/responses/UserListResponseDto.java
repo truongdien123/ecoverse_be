@@ -10,8 +10,8 @@ import java.util.List;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class UserListResponseDto<T> {
     @JsonProperty("list")
     private List<T> list;

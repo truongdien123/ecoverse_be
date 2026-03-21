@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class BulkCreateReportResponseDto {
     @JsonProperty("type")
     private String type;

@@ -13,7 +13,6 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class GameRoundItem extends BaseEntity {
 
     @Column(name = "order_index", columnDefinition = "integer default 0")

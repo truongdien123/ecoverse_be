@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class CompetitionParticipant extends BaseEntity {
 
     @Column(name = "joined_at", nullable = false)

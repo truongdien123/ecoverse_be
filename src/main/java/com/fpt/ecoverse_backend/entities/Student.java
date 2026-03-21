@@ -12,7 +12,6 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Student extends BaseEntity {
 
     @Column(name = "full_name", nullable = false, length = 255)
@@ -21,7 +20,7 @@ public class Student extends BaseEntity {
     @Column(name = "grade", length = 10)
     private String grade;
 
-    @Column(name = "avatar_url", length = 50)
+    @Column(name = "avatar_url")
     private String avatarUrl;
 
     @Column(name = "active", nullable = false, columnDefinition = "boolean default true")

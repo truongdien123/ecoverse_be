@@ -8,11 +8,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface StudentRepository extends JpaRepository<Student, String> {
 
     @Query("select count(st.id) from Student st where st.partner.id = :partnerId")
     long countStudentByPartnerId(@Param("partnerId") String partnerId);
+
+    Optional<Student> findByStudentCode(String studentCode);
 
     @Query(
             "select s from Student s " +

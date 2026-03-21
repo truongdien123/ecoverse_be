@@ -4,6 +4,7 @@ import com.fpt.ecoverse_backend.entities.base.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -13,11 +14,6 @@ import java.util.List;
     @Index(name = "idx_game_attempts_round_student", columnList = "game_round_id,student_id"),
     @Index(name = "idx_game_attempts_completed", columnList = "completed")
 })
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class GameAttempt extends BaseEntity {
 
     @Column(name = "duration")
@@ -48,4 +44,104 @@ public class GameAttempt extends BaseEntity {
 
     @OneToMany(mappedBy = "gameAttempt", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GamePlacement> gamePlacements;
+
+    public GameAttempt() {
+    }
+
+    public GameAttempt(Integer duration, Integer pointsEarned, Integer correctCount, Integer totalItems, Integer attemptNumber, Boolean completed, GameRound gameRound, Student student, List<GamePlacement> gamePlacements) {
+        this.duration = duration;
+        this.pointsEarned = pointsEarned;
+        this.correctCount = correctCount;
+        this.totalItems = totalItems;
+        this.attemptNumber = attemptNumber;
+        this.completed = completed;
+        this.gameRound = gameRound;
+        this.student = student;
+        this.gamePlacements = gamePlacements;
+    }
+
+    public GameAttempt(String id, LocalDateTime createdAt, LocalDateTime updatedAt, Integer duration, Integer pointsEarned, Integer correctCount, Integer totalItems, Integer attemptNumber, Boolean completed, GameRound gameRound, Student student, List<GamePlacement> gamePlacements) {
+        super(id, createdAt, updatedAt);
+        this.duration = duration;
+        this.pointsEarned = pointsEarned;
+        this.correctCount = correctCount;
+        this.totalItems = totalItems;
+        this.attemptNumber = attemptNumber;
+        this.completed = completed;
+        this.gameRound = gameRound;
+        this.student = student;
+        this.gamePlacements = gamePlacements;
+    }
+
+    public Integer getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Integer duration) {
+        this.duration = duration;
+    }
+
+    public Integer getPointsEarned() {
+        return pointsEarned;
+    }
+
+    public void setPointsEarned(Integer pointsEarned) {
+        this.pointsEarned = pointsEarned;
+    }
+
+    public Integer getCorrectCount() {
+        return correctCount;
+    }
+
+    public void setCorrectCount(Integer correctCount) {
+        this.correctCount = correctCount;
+    }
+
+    public Integer getTotalItems() {
+        return totalItems;
+    }
+
+    public void setTotalItems(Integer totalItems) {
+        this.totalItems = totalItems;
+    }
+
+    public Integer getAttemptNumber() {
+        return attemptNumber;
+    }
+
+    public void setAttemptNumber(Integer attemptNumber) {
+        this.attemptNumber = attemptNumber;
+    }
+
+    public Boolean getCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(Boolean completed) {
+        this.completed = completed;
+    }
+
+    public GameRound getGameRound() {
+        return gameRound;
+    }
+
+    public void setGameRound(GameRound gameRound) {
+        this.gameRound = gameRound;
+    }
+
+    public Student getStudent() {
+        return student;
+    }
+
+    public void setStudent(Student student) {
+        this.student = student;
+    }
+
+    public List<GamePlacement> getGamePlacements() {
+        return gamePlacements;
+    }
+
+    public void setGamePlacements(List<GamePlacement> gamePlacements) {
+        this.gamePlacements = gamePlacements;
+    }
 }

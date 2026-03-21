@@ -16,7 +16,6 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class GameRound extends BaseEntity {
 
     @Column(name = "title", nullable = false, length = 255)

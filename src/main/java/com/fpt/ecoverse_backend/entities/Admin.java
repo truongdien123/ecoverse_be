@@ -10,7 +10,6 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Admin extends BaseEntity {
 
     @Column(name = "full_name", nullable = false, length = 255)

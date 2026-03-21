@@ -1,11 +1,9 @@
 package com.fpt.ecoverse_backend.dtos;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Value;
 
-@Getter
-@AllArgsConstructor
+@Value
 public class RowInput<T> {
-    private final int excelRowNumber;
-    private final T dto;
+    int excelRowNumber;
+    T dto;
 }

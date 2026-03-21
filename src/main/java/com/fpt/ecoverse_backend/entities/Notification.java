@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Notification extends BaseEntity {
 
     @Column(name = "user_id", nullable = false, length = 36)

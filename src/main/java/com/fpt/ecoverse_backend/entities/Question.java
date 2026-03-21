@@ -14,7 +14,6 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Question extends BaseEntity {
 
     @Column(name = "text", nullable = false, columnDefinition = "text")

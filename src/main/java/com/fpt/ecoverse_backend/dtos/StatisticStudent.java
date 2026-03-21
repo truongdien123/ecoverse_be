@@ -8,8 +8,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class StatisticStudent {
     @JsonProperty("total_games_played")
     private int totalGamesPlayed;
