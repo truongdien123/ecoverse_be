@@ -122,6 +122,27 @@ public class WasteServiceImp implements WasteService {
         return wasteBinMapper.toWasteBinResponse(wasteBinOptional.get());
     }
 
+    @Override
+    public WasteItemResponseDto deleteWasteItem(String userId, String wasteItemId) {
+        CreatedBy userRole = getUserRole(userId);
+        Optional<WasteItem> wasteItemOptional;
+        if (userRole == CreatedBy.PARTNERSHIP) {
+            wasteItemOptional = wasteItemRepository.findWasteItemByPartnerId(userId);
+            if (wasteItemOptional.isEmpty()) {
+                throw new NotFoundException("Waste item not found");
+            }
+            wasteItemRepository.delete(wasteItemOptional.get());
+            return wasteItemMapper.toWasteItemResponse(wasteItemOptional.get());
+        } else {
+            wasteItemOptional = wasteItemRepository.findById(wasteItemId);
+            if (wasteItemOptional.isEmpty()) {
+                throw new NotFoundException("Waste item not found");
+            }
+            wasteItemRepository.delete(wasteItemOptional.get());
+            return wasteItemMapper.toWasteItemResponse(wasteItemOptional.get());
+        }
+    }
+
     private CreatedBy getUserRole(String userId) {
         if (adminRepository.existsById(userId)) {
             return CreatedBy.ADMIN;

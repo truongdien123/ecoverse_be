@@ -15,4 +15,5 @@ public interface WasteService {
     List<WasteItemResponseDto> getWasteItems(String userId);
     WasteItemResponseDto updateWasteItem(String userId, String wasteItemId, WasteItemRequestDto request);
     WasteBinResponseDto updateWasteBin(String adminId, String wasteBinId, WasteBinRequestDto request);
+    WasteItemResponseDto deleteWasteItem(String userId, String wasteItemId);
 }
