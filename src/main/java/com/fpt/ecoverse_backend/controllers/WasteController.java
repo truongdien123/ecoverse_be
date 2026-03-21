@@ -40,4 +40,10 @@ public class WasteController {
     public ResponseEntity<?> getWasteItems(@PathVariable("user_id") String userId) {
         return ResponseUtil.success("Get waste items successfully", wasteService.getWasteItems(userId));
     }
+
+    @PutMapping("/items/{waste_item_id}/users/{user_id}")
+    public ResponseEntity<?> updateWasteItem(@PathVariable("user_id") String userId, @PathVariable("waste_item_id") String wasteItemId, WasteItemRequestDto request) {
+        WasteItemResponseDto response = wasteService.updateWasteItem(userId, wasteItemId, request);
+        return ResponseUtil.success("Update waste item successfully", response);
+    }
 }

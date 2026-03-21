@@ -11,11 +11,12 @@ import org.springframework.web.multipart.MultipartFile;
 public interface WasteItemMapper {
 
     @Mappings({
-            @Mapping(target = "name", source = "name"),
-            @Mapping(target = "description", source = "description"),
-            @Mapping(target = "imageUrl", source = "image", qualifiedByName = "convertImg")
+            @Mapping(target = "name", source = "request.name"),
+            @Mapping(target = "description", source = "request.description"),
+            @Mapping(target = "imageUrl", source = "request.image", qualifiedByName = "convertImg"),
+            @Mapping(target = "id", source = "id")
     })
-    WasteItem toWasteItem(WasteItemRequestDto request, @Context UploadFile uploadFile);
+    WasteItem toWasteItem(WasteItemRequestDto request, String id, @Context UploadFile uploadFile);
 
     @Mappings({
             @Mapping(target = "name", source = "name"),

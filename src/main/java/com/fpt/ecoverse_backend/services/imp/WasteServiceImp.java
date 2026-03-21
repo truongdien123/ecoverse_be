@@ -46,7 +46,7 @@ public class WasteServiceImp implements WasteService {
     @Override
     public WasteItemResponseDto createWasteItem(String userId, WasteItemRequestDto request) {
         CreatedBy userRole = getUserRole(userId);
-        WasteItem wasteItem = wasteItemMapper.toWasteItem(request, uploadFile);
+        WasteItem wasteItem = wasteItemMapper.toWasteItem(request, null, uploadFile);
         wasteItem.setCreatedBy(userRole);
         Optional<WasteBin> wasteBin = wasteBinRepository.findByCode(request.getCorrectBinCode());
         if (wasteBin.isEmpty()) {
@@ -81,6 +81,29 @@ public class WasteServiceImp implements WasteService {
         CreatedBy userRole = getUserRole(userId);
         List<WasteItem> wasteItems = wasteItemRepository.findWasteItems(userRole, userId);
         return wasteItems.stream().map(wasteItemMapper::toWasteItemResponse).toList();
+    }
+
+    @Override
+    public WasteItemResponseDto updateWasteItem(String userId, String wasteItemId, WasteItemRequestDto request) {
+        CreatedBy userRole = getUserRole(userId);
+        Optional<WasteItem> wasteItemOptional;
+        if (userRole == CreatedBy.PARTNERSHIP) {
+            wasteItemOptional = wasteItemRepository.findWasteItemByPartnerId(userId);
+            if (wasteItemOptional.isEmpty()) {
+                throw new NotFoundException("Waste item not found");
+            }
+            wasteItemMapper.toWasteItem(request, wasteItemOptional.get().getId(), uploadFile);
+            wasteItemRepository.save(wasteItemOptional.get());
+            return wasteItemMapper.toWasteItemResponse(wasteItemOptional.get());
+        } else {
+            wasteItemOptional = wasteItemRepository.findById(wasteItemId);
+            if (wasteItemOptional.isEmpty()) {
+                throw new NotFoundException("Waste item not found");
+            }
+            wasteItemMapper.toWasteItem(request, wasteItemOptional.get().getId(), uploadFile);
+            wasteItemRepository.save(wasteItemOptional.get());
+            return wasteItemMapper.toWasteItemResponse(wasteItemOptional.get());
+        }
     }
 
     private CreatedBy getUserRole(String userId) {
