@@ -46,8 +46,8 @@ public class PartnerController {
         return ResponseUtil.success("Update partner successfully", response);
     }
 
-    @PostMapping("/{partnership_id}/bulk-create")
-    public ResponseEntity<?> bulkCreate(@PathVariable("partnership_id") String partnerId, @RequestParam("file") MultipartFile file) {
+    @PostMapping(value = "/{partnership_id}/bulk-create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> bulkCreate(@PathVariable("partnership_id") String partnerId, @ModelAttribute @RequestParam("file") MultipartFile file) {
         BulkCreateReportResponseDto response = partnerService.bulkCreate(file, partnerId);
         return ResponseUtil.success("Bulk create students and parent successfully. Please check file report", response);
     }
