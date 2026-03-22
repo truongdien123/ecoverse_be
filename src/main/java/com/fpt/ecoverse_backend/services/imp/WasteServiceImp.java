@@ -8,6 +8,7 @@ import com.fpt.ecoverse_backend.entities.Admin;
 import com.fpt.ecoverse_backend.entities.WasteBin;
 import com.fpt.ecoverse_backend.entities.WasteItem;
 import com.fpt.ecoverse_backend.enums.CreatedBy;
+import com.fpt.ecoverse_backend.exceptions.ForbiddenException;
 import com.fpt.ecoverse_backend.exceptions.NotFoundException;
 import com.fpt.ecoverse_backend.mappers.WasteBinMapper;
 import com.fpt.ecoverse_backend.mappers.WasteItemMapper;
@@ -66,7 +67,7 @@ public class WasteServiceImp implements WasteService {
         if (admin.isEmpty()) {
             throw new NotFoundException("Admin not found");
         }
-        WasteBin wasteBin = wasteBinMapper.toWasteBin(request, uploadFile);
+        WasteBin wasteBin = wasteBinMapper.toWasteBin(request, null, uploadFile);
         wasteBinRepository.save(wasteBin);
         return wasteBinMapper.toWasteBinResponse(wasteBin);
     }
@@ -102,6 +103,42 @@ public class WasteServiceImp implements WasteService {
             }
             wasteItemMapper.toWasteItem(request, wasteItemOptional.get().getId(), uploadFile);
             wasteItemRepository.save(wasteItemOptional.get());
+            return wasteItemMapper.toWasteItemResponse(wasteItemOptional.get());
+        }
+    }
+
+    @Override
+    public WasteBinResponseDto updateWasteBin(String adminId, String wasteBinId, WasteBinRequestDto request) {
+        CreatedBy userRole = getUserRole(adminId);
+        if (userRole != CreatedBy.ADMIN) {
+            throw new ForbiddenException("Only admin can update waste bin");
+        }
+        Optional<WasteBin> wasteBinOptional = wasteBinRepository.findById(wasteBinId);
+        if (wasteBinOptional.isEmpty()) {
+            throw new NotFoundException("Waste bin not found");
+        }
+        wasteBinMapper.toWasteBin(request, wasteBinOptional.get().getId(), uploadFile);
+        wasteBinRepository.save(wasteBinOptional.get());
+        return wasteBinMapper.toWasteBinResponse(wasteBinOptional.get());
+    }
+
+    @Override
+    public WasteItemResponseDto deleteWasteItem(String userId, String wasteItemId) {
+        CreatedBy userRole = getUserRole(userId);
+        Optional<WasteItem> wasteItemOptional;
+        if (userRole == CreatedBy.PARTNERSHIP) {
+            wasteItemOptional = wasteItemRepository.findWasteItemByPartnerId(userId);
+            if (wasteItemOptional.isEmpty()) {
+                throw new NotFoundException("Waste item not found");
+            }
+            wasteItemRepository.delete(wasteItemOptional.get());
+            return wasteItemMapper.toWasteItemResponse(wasteItemOptional.get());
+        } else {
+            wasteItemOptional = wasteItemRepository.findById(wasteItemId);
+            if (wasteItemOptional.isEmpty()) {
+                throw new NotFoundException("Waste item not found");
+            }
+            wasteItemRepository.delete(wasteItemOptional.get());
             return wasteItemMapper.toWasteItemResponse(wasteItemOptional.get());
         }
     }

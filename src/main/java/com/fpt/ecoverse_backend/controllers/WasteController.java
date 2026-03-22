@@ -46,4 +46,16 @@ public class WasteController {
         WasteItemResponseDto response = wasteService.updateWasteItem(userId, wasteItemId, request);
         return ResponseUtil.success("Update waste item successfully", response);
     }
+
+    @PutMapping("/bins/{waste_bin_id}/admins/{admin_id}")
+    public ResponseEntity<?> updateWasteBin(@PathVariable("admin_id") String adminId, @PathVariable("waste_bin_id") String wasteBinId, WasteBinRequestDto request) {
+        WasteBinResponseDto response = wasteService.updateWasteBin(adminId, wasteBinId, request);
+        return ResponseUtil.success("Update waste bin successfully", response);
+    }
+
+    @DeleteMapping("/items/{waste_item_id}/users/{user_id}")
+    public ResponseEntity<?> deleteWasteItem(@PathVariable("user_id") String userId, @PathVariable("waste_item_id") String wasteItemId) {
+        WasteItemResponseDto response = wasteService.deleteWasteItem(userId, wasteItemId);
+        return ResponseUtil.success("Delete waste item successfully", response);
+    }
 }
