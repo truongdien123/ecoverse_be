@@ -4,7 +4,7 @@ import com.fpt.ecoverse_backend.dtos.requests.WasteBinRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.WasteItemRequestDto;
 import com.fpt.ecoverse_backend.dtos.responses.WasteBinResponseDto;
 import com.fpt.ecoverse_backend.dtos.responses.WasteItemResponseDto;
-import com.fpt.ecoverse_backend.entities.Admin;
+import com.fpt.ecoverse_backend.entities.User;
 import com.fpt.ecoverse_backend.entities.WasteBin;
 import com.fpt.ecoverse_backend.entities.WasteItem;
 import com.fpt.ecoverse_backend.enums.CreatedBy;
@@ -12,8 +12,8 @@ import com.fpt.ecoverse_backend.exceptions.ForbiddenException;
 import com.fpt.ecoverse_backend.exceptions.NotFoundException;
 import com.fpt.ecoverse_backend.mappers.WasteBinMapper;
 import com.fpt.ecoverse_backend.mappers.WasteItemMapper;
-import com.fpt.ecoverse_backend.repositories.AdminRepository;
 import com.fpt.ecoverse_backend.repositories.PartnerRepository;
+import com.fpt.ecoverse_backend.repositories.UserRepository;
 import com.fpt.ecoverse_backend.repositories.WasteBinRepository;
 import com.fpt.ecoverse_backend.repositories.WasteItemRepository;
 import com.fpt.ecoverse_backend.services.WasteService;
@@ -28,16 +28,16 @@ public class WasteServiceImp implements WasteService {
 
     private final WasteItemRepository wasteItemRepository;
     private final WasteItemMapper wasteItemMapper;
-    private final AdminRepository adminRepository;
+    private final UserRepository userRepository;
     private final PartnerRepository partnerRepository;
     private final UploadFile uploadFile;
     private final WasteBinRepository wasteBinRepository;
     private final WasteBinMapper wasteBinMapper;
 
-    public WasteServiceImp(WasteItemRepository wasteItemRepository, WasteItemMapper wasteItemMapper, AdminRepository adminRepository, PartnerRepository partnerRepository, UploadFile uploadFile, WasteBinRepository wasteBinRepository, WasteBinMapper wasteBinMapper) {
+    public WasteServiceImp(WasteItemRepository wasteItemRepository, WasteItemMapper wasteItemMapper, UserRepository userRepository, PartnerRepository partnerRepository, UploadFile uploadFile, WasteBinRepository wasteBinRepository, WasteBinMapper wasteBinMapper) {
         this.wasteItemRepository = wasteItemRepository;
         this.wasteItemMapper = wasteItemMapper;
-        this.adminRepository = adminRepository;
+        this.userRepository = userRepository;
         this.partnerRepository = partnerRepository;
         this.uploadFile = uploadFile;
         this.wasteBinRepository = wasteBinRepository;
@@ -63,7 +63,7 @@ public class WasteServiceImp implements WasteService {
 
     @Override
     public WasteBinResponseDto createWasteBin(String adminId, WasteBinRequestDto request) {
-        Optional<Admin> admin = adminRepository.findById(adminId);
+        Optional<User> admin = userRepository.findById(adminId);
         if (admin.isEmpty()) {
             throw new NotFoundException("Admin not found");
         }
@@ -144,9 +144,9 @@ public class WasteServiceImp implements WasteService {
     }
 
     private CreatedBy getUserRole(String userId) {
-        if (adminRepository.existsById(userId)) {
+        if (userRepository.existsById(userId)) {
             return CreatedBy.ADMIN;
-        } else if (partnerRepository.existsById(userId)) {
+        } else if (userRepository.existsById(userId)) {
             return CreatedBy.PARTNERSHIP;
         } else {
             throw new NotFoundException("User not found");

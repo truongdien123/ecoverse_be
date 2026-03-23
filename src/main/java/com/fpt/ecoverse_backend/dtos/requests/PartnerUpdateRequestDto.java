@@ -16,13 +16,13 @@ public class PartnerUpdateRequestDto {
     @JsonProperty("organization_name")
     private String organizationName;
 
-    @JsonProperty("phone_number")
-    private String phoneNumber;
-
     @JsonProperty("contact_person")
     private String contactPerson;
 
     @JsonProperty("avatar")
     private MultipartFile avatar;
+
+    @JsonProperty("address")
+    private String address;
 }
 

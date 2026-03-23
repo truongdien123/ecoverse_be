@@ -3,34 +3,33 @@ package com.fpt.ecoverse_backend.services.imp;
 import com.fpt.ecoverse_backend.dtos.requests.GameRoundRequestDto;
 import com.fpt.ecoverse_backend.dtos.responses.GameRoundItemResponseDto;
 import com.fpt.ecoverse_backend.dtos.responses.GameRoundResponseDto;
-import com.fpt.ecoverse_backend.entities.GameRound;
-import com.fpt.ecoverse_backend.entities.GameRoundItem;
-import com.fpt.ecoverse_backend.entities.Partner;
-import com.fpt.ecoverse_backend.entities.WasteItem;
+import com.fpt.ecoverse_backend.entities.*;
 import com.fpt.ecoverse_backend.enums.CreatedBy;
+import com.fpt.ecoverse_backend.enums.UserType;
 import com.fpt.ecoverse_backend.exceptions.NotFoundException;
 import com.fpt.ecoverse_backend.mappers.GameRoundMapper;
-import com.fpt.ecoverse_backend.repositories.AdminRepository;
 import com.fpt.ecoverse_backend.repositories.GameRoundRepository;
 import com.fpt.ecoverse_backend.repositories.PartnerRepository;
+import com.fpt.ecoverse_backend.repositories.UserRepository;
 import com.fpt.ecoverse_backend.repositories.WasteItemRepository;
 import com.fpt.ecoverse_backend.services.GameService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class GameServiceImp implements GameService {
 
-    private final AdminRepository adminRepository;
+    private final UserRepository userRepository;
     private final PartnerRepository partnerRepository;
     private final GameRoundRepository gameRoundRepository;
     private final GameRoundMapper gameRoundMapper;
     private final WasteItemRepository wasteItemRepository;
 
-    public GameServiceImp(AdminRepository adminRepository, PartnerRepository partnerRepository, GameRoundRepository gameRoundRepository, GameRoundMapper gameRoundMapper, WasteItemRepository wasteItemRepository) {
-        this.adminRepository = adminRepository;
+    public GameServiceImp(UserRepository userRepository, PartnerRepository partnerRepository, GameRoundRepository gameRoundRepository, GameRoundMapper gameRoundMapper, WasteItemRepository wasteItemRepository) {
+        this.userRepository = userRepository;
         this.partnerRepository = partnerRepository;
         this.gameRoundRepository = gameRoundRepository;
         this.gameRoundMapper = gameRoundMapper;
@@ -70,11 +69,14 @@ public class GameServiceImp implements GameService {
     }
 
 
-
     private CreatedBy getUserRole(String userId) {
-        if (adminRepository.existsById(userId)) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isEmpty()) {
+            throw new NotFoundException("User not found");
+        }
+        if (userOpt.get().getRole() == UserType.ADMIN) {
             return CreatedBy.ADMIN;
-        } else if (partnerRepository.existsById(userId)) {
+        } else if (userOpt.get().getRole() == UserType.PARENT) {
             return CreatedBy.PARTNERSHIP;
         } else {
             throw new NotFoundException("User not found");

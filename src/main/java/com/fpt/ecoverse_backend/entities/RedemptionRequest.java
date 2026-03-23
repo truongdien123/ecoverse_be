@@ -9,6 +9,10 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "redemption_requests")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class RedemptionRequest extends BaseEntity {
 
     @Column(name = "reason_parent", length = 36)
@@ -44,103 +48,4 @@ public class RedemptionRequest extends BaseEntity {
     @JoinColumn(name = "reward_item_id")
     private RewardItem rewardItem;
 
-    public RedemptionRequest() {
-    }
-
-    public RedemptionRequest(String reasonParent, String reasonPartner, ApprovalStatus parentApproval, ApprovalStatus partnerApproval, Boolean fulfilled, Student student, Parent parent, Partner partner, RewardItem rewardItem) {
-        this.reasonParent = reasonParent;
-        this.reasonPartner = reasonPartner;
-        this.parentApproval = parentApproval;
-        this.partnerApproval = partnerApproval;
-        this.fulfilled = fulfilled;
-        this.student = student;
-        this.parent = parent;
-        this.partner = partner;
-        this.rewardItem = rewardItem;
-    }
-
-    public RedemptionRequest(String id, LocalDateTime createdAt, LocalDateTime updatedAt, String reasonParent, String reasonPartner, ApprovalStatus parentApproval, ApprovalStatus partnerApproval, Boolean fulfilled, Student student, Parent parent, Partner partner, RewardItem rewardItem) {
-        super(id, createdAt, updatedAt);
-        this.reasonParent = reasonParent;
-        this.reasonPartner = reasonPartner;
-        this.parentApproval = parentApproval;
-        this.partnerApproval = partnerApproval;
-        this.fulfilled = fulfilled;
-        this.student = student;
-        this.parent = parent;
-        this.partner = partner;
-        this.rewardItem = rewardItem;
-    }
-
-    public String getReasonParent() {
-        return reasonParent;
-    }
-
-    public void setReasonParent(String reasonParent) {
-        this.reasonParent = reasonParent;
-    }
-
-    public String getReasonPartner() {
-        return reasonPartner;
-    }
-
-    public void setReasonPartner(String reasonPartner) {
-        this.reasonPartner = reasonPartner;
-    }
-
-    public ApprovalStatus getParentApproval() {
-        return parentApproval;
-    }
-
-    public void setParentApproval(ApprovalStatus parentApproval) {
-        this.parentApproval = parentApproval;
-    }
-
-    public ApprovalStatus getPartnerApproval() {
-        return partnerApproval;
-    }
-
-    public void setPartnerApproval(ApprovalStatus partnerApproval) {
-        this.partnerApproval = partnerApproval;
-    }
-
-    public Boolean getFulfilled() {
-        return fulfilled;
-    }
-
-    public void setFulfilled(Boolean fulfilled) {
-        this.fulfilled = fulfilled;
-    }
-
-    public Student getStudent() {
-        return student;
-    }
-
-    public void setStudent(Student student) {
-        this.student = student;
-    }
-
-    public Parent getParent() {
-        return parent;
-    }
-
-    public void setParent(Parent parent) {
-        this.parent = parent;
-    }
-
-    public Partner getPartner() {
-        return partner;
-    }
-
-    public void setPartner(Partner partner) {
-        this.partner = partner;
-    }
-
-    public RewardItem getRewardItem() {
-        return rewardItem;
-    }
-
-    public void setRewardItem(RewardItem rewardItem) {
-        this.rewardItem = rewardItem;
-    }
 }
