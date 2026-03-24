@@ -10,6 +10,7 @@ import com.fpt.ecoverse_backend.entities.Parent;
 import com.fpt.ecoverse_backend.entities.Partner;
 import com.fpt.ecoverse_backend.entities.Student;
 import com.fpt.ecoverse_backend.entities.User;
+import com.fpt.ecoverse_backend.enums.UserType;
 import com.fpt.ecoverse_backend.exceptions.BadRequestException;
 import com.fpt.ecoverse_backend.exceptions.FileHandlingException;
 import com.fpt.ecoverse_backend.exceptions.NotFoundException;
@@ -89,7 +90,9 @@ public class PartnerServiceImp implements PartnerService {
         User user = userMapper.toUser(request, uploadFile);
         Partner partner = partnerMapper.toPartner(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole(UserType.PARTNERSHIP);
         userRepository.save(user);
+        partner.setUser(user);
         partnerRepository.save(partner);
         return partnerMapper.toPartnerResponse(partner, user);
     }
@@ -190,6 +193,7 @@ public class PartnerServiceImp implements PartnerService {
             user.setPassword(rawPassword);
             parent.setPartner(partner.get());
             userRepository.save(user);
+            parent.setUser(user);
             parentRepository.save(parent);
 
             createdParentMails.add(new ParentCredentialMail(user.getEmail(), user.getFullName(), password));
@@ -215,6 +219,7 @@ public class PartnerServiceImp implements PartnerService {
             student.setStudentCode(studentCode);
             student.setPartner(partner.get());
             userRepository.save(user);
+            student.setUser(user);
             studentRepository.save(student);
             studentResults.add(RowResult.success(rowNo, dto, "Add successfully"));
         }
