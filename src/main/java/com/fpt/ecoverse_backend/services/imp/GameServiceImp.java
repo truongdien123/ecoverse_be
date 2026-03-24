@@ -1,6 +1,7 @@
 package com.fpt.ecoverse_backend.services.imp;
 
 import com.fpt.ecoverse_backend.dtos.requests.GameRoundRequestDto;
+import com.fpt.ecoverse_backend.dtos.requests.PageFilterRequestDto;
 import com.fpt.ecoverse_backend.dtos.responses.GameRoundItemResponseDto;
 import com.fpt.ecoverse_backend.dtos.responses.GameRoundResponseDto;
 import com.fpt.ecoverse_backend.entities.*;
@@ -13,6 +14,10 @@ import com.fpt.ecoverse_backend.repositories.PartnerRepository;
 import com.fpt.ecoverse_backend.repositories.UserRepository;
 import com.fpt.ecoverse_backend.repositories.WasteItemRepository;
 import com.fpt.ecoverse_backend.services.GameService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -66,6 +71,67 @@ public class GameServiceImp implements GameService {
         response.setGameRoundItems(gameRoundItemResponseDtos);
         response.setPartnerId(partner.getId());
         return response;
+    }
+
+    @Override
+    public List<GameRoundResponseDto> getGameRounds(String userId, PageFilterRequestDto pageFilterRequestDto) {
+        Pageable pageable = PageRequest.of(
+                pageFilterRequestDto.getPageNo()-1,
+                pageFilterRequestDto.getPageSize(),
+                Sort.by(pageFilterRequestDto.getSorting()).descending());
+        Page<GameRound> gameRoundPage = gameRoundRepository.findGameRounds(
+                userId, pageFilterRequestDto.getSearching(), getUserRole(userId).name(), pageable);
+        List<GameRoundResponseDto> response = new ArrayList<>();
+        for (GameRound gameRound : gameRoundPage.getContent()) {
+            GameRoundResponseDto gameRoundResponseDto = gameRoundMapper.toGameRoundResponse(gameRound);
+            gameRoundResponseDto.setPartnerId(gameRound.getPartner() != null ? gameRound.getPartner().getId() : null);
+            response.add(gameRoundResponseDto);
+        }
+        return response;
+    }
+
+    @Override
+    public GameRoundResponseDto updateGameRound(String userId, String gameRoundId, GameRoundRequestDto request) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isEmpty()) {
+            throw new NotFoundException("User not found");
+        }
+        Optional<GameRound> gameRoundOpt = gameRoundRepository.findById(gameRoundId);
+        if (gameRoundOpt.isEmpty()) {
+            throw new NotFoundException("Game round not found");
+        }
+        GameRound gameRound = getGameRound(userId, gameRoundOpt, userOpt);
+        GameRound updatedGameRound = gameRoundMapper.toGameRound(request, gameRound.getId());
+        return gameRoundMapper.toGameRoundResponse(gameRoundRepository.save(updatedGameRound));
+    }
+
+    @Override
+    public GameRoundResponseDto deleteGameRound(String userId, String gameRoundId) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isEmpty()) {
+            throw new NotFoundException("User not found");
+        }
+        Optional<GameRound> gameRoundOpt = gameRoundRepository.findById(gameRoundId);
+        if (gameRoundOpt.isEmpty()) {
+            throw new NotFoundException("Game round not found");
+        }
+        GameRound gameRound = getGameRound(userId, gameRoundOpt, userOpt);
+        gameRoundRepository.delete(gameRound);
+        return gameRoundMapper.toGameRoundResponse(gameRound);
+    }
+
+    private static GameRound getGameRound(String userId, Optional<GameRound> gameRoundOpt, Optional<User> userOpt) {
+        GameRound gameRound = gameRoundOpt.get();
+        if (gameRound.getCreatedBy() == CreatedBy.ADMIN &&
+                userOpt.get().getRole() != UserType.ADMIN) {
+            throw new NotFoundException("Game round not found");
+        }
+        if (gameRound.getCreatedBy() == CreatedBy.PARTNERSHIP &&
+                (userOpt.get().getRole() != UserType.PARTNERSHIP
+                        || !gameRound.getPartner().getId().equals(userId))) {
+            throw new NotFoundException("Game round not found");
+        }
+        return gameRound;
     }
 
 
