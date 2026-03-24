@@ -19,10 +19,10 @@ public interface StudentRepository extends JpaRepository<Student, String> {
     Optional<Student> findByStudentCode(String studentCode);
 
     @Query(
-            "select s from Student s " +
+            "select s, u from Student s join s.user u " +
                     "where s.partner.id = :partnerId " +
-                    "and (:searching is null or lower(s.fullName) like lower(concat('%',:searching,'%'))) " +
+                    "and (:searching is null or lower(u.fullName) like lower(concat('%', :searching, '%'))) " +
                     "and (:grade is null or s.grade = :grade)"
     )
-    Page<Student> searchStudents(@Param("partnerId") String partnerId, @Param("searching") String searching, @Param("grade") String grade, Pageable pageable);
+    Page<Object[]> searchStudents(@Param("partnerId") String partnerId, @Param("searching") String searching, @Param("grade") String grade, Pageable pageable);
 }

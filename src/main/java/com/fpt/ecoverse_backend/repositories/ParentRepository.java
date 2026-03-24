@@ -17,20 +17,16 @@ public interface ParentRepository extends JpaRepository<Parent, String> {
     @Query("select count(p.id) from Parent p where p.partner.id = :partnerId")
     long countParentsByPartnerId(@Param("partnerId") String partnerId);
 
-    Optional<Parent> findByEmail(String email);
 
-    boolean existsByEmail(String email);
-    boolean existsByPhoneNumber(String phoneNumber);
-
-    @Query("select p.email from Parent p where p.email in :emails")
+    @Query("select u.email from User u where u.email in :emails")
     Set<String> findExistingEmails(@Param("emails") Set<String> mails);
 
     @Query(
-            "select p from Parent p " +
+            "select p, u from Parent p join p.user u " +
                     "where p.partner.id = :partnerId " +
-                    "and (:searching is null or lower(p.fullName) like lower(concat('%',:searching,'%'))) " +
+                    "and (:searching is null or lower(u.fullName) like lower(concat('%',:searching,'%'))) " +
                     "and (:hasChildren = false or (:hasChildren = true " +
                     "and exists (select s from Student s where s.parent.id = p.id)))"
     )
-    Page<Parent> searchParents(@Param("partnerId") String partnerId, @Param("searching") String searching, @Param("hasChildren") boolean hasChildren, Pageable pageable);
+    Page<Object[]> searchParents(@Param("partnerId") String partnerId, @Param("searching") String searching, @Param("hasChildren") boolean hasChildren, Pageable pageable);
 }

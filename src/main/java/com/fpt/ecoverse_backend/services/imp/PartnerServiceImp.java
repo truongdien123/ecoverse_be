@@ -9,12 +9,14 @@ import com.fpt.ecoverse_backend.dtos.responses.*;
 import com.fpt.ecoverse_backend.entities.Parent;
 import com.fpt.ecoverse_backend.entities.Partner;
 import com.fpt.ecoverse_backend.entities.Student;
+import com.fpt.ecoverse_backend.entities.User;
 import com.fpt.ecoverse_backend.exceptions.BadRequestException;
 import com.fpt.ecoverse_backend.exceptions.FileHandlingException;
 import com.fpt.ecoverse_backend.exceptions.NotFoundException;
 import com.fpt.ecoverse_backend.mappers.ParentMapper;
 import com.fpt.ecoverse_backend.mappers.PartnerMapper;
 import com.fpt.ecoverse_backend.mappers.StudentMapper;
+import com.fpt.ecoverse_backend.mappers.UserMapper;
 import com.fpt.ecoverse_backend.repositories.*;
 import com.fpt.ecoverse_backend.services.PartnerService;
 import com.fpt.ecoverse_backend.utils.UploadFile;
@@ -53,45 +55,43 @@ public class PartnerServiceImp implements PartnerService {
     private final UploadFile uploadFile;
     private final ParentRepository parentRepository;
     private final StudentRepository studentRepository;
-    private final AdminRepository adminRepository;
-    private final CheckingUserRepository checkingUserRepository;
+    private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final ParentMapper parentMapper;
     private final StudentMapper studentMapper;
+    private final UserMapper userMapper;
 
-    public PartnerServiceImp(PartnerRepository partnerRepository, PartnerMapper partnerMapper, PasswordEncoder passwordEncoder, UploadFile uploadFile, ParentRepository parentRepository, StudentRepository studentRepository, AdminRepository adminRepository, CheckingUserRepository checkingUserRepository, ApplicationEventPublisher eventPublisher, ParentMapper parentMapper, StudentMapper studentMapper) {
+    public PartnerServiceImp(PartnerRepository partnerRepository, PartnerMapper partnerMapper, PasswordEncoder passwordEncoder, UploadFile uploadFile, ParentRepository parentRepository, StudentRepository studentRepository, UserRepository userRepository, ApplicationEventPublisher eventPublisher, ParentMapper parentMapper, StudentMapper studentMapper, UserMapper userMapper) {
         this.partnerRepository = partnerRepository;
         this.partnerMapper = partnerMapper;
         this.passwordEncoder = passwordEncoder;
         this.uploadFile = uploadFile;
         this.parentRepository = parentRepository;
         this.studentRepository = studentRepository;
-        this.adminRepository = adminRepository;
-        this.checkingUserRepository = checkingUserRepository;
+        this.userRepository = userRepository;
         this.eventPublisher = eventPublisher;
         this.parentMapper = parentMapper;
         this.studentMapper = studentMapper;
+        this.userMapper = userMapper;
     }
 
     @Override
     @Transactional
     public PartnerResponseDto createPartner(PartnerRegisterRequestDto request) {
-        boolean existingEmail = partnerRepository.existsByEmail(request.getEmail())
-                || parentRepository.existsByEmail(request.getEmail())
-                || adminRepository.existsByEmail(request.getEmail());
-        if (existingEmail) {
-            throw new BadRequestException("Email already exist");
+        Optional<User> existingUser = userRepository.findByEmailOrPhoneNumber(request.getEmail(), request.getPhoneNumber());
+        if (existingUser.isPresent()) {
+            if (existingUser.get().getEmail().equalsIgnoreCase(request.getEmail())) {
+                throw new BadRequestException("Email already exist");
+            } else {
+                throw new BadRequestException("Phone number already exist");
+            }
         }
-        boolean existingPhoneNumber = partnerRepository.existsByPhoneNumber(request.getPhoneNumber())
-                || parentRepository.existsByPhoneNumber(request.getPhoneNumber())
-                || adminRepository.existsByPhoneNumber(request.getPhoneNumber());
-        if (existingPhoneNumber) {
-            throw new BadRequestException("Phone number already exist");
-        }
-        Partner partner = partnerMapper.toPartner(request, uploadFile);
-        partner.setPassword(passwordEncoder.encode(request.getPassword()));
+        User user = userMapper.toUser(request, uploadFile);
+        Partner partner = partnerMapper.toPartner(request);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        userRepository.save(user);
         partnerRepository.save(partner);
-        return partnerMapper.toPartnerResponse(partner);
+        return partnerMapper.toPartnerResponse(partner, user);
     }
 
     @Override
@@ -100,7 +100,11 @@ public class PartnerServiceImp implements PartnerService {
         if (partner.isEmpty()) {
             throw new NotFoundException("Not found partner");
         }
-        PartnerResponseDto partnerResponseDto = partnerMapper.toPartnerResponse(partner.get());
+        Optional<User> user = userRepository.findById(partner.get().getUser().getId());
+        if (user.isEmpty()) {
+            throw new NotFoundException("Not found user for partner");
+        }
+        PartnerResponseDto partnerResponseDto = partnerMapper.toPartnerResponse(partner.get(), user.get());
         StatisticPartner statisticPartner = new StatisticPartner();
         statisticPartner.setTotalParents(parentRepository.countParentsByPartnerId(partnerId));
         statisticPartner.setTotalStudents(studentRepository.countStudentByPartnerId(partnerId));
@@ -119,12 +123,16 @@ public class PartnerServiceImp implements PartnerService {
         if (partner.isEmpty()) {
             throw new NotFoundException("Not found partner");
         }
-        partnerMapper.toPartner(partner.get(), request, uploadFile);
+        Optional<User> user = userRepository.findById(partner.get().getUser().getId());
+        if (user.isEmpty()) {
+            throw new NotFoundException("Not found user for partner");
+        }
+        partnerMapper.toPartner(partner.get(), request);
         if (request.getAvatar() != null) {
-            partner.get().setAvatarUrl(uploadFile.imageToUrl(request.getAvatar()));
+            user.get().setAvatarUrl(uploadFile.imageToUrl(request.getAvatar()));
         }
         partnerRepository.save(partner.get());
-        PartnerResponseDto partnerResponseDto = partnerMapper.toPartnerResponse(partner.get());
+        PartnerResponseDto partnerResponseDto = partnerMapper.toPartnerResponse(partner.get(), user.get());
         StatisticPartner statisticPartner = new StatisticPartner();
         statisticPartner.setTotalParents(parentRepository.countParentsByPartnerId(partnerId));
         statisticPartner.setTotalStudents(studentRepository.countStudentByPartnerId(partnerId));
@@ -152,7 +160,7 @@ public class PartnerServiceImp implements PartnerService {
             String email = input.getDto().getEmail().toLowerCase();
             parentEmailInFile.add(email);
         }
-        Set<String> existingEmails = checkingUserRepository.findExistingEmail(parentEmailInFile);
+        Set<String> existingEmails = userRepository.findExistingEmail(parentEmailInFile);
         Set<String> seenParentEmailsInFile = new HashSet<>();
         for (RowInput<ParentExcelRowDto> input : parsed.parentRows) {
             int rowNo = input.getExcelRowNumber();
@@ -173,18 +181,18 @@ public class PartnerServiceImp implements PartnerService {
             }
             String password = generatePassword();
             String rawPassword = passwordEncoder.encode(password);
-
+            User user = new User();
             Parent parent = new Parent();
-            parent.setFullName(dto.getFullName().trim());
-            parent.setEmail(email);
-            parent.setPhoneNumber(dto.getPhoneNumber().replaceAll("\\s+", ""));
-            parent.setAddress(dto.getAddress().trim());
-            parent.setPassword(rawPassword);
+            user.setFullName(dto.getFullName().trim());
+            user.setEmail(email);
+            user.setPhoneNumber(dto.getPhoneNumber().replaceAll("\\s+", ""));
+            user.setAddress(dto.getAddress().trim());
+            user.setPassword(rawPassword);
             parent.setPartner(partner.get());
-
+            userRepository.save(user);
             parentRepository.save(parent);
 
-            createdParentMails.add(new ParentCredentialMail(parent.getEmail(), parent.getFullName(), password));
+            createdParentMails.add(new ParentCredentialMail(user.getEmail(), user.getFullName(), password));
             parentResults.add(RowResult.success(rowNo, dto, "Add successfully"));
 
         }
@@ -200,12 +208,13 @@ public class PartnerServiceImp implements PartnerService {
                 studentResults.add(RowResult.failed(rowNo, dto, "Student grade required"));
             }
             String studentCode = generateStudentCode(dto.getFullName(), dto.getGrade(), dto.getClassNumber());
+            User user = new User();
             Student student = new Student();
-            student.setFullName(dto.getFullName().trim());
+            user.setFullName(dto.getFullName().trim());
             student.setGrade(dto.getGrade());
             student.setStudentCode(studentCode);
             student.setPartner(partner.get());
-
+            userRepository.save(user);
             studentRepository.save(student);
             studentResults.add(RowResult.success(rowNo, dto, "Add successfully"));
         }
@@ -261,11 +270,16 @@ public class PartnerServiceImp implements PartnerService {
         if (student.isEmpty()) {
             throw new NotFoundException("Not found student");
         }
+        Optional<User> user = userRepository.findById(student.get().getUser().getId());
+        if (user.isEmpty()) {
+            throw new NotFoundException("Not found user for student");
+        }
         StatisticStudent statistic = new StatisticStudent();
-        StudentResponseDto studentResponseDto = studentMapper.toStudentResponse(student.get());
+        StudentResponseDto studentResponseDto = studentMapper.toStudentResponse(student.get(), user.get());
         if (student.get().getParent() != null) {
             Optional<Parent> parent = parentRepository.findById(student.get().getParent().getId());
-            studentResponseDto.setParent(parentMapper.toParentResponse(parent.get()));
+            Optional<User> parentUser = userRepository.findById(parent.get().getUser().getId());
+            studentResponseDto.setParent(parentMapper.toParentResponse(parent.get(), parentUser.get()));
         }
         studentResponseDto.setStatistics(statistic);
         return studentResponseDto;
@@ -281,14 +295,15 @@ public class PartnerServiceImp implements PartnerService {
         if (student.isEmpty()) {
             throw new NotFoundException("Not found student");
         }
+        Optional<User> user = userRepository.findById(student.get().getUser().getId());
         if (status.equalsIgnoreCase("active")) {
-            student.get().setActive(true);
-            studentRepository.save(student.get());
+            user.get().setActive(true);
+            userRepository.save(user.get());
         } else {
-            student.get().setActive(false);
-            studentRepository.save(student.get());
+            user.get().setActive(false);
+            userRepository.save(user.get());
         }
-        return studentMapper.toStudentResponse(student.get());
+        return studentMapper.toStudentResponse(student.get(), user.get());
     }
 
     @Override
@@ -298,9 +313,13 @@ public class PartnerServiceImp implements PartnerService {
                 pageFilterRequestDto.getPageSize(),
                 Sort.by(pageFilterRequestDto.getSorting()).descending());
         if (pageFilterRequestDto.getType().equalsIgnoreCase("student")) {
-            Page<Student> students = studentRepository.searchStudents(
+            Page<Object[]> students = studentRepository.searchStudents(
                     partnerId, pageFilterRequestDto.getSearching(), pageFilterRequestDto.getGrade(), pageable);
-            List<StudentResponseDto> list = students.getContent().stream().map(studentMapper::toStudentResponse).toList();
+            List<StudentResponseDto> list = students.getContent().stream().map(row -> {
+                Student student = (Student) row[0];
+                User user = (User) row[1];
+                return studentMapper.toStudentResponse(student, user);
+            }).toList();
             return new UserListResponseDto<>(
                     list,
                     pageFilterRequestDto.getPageNo(),
@@ -308,9 +327,13 @@ public class PartnerServiceImp implements PartnerService {
                     students.getTotalElements(),
                     students.getTotalPages());
         } else if (pageFilterRequestDto.getType().equalsIgnoreCase("parent")) {
-            Page<Parent> parents = parentRepository.searchParents(
+            Page<Object[]> parents = parentRepository.searchParents(
                     partnerId, pageFilterRequestDto.getSearching(), pageFilterRequestDto.isHasChildren(), pageable);
-            List<ParentResponseDto> list = parents.getContent().stream().map(parentMapper::toParentResponse).toList();
+            List<ParentResponseDto> list = parents.getContent().stream().map(row -> {
+                Parent parent = (Parent) row[0];
+                User user = (User) row[1];
+                return parentMapper.toParentResponse(parent, user);
+            }).toList();
             return new UserListResponseDto<>(
                     list,
                     pageFilterRequestDto.getPageNo(),
@@ -327,16 +350,26 @@ public class PartnerServiceImp implements PartnerService {
         if (partner.isEmpty()) {
             throw new NotFoundException("Not found partner");
         }
-        List<Student> students = new ArrayList<>();
-        for (StudentRequestDto dto : studentRequestDtos) {
+        List<Student> students = studentRequestDtos.stream().map(dto -> {
+            User user = userMapper.toUser(dto, uploadFile);
             Student student = studentMapper.toStudent(dto);
+            User savedUser = userRepository.save(user);
+            student.setUser(savedUser);
             student.setPartner(partner.get());
-            String studentCode = generateStudentCode(dto.getFullName(), dto.getGrade(), dto.getClassNumber());
+            String studentCode = generateStudentCode(
+                    dto.getFullName(),
+                    dto.getGrade(),
+                    dto.getClassNumber()
+            );
             student.setStudentCode(studentCode);
-            students.add(student);
+            return studentRepository.save(student);
+
+        }).toList();
+        List<StudentResponseDto> response = new ArrayList<>();
+        for (Student student : students) {
+            response.add(studentMapper.toStudentResponse(student, student.getUser()));
         }
-        studentRepository.saveAll(students);
-        return students.stream().map(studentMapper::toStudentResponse).toList();
+        return response;
     }
 
     private String generateReportFile(
