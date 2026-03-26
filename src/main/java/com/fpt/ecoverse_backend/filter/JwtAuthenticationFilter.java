@@ -37,7 +37,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String email = jwtUtils.extractEmail(jwt);
                 var userType = jwtUtils.extractUserType(jwt);
 
-                UserDetails userDetails = userDetailsService.loadUserByEmailAndType(email, userType);
+                UserDetails userDetails;
+                if (userType == com.fpt.ecoverse_backend.enums.UserType.STUDENT) {
+                    // STUDENT không có email trong token, load bằng userId
+                    userDetails = userDetailsService.loadUserByEmailAndType(userId, userType);
+                } else {
+                    userDetails = userDetailsService.loadUserByEmailAndType(email, userType);
+                }
 
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
@@ -50,7 +56,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (Exception e) {
-            logger.error("Cannot set user authentication: {}");
+            logger.error("Cannot set user authentication: {}", e);
         }
 
         filterChain.doFilter(request, response);
