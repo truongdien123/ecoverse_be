@@ -4,15 +4,18 @@ import com.fpt.ecoverse_backend.dtos.requests.WasteBinRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.WasteItemRequestDto;
 import com.fpt.ecoverse_backend.dtos.responses.WasteBinResponseDto;
 import com.fpt.ecoverse_backend.dtos.responses.WasteItemResponseDto;
-import com.fpt.ecoverse_backend.entities.Admin;
+import com.fpt.ecoverse_backend.entities.User;
 import com.fpt.ecoverse_backend.entities.WasteBin;
 import com.fpt.ecoverse_backend.entities.WasteItem;
 import com.fpt.ecoverse_backend.enums.CreatedBy;
+import com.fpt.ecoverse_backend.enums.UserType;
+import com.fpt.ecoverse_backend.exceptions.ForbiddenException;
 import com.fpt.ecoverse_backend.exceptions.NotFoundException;
 import com.fpt.ecoverse_backend.mappers.WasteBinMapper;
 import com.fpt.ecoverse_backend.mappers.WasteItemMapper;
-import com.fpt.ecoverse_backend.repositories.AdminRepository;
+import com.fpt.ecoverse_backend.projections.WasteItemWithOrderProjection;
 import com.fpt.ecoverse_backend.repositories.PartnerRepository;
+import com.fpt.ecoverse_backend.repositories.UserRepository;
 import com.fpt.ecoverse_backend.repositories.WasteBinRepository;
 import com.fpt.ecoverse_backend.repositories.WasteItemRepository;
 import com.fpt.ecoverse_backend.services.WasteService;
@@ -27,16 +30,16 @@ public class WasteServiceImp implements WasteService {
 
     private final WasteItemRepository wasteItemRepository;
     private final WasteItemMapper wasteItemMapper;
-    private final AdminRepository adminRepository;
+    private final UserRepository userRepository;
     private final PartnerRepository partnerRepository;
     private final UploadFile uploadFile;
     private final WasteBinRepository wasteBinRepository;
     private final WasteBinMapper wasteBinMapper;
 
-    public WasteServiceImp(WasteItemRepository wasteItemRepository, WasteItemMapper wasteItemMapper, AdminRepository adminRepository, PartnerRepository partnerRepository, UploadFile uploadFile, WasteBinRepository wasteBinRepository, WasteBinMapper wasteBinMapper) {
+    public WasteServiceImp(WasteItemRepository wasteItemRepository, WasteItemMapper wasteItemMapper, UserRepository userRepository, PartnerRepository partnerRepository, UploadFile uploadFile, WasteBinRepository wasteBinRepository, WasteBinMapper wasteBinMapper) {
         this.wasteItemRepository = wasteItemRepository;
         this.wasteItemMapper = wasteItemMapper;
-        this.adminRepository = adminRepository;
+        this.userRepository = userRepository;
         this.partnerRepository = partnerRepository;
         this.uploadFile = uploadFile;
         this.wasteBinRepository = wasteBinRepository;
@@ -54,19 +57,19 @@ public class WasteServiceImp implements WasteService {
         }
         wasteItem.setWasteBin(wasteBin.get());
         wasteItemRepository.save(wasteItem);
-        WasteItemResponseDto response = wasteItemMapper.toWasteItemResponse(wasteItem);
+        WasteItemResponseDto response = wasteItemMapper.toWasteItemResponse(wasteItem, null);
         response.setCorrectBinCode(wasteBin.get().getCode());
         response.setCreatedBy(userRole.toString());
-        return wasteItemMapper.toWasteItemResponse(wasteItem);
+        return wasteItemMapper.toWasteItemResponse(wasteItem, null);
     }
 
     @Override
     public WasteBinResponseDto createWasteBin(String adminId, WasteBinRequestDto request) {
-        Optional<Admin> admin = adminRepository.findById(adminId);
+        Optional<User> admin = userRepository.findById(adminId);
         if (admin.isEmpty()) {
             throw new NotFoundException("Admin not found");
         }
-        WasteBin wasteBin = wasteBinMapper.toWasteBin(request, uploadFile);
+        WasteBin wasteBin = wasteBinMapper.toWasteBin(request, null, uploadFile);
         wasteBinRepository.save(wasteBin);
         return wasteBinMapper.toWasteBinResponse(wasteBin);
     }
@@ -77,10 +80,14 @@ public class WasteServiceImp implements WasteService {
     }
 
     @Override
-    public List<WasteItemResponseDto> getWasteItems(String userId) {
+    public List<WasteItemResponseDto> getWasteItems(String userId, String gameRoundId) {
         CreatedBy userRole = getUserRole(userId);
-        List<WasteItem> wasteItems = wasteItemRepository.findWasteItems(userRole, userId);
-        return wasteItems.stream().map(wasteItemMapper::toWasteItemResponse).toList();
+        List<WasteItemWithOrderProjection> wasteItemWithOrder = wasteItemRepository.findByUserIdAndGameRoundId(userId, gameRoundId);
+        if (wasteItemWithOrder.isEmpty()) {
+            throw new NotFoundException("Waste items not found");
+        }
+        return wasteItemWithOrder.stream().map(projection ->
+                wasteItemMapper.toWasteItemResponse(projection.getWasteItem(), projection.getOrderIndex())).toList();
     }
 
     @Override
@@ -94,7 +101,7 @@ public class WasteServiceImp implements WasteService {
             }
             wasteItemMapper.toWasteItem(request, wasteItemOptional.get().getId(), uploadFile);
             wasteItemRepository.save(wasteItemOptional.get());
-            return wasteItemMapper.toWasteItemResponse(wasteItemOptional.get());
+            return wasteItemMapper.toWasteItemResponse(wasteItemOptional.get(), null);
         } else {
             wasteItemOptional = wasteItemRepository.findById(wasteItemId);
             if (wasteItemOptional.isEmpty()) {
@@ -102,18 +109,57 @@ public class WasteServiceImp implements WasteService {
             }
             wasteItemMapper.toWasteItem(request, wasteItemOptional.get().getId(), uploadFile);
             wasteItemRepository.save(wasteItemOptional.get());
-            return wasteItemMapper.toWasteItemResponse(wasteItemOptional.get());
+            return wasteItemMapper.toWasteItemResponse(wasteItemOptional.get(), null);
+        }
+    }
+
+    @Override
+    public WasteBinResponseDto updateWasteBin(String adminId, String wasteBinId, WasteBinRequestDto request) {
+        CreatedBy userRole = getUserRole(adminId);
+        if (userRole != CreatedBy.ADMIN) {
+            throw new ForbiddenException("Only admin can update waste bin");
+        }
+        Optional<WasteBin> wasteBinOptional = wasteBinRepository.findById(wasteBinId);
+        if (wasteBinOptional.isEmpty()) {
+            throw new NotFoundException("Waste bin not found");
+        }
+        wasteBinMapper.toWasteBin(request, wasteBinOptional.get().getId(), uploadFile);
+        wasteBinRepository.save(wasteBinOptional.get());
+        return wasteBinMapper.toWasteBinResponse(wasteBinOptional.get());
+    }
+
+    @Override
+    public WasteItemResponseDto deleteWasteItem(String userId, String wasteItemId) {
+        CreatedBy userRole = getUserRole(userId);
+        Optional<WasteItem> wasteItemOptional;
+        if (userRole == CreatedBy.PARTNERSHIP) {
+            wasteItemOptional = wasteItemRepository.findWasteItemByPartnerId(userId);
+            if (wasteItemOptional.isEmpty()) {
+                throw new NotFoundException("Waste item not found");
+            }
+            wasteItemRepository.delete(wasteItemOptional.get());
+            return wasteItemMapper.toWasteItemResponse(wasteItemOptional.get(), null);
+        } else {
+            wasteItemOptional = wasteItemRepository.findById(wasteItemId);
+            if (wasteItemOptional.isEmpty()) {
+                throw new NotFoundException("Waste item not found");
+            }
+            wasteItemRepository.delete(wasteItemOptional.get());
+            return wasteItemMapper.toWasteItemResponse(wasteItemOptional.get(), null);
         }
     }
 
     private CreatedBy getUserRole(String userId) {
-        if (adminRepository.existsById(userId)) {
-            return CreatedBy.ADMIN;
-        } else if (partnerRepository.existsById(userId)) {
-            return CreatedBy.PARTNERSHIP;
-        } else {
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isEmpty()) {
             throw new NotFoundException("User not found");
         }
+        if (userOpt.get().getRole() == UserType.ADMIN) {
+            return CreatedBy.ADMIN;
+        } else if (userOpt.get().getRole() == UserType.PARTNERSHIP) {
+            return CreatedBy.PARTNERSHIP;
+        }
+        return null;
     }
 }
 

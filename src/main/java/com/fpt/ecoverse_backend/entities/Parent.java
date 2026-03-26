@@ -1,6 +1,5 @@
 package com.fpt.ecoverse_backend.entities;
 
-import com.fpt.ecoverse_backend.entities.base.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,28 +11,15 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Parent extends BaseEntity {
+public class Parent {
 
-    @Column(name = "full_name", nullable = false, length = 255)
-    private String fullName;
+    @Id
+    private String id;
 
-    @Column(name = "email", nullable = false, length = 255, unique = true)
-    private String email;
-
-    @Column(name = "phone_number", length = 20)
-    private String phoneNumber;
-
-    @Column(name = "address", columnDefinition = "text")
-    private String address;
-
-    @Column(name = "avatar_url")
-    private String avatarUrl;
-
-    @Column(name = "password", nullable = false, length = 255)
-    private String password;
-
-    @Column(name = "active", nullable = false)
-    private Boolean active = true;
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "id")
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "partner_id")

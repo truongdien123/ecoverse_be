@@ -19,13 +19,14 @@ public interface WasteItemMapper {
     WasteItem toWasteItem(WasteItemRequestDto request, String id, @Context UploadFile uploadFile);
 
     @Mappings({
-            @Mapping(target = "name", source = "name"),
-            @Mapping(target = "description", source = "description"),
-            @Mapping(target = "id", source = "id"),
-            @Mapping(target = "imageUrl", source = "imageUrl"),
-            @Mapping(target = "createdBy", source = "createdBy", ignore = true)
+            @Mapping(target = "name", source = "item.name"),
+            @Mapping(target = "description", source = "item.description"),
+            @Mapping(target = "id", source = "item.id"),
+            @Mapping(target = "imageUrl", source = "item.imageUrl"),
+            @Mapping(target = "createdBy", source = "item.createdBy"),
+            @Mapping(target = "orderIndex", source = "orderIndex")
     })
-    WasteItemResponseDto toWasteItemResponse(WasteItem item);
+    WasteItemResponseDto toWasteItemResponse(WasteItem item, Integer orderIndex);
 
     @Named("convertImg")
     static String convertImage(MultipartFile multipartFile, @Context UploadFile uploadFile) {

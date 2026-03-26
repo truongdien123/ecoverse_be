@@ -42,8 +42,9 @@ public class SecurityConfig {
             "/api/auth/logout",
             "/swagger-ui/**",
             "/v3/api-docs/**",
-            "/actuator/**",
-            "/partnerships/register",
+            "/api-docs",
+            "/api-docs.yaml",
+            "/webjars/**",
             "/partnerships/{partnership_id}",
             "/partnerships/{partnership_id}/profile"
     };

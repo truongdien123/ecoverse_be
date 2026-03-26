@@ -6,16 +6,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ParentResponseDto {
+public class AdminResponseDto {
 
-    @JsonProperty("parent_id")
-    private String parentId;
+    @JsonProperty("id")
+    private String id;
+
+    @JsonProperty("email")
+    private String email;
 
     @JsonProperty("full_name")
     private String fullName;
@@ -23,19 +24,6 @@ public class ParentResponseDto {
     @JsonProperty("phone_number")
     private String phoneNumber;
 
-    @JsonProperty("address")
-    private String address;
-
-    @JsonProperty("email")
-    private String email;
-
     @JsonProperty("avatar_url")
     private String avatarUrl;
-
-    @JsonProperty("active")
-    private Boolean active;
-
-    @JsonProperty("students")
-    private List<StudentResponseDto> students;
 }
-

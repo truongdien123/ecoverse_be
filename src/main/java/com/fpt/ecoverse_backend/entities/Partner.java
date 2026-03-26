@@ -1,6 +1,5 @@
 package com.fpt.ecoverse_backend.entities;
 
-import com.fpt.ecoverse_backend.entities.base.BaseEntity;
 import com.fpt.ecoverse_backend.enums.PartnerStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -13,25 +12,19 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Partner extends BaseEntity {
+public class Partner {
 
-    @Column(name = "email", nullable = false, length = 255, unique = true)
-    private String email;
+    @Id
+    private String id;
 
-    @Column(name = "phone_number", length = 20)
-    private String phoneNumber;
-
-    @Column(name = "avatar_url")
-    private String avatarUrl;
-
-    @Column(name = "password", nullable = false, length = 255)
-    private String password;
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "id")
+    private User user;
 
     @Column(name = "organization_name", nullable = false, length = 255)
     private String organizationName;
 
-    @Column(name = "address", columnDefinition = "text")
-    private String address;
 
     @Column(name = "contact_person", length = 255)
     private String contactPerson;
