@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -25,4 +26,7 @@ public interface StudentRepository extends JpaRepository<Student, String> {
                     "and (:grade is null or s.grade = :grade)"
     )
     Page<Object[]> searchStudents(@Param("partnerId") String partnerId, @Param("searching") String searching, @Param("grade") String grade, Pageable pageable);
+
+    @Query("select s from Student s where s.parent.id = :parentId")
+    List<Student> findByParentId(String parentId);
 }

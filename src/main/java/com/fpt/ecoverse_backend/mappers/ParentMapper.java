@@ -13,7 +13,10 @@ public interface ParentMapper {
             @Mapping(target = "fullName", source = "user.fullName"),
             @Mapping(target = "phoneNumber", source = "user.phoneNumber"),
             @Mapping(target = "address", source = "user.address"),
-            @Mapping(target = "email", source = "user.email")
+            @Mapping(target = "email", source = "user.email"),
+            @Mapping(target = "avatarUrl", source = "user.avatarUrl"),
+            @Mapping(target = "active", source = "user.active"),
+            @Mapping(target = "parentId", source = "parent.id")
     })
     ParentResponseDto toParentResponse(Parent parent, User user);
 }
