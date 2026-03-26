@@ -36,9 +36,9 @@ public class WasteController {
         return ResponseUtil.success("Get waste bins successfully", wasteService.getWasteBins());
     }
 
-    @GetMapping("/items/{user_id}")
-    public ResponseEntity<?> getWasteItems(@PathVariable("user_id") String userId) {
-        return ResponseUtil.success("Get waste items successfully", wasteService.getWasteItems(userId));
+    @GetMapping("/items/users/{user_id}/game-rounds/{game_round_id}")
+    public ResponseEntity<?> getWasteItems(@PathVariable("user_id") String userId, @PathVariable("game_round_id") String gameRoundId) {
+        return ResponseUtil.success("Get waste items successfully", wasteService.getWasteItems(userId, gameRoundId));
     }
 
     @PutMapping("/items/{waste_item_id}/users/{user_id}")

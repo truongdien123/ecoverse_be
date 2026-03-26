@@ -30,4 +30,7 @@ public class WasteItemResponseDto {
 
     @JsonProperty("created_by")
     private String createdBy;
+
+    @JsonProperty("order_index")
+    private Integer orderIndex;
 }
