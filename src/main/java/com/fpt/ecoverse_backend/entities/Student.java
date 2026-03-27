@@ -1,6 +1,5 @@
 package com.fpt.ecoverse_backend.entities;
 
-import com.fpt.ecoverse_backend.entities.base.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,19 +11,19 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Student extends BaseEntity {
+public class Student {
 
-    @Column(name = "full_name", nullable = false, length = 255)
-    private String fullName;
+    @Id
+    private String id;
+
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "id")
+    private User user;
 
     @Column(name = "grade", length = 10)
     private String grade;
 
-    @Column(name = "avatar_url")
-    private String avatarUrl;
-
-    @Column(name = "active", nullable = false, columnDefinition = "boolean default true")
-    private Boolean active = true;
 
     @Column(name = "student_code", length = 50, unique = true)
     private String studentCode;

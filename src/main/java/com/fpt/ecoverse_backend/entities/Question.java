@@ -8,7 +8,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "questions", indexes = {
-    @Index(name = "idx_questions_template_id", columnList = "quiz_template_id")
+        @Index(name = "idx_questions_template_id", columnList = "quiz_template_id")
 })
 @Getter
 @Setter

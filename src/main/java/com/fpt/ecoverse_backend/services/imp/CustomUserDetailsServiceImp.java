@@ -1,28 +1,32 @@
 package com.fpt.ecoverse_backend.services.imp;
 
+import com.fpt.ecoverse_backend.entities.Partner;
+import com.fpt.ecoverse_backend.entities.User;
 import com.fpt.ecoverse_backend.enums.UserType;
 import com.fpt.ecoverse_backend.exceptions.NotFoundException;
 import com.fpt.ecoverse_backend.filter.CustomUserDetails;
-import com.fpt.ecoverse_backend.repositories.AdminRepository;
 import com.fpt.ecoverse_backend.repositories.ParentRepository;
 import com.fpt.ecoverse_backend.repositories.PartnerRepository;
 import com.fpt.ecoverse_backend.repositories.StudentRepository;
+import com.fpt.ecoverse_backend.repositories.UserRepository;
 import com.fpt.ecoverse_backend.services.CustomUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class CustomUserDetailsServiceImp implements CustomUserDetailsService, UserDetailsService {
 
-    private final AdminRepository adminRepository;
+    private final UserRepository userRepository;
     private final StudentRepository studentRepository;
     private final ParentRepository parentRepository;
     private final PartnerRepository partnerRepository;
 
-    public CustomUserDetailsServiceImp(AdminRepository adminRepository, StudentRepository studentRepository, ParentRepository parentRepository, PartnerRepository partnerRepository) {
-        this.adminRepository = adminRepository;
+    public CustomUserDetailsServiceImp(UserRepository userRepository, StudentRepository studentRepository, ParentRepository parentRepository, PartnerRepository partnerRepository) {
+        this.userRepository = userRepository;
         this.studentRepository = studentRepository;
         this.parentRepository = parentRepository;
         this.partnerRepository = partnerRepository;
@@ -43,22 +47,25 @@ public class CustomUserDetailsServiceImp implements CustomUserDetailsService, Us
     public UserDetails loadStudentByCode(String studentCode) {
         var student = studentRepository.findByStudentCode(studentCode)
                 .orElseThrow(() -> new NotFoundException("Student not found with code: " + studentCode));
-
+        Optional<User> userOpt = userRepository.findById(student.getId());
+        if (userOpt.isEmpty()) {
+            throw new NotFoundException("User not found for student with code: " + studentCode);
+        }
         return CustomUserDetails.builder()
                 .id(student.getId())
                 .email(null)
                 .password(null)
-                .fullName(student.getFullName())
-                .avatarUrl(student.getAvatarUrl())
+                .fullName(userOpt.get().getFullName())
+                .avatarUrl(userOpt.get().getAvatarUrl())
                 .userType(UserType.STUDENT)
-                .active(student.getActive() != null ? student.getActive() : true)
+                .active(userOpt.get().getActive() != null ? userOpt.get().getActive() : true)
                 .build();
     }
 
 
     @Override
     public UserDetails loadAdmin(String email) {
-        var admin = adminRepository.findByEmail(email)
+        var admin = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("Admin not found with email: " + email));
 
         return CustomUserDetails.builder()
@@ -74,9 +81,8 @@ public class CustomUserDetailsServiceImp implements CustomUserDetailsService, Us
 
     @Override
     public UserDetails loadParent(String email) {
-        var parent = parentRepository.findByEmail(email)
+        var parent = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("Parent not found with email: " + email));
-
         return CustomUserDetails.builder()
                 .id(parent.getId())
                 .email(parent.getEmail())
@@ -90,15 +96,18 @@ public class CustomUserDetailsServiceImp implements CustomUserDetailsService, Us
 
     @Override
     public UserDetails loadPartnership(String email) {
-        var partnership = partnerRepository.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("Partnership not found with email: " + email));
-
+        var user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User not found with email: " + email));
+        Optional<Partner> partner = partnerRepository.findById(user.getId());
+        if (partner.isEmpty()) {
+            throw new NotFoundException("Partner not found");
+        }
         return CustomUserDetails.builder()
-                .id(partnership.getId())
-                .email(partnership.getEmail())
-                .password(partnership.getPassword())
-                .fullName(partnership.getOrganizationName())
-                .avatarUrl(partnership.getAvatarUrl())
+                .id(user.getId())
+                .email(user.getEmail())
+                .password(user.getPassword())
+                .fullName(partner.get().getOrganizationName())
+                .avatarUrl(user.getAvatarUrl())
                 .userType(UserType.PARTNERSHIP)
                 .active(true)
                 .build();
