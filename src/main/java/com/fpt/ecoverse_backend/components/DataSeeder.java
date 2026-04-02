@@ -30,12 +30,10 @@ public class DataSeeder implements ApplicationRunner {
 
     private void seedAdmin() {
         String adminEmail = "admin@ecoverse.com";
-
         if (userRepository.findByEmail(adminEmail).isPresent()) {
             log.info("Admin already exists, skipping seed.");
             return;
         }
-
         User admin = new User();
         admin.setEmail(adminEmail);
         admin.setPassword(passwordEncoder.encode("Admin@123"));
@@ -43,8 +41,7 @@ public class DataSeeder implements ApplicationRunner {
         admin.setPhoneNumber("0900000000");
         admin.setRole(UserType.ADMIN);
         admin.setActive(true);
-
         userRepository.save(admin);
-        log.info("✅ Admin seeded: email={}, password=Admin@123", adminEmail);
+        log.info("✅ Admin seeded: email=admin@ecoverse.com, password=Admin@123");
     }
 }
