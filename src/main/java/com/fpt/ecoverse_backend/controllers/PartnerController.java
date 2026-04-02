@@ -75,5 +75,11 @@ public class PartnerController {
         List<StudentResponseDto> list = partnerService.createStudents(partnerId, studentRequestDtos);
         return ResponseUtil.success("Create students successfully", list);
     }
+
+    @DeleteMapping("/{partnership_id}")
+    public ResponseEntity<?> deletePartner(@PathVariable("partnership_id") String partnerId) {
+        PartnerResponseDto response = partnerService.deletePartner(partnerId);
+        return ResponseUtil.success("Delete partner successfully", response);
+    }
 }
 

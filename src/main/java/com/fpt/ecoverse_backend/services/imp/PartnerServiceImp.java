@@ -377,6 +377,17 @@ public class PartnerServiceImp implements PartnerService {
         return response;
     }
 
+    @Override
+    public PartnerResponseDto deletePartner(String partnerId) {
+        Optional<Partner> partner = partnerRepository.findById(partnerId);
+        if (partner.isEmpty()) {
+            throw new NotFoundException("Not found partner");
+        }
+        partnerRepository.delete(partner.get());
+        userRepository.delete(partner.get().getUser());
+        return partnerMapper.toPartnerResponse(partner.get(), partner.get().getUser());
+    }
+
     private String generateReportFile(
             List<RowResult<ParentExcelRowDto>> parentResults,
             List<RowResult<StudentExcelRowDto>> studentResults,
