@@ -1,5 +1,6 @@
 package com.fpt.ecoverse_backend.controllers;
 
+import com.fpt.ecoverse_backend.dtos.requests.GameAttemptRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.GameRoundRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.PageFilterRequestDto;
 import com.fpt.ecoverse_backend.dtos.responses.GameRoundResponseDto;
@@ -39,5 +40,10 @@ public class GameController {
     public ResponseEntity<?> deleteGameRound(@PathVariable("user_id") String userId, @PathVariable("game_round_id") String gameRoundId) {
         GameRoundResponseDto response = gameService.deleteGameRound(userId, gameRoundId);
         return ResponseUtil.success("Delete game round successfully", response);
+    }
+
+    @PostMapping("/rounds/{game_round_id}/students/{student_id}/attempts")
+    public ResponseEntity<?> createGameAttempt(@PathVariable("game_round_id") String gameRoundId, @PathVariable("student_id") String studentId, GameAttemptRequestDto request) {
+        return ResponseUtil.success("Create game attempt successfully", gameService.createGameAttempt(gameRoundId, studentId, request));
     }
 }
