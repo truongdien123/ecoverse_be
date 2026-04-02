@@ -6,6 +6,9 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -45,6 +48,25 @@ public class ExceptionHandlerConfig {
         LOG.error(ex.getMessage(), ex);
         String message = ex.getMessage();
         return ResponseUtil.error(HttpStatus.UNSUPPORTED_MEDIA_TYPE, message);
+    }
+
+    @ExceptionHandler(value = BadCredentialsException.class)
+    public ResponseEntity<?> handleBadCredentials(BadCredentialsException ex) {
+        return ResponseUtil.error(HttpStatus.UNAUTHORIZED, ex.getMessage());
+    }
+
+    @ExceptionHandler(value = DisabledException.class)
+    public ResponseEntity<?> handleDisabled(DisabledException ex) {
+        return ResponseUtil.error(HttpStatus.FORBIDDEN, ex.getMessage());
+    }
+
+    @ExceptionHandler(value = MethodArgumentNotValidException.class)
+    public ResponseEntity<?> handleValidation(MethodArgumentNotValidException ex) {
+        String message = ex.getBindingResult().getFieldErrors().stream()
+                .map(e -> e.getField() + ": " + e.getDefaultMessage())
+                .findFirst()
+                .orElse("Validation failed");
+        return ResponseUtil.error(HttpStatus.BAD_REQUEST, message);
     }
 }
 

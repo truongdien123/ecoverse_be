@@ -87,7 +87,7 @@ public class PartnerServiceImp implements PartnerService {
                 throw new BadRequestException("Phone number already exist");
             }
         }
-        User user = userMapper.toUser(request, uploadFile);
+        User user = userMapper.toUser(request, null, uploadFile);
         Partner partner = partnerMapper.toPartner(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(UserType.PARTNERSHIP);
@@ -356,7 +356,7 @@ public class PartnerServiceImp implements PartnerService {
             throw new NotFoundException("Not found partner");
         }
         List<Student> students = studentRequestDtos.stream().map(dto -> {
-            User user = userMapper.toUser(dto, uploadFile);
+            User user = userMapper.toUser(dto, null, uploadFile);
             Student student = studentMapper.toStudent(dto);
             User savedUser = userRepository.save(user);
             student.setUser(savedUser);
@@ -375,6 +375,17 @@ public class PartnerServiceImp implements PartnerService {
             response.add(studentMapper.toStudentResponse(student, student.getUser()));
         }
         return response;
+    }
+
+    @Override
+    public PartnerResponseDto deletePartner(String partnerId) {
+        Optional<Partner> partner = partnerRepository.findById(partnerId);
+        if (partner.isEmpty()) {
+            throw new NotFoundException("Not found partner");
+        }
+        partnerRepository.delete(partner.get());
+        userRepository.delete(partner.get().getUser());
+        return partnerMapper.toPartnerResponse(partner.get(), partner.get().getUser());
     }
 
     private String generateReportFile(

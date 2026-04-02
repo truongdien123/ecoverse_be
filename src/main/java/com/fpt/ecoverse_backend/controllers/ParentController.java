@@ -1,5 +1,6 @@
 package com.fpt.ecoverse_backend.controllers;
 
+import com.fpt.ecoverse_backend.dtos.requests.ParentRequestDto;
 import com.fpt.ecoverse_backend.dtos.responses.ParentResponseDto;
 import com.fpt.ecoverse_backend.services.ParentService;
 import com.fpt.ecoverse_backend.utils.ResponseUtil;
@@ -27,5 +28,18 @@ public class ParentController {
         return ResponseUtil.success("Get list student by parent id successfully", parentService.getListStudent(parentId));
     }
 
+    @PutMapping("{parent_id}")
+    public ResponseEntity<?> updateParent(@PathVariable("parent_id") String parentId, ParentRequestDto request) {
+        return ResponseUtil.success("Update parent successfully", parentService.updateParent(parentId, request));
+    }
 
+    @GetMapping("{parent_id}")
+    public ResponseEntity<?> getParentDetail(@PathVariable("parent_id") String parentId) {
+        return ResponseUtil.success("Get parent by id successfully", parentService.getParentDetail(parentId));
+    }
+
+    @DeleteMapping("{parent_id}")
+    public ResponseEntity<?> deleteParent(@PathVariable("parent_id") String parentId) {
+        return ResponseUtil.success("Delete parent successfully", parentService.deleteParent(parentId));
+    }
 }

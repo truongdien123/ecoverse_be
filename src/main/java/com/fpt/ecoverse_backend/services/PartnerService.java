@@ -21,4 +21,5 @@ public interface PartnerService {
     StudentResponseDto changeStatusStudent(String partnerId, String studentId, String status);
     UserListResponseDto<?> getListUser(String partnerId, PageFilterRequestDto pageFilterRequestDto);
     List<StudentResponseDto> createStudents(String partnerId, List<StudentRequestDto> studentRequestDtos);
+    PartnerResponseDto deletePartner(String partnerId);
 }

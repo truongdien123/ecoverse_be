@@ -34,12 +34,12 @@ public class CustomUserDetailsServiceImp implements CustomUserDetailsService, Us
 
 
     @Override
-    public UserDetails loadUserByEmailAndType(String email, UserType userType) {
+    public UserDetails loadUserByEmailAndType(String emailOrId, UserType userType) {
         return switch (userType) {
-            case ADMIN -> loadAdmin(email);
-            case PARENT -> loadParent(email);
-            case PARTNERSHIP -> loadPartnership(email);
-            case STUDENT -> throw new NotFoundException("Students should use student code to login");
+            case ADMIN -> loadAdmin(emailOrId);
+            case PARENT -> loadParent(emailOrId);
+            case PARTNERSHIP -> loadPartnership(emailOrId);
+            case STUDENT -> loadStudentById(emailOrId);
         };
     }
 
@@ -116,5 +116,19 @@ public class CustomUserDetailsServiceImp implements CustomUserDetailsService, Us
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         throw new UsernameNotFoundException("Use loadUserByEmailAndType instead");
+    }
+
+    private UserDetails loadStudentById(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Student user not found with id: " + userId));
+        return CustomUserDetails.builder()
+                .id(user.getId())
+                .email(null)
+                .password(null)
+                .fullName(user.getFullName())
+                .avatarUrl(user.getAvatarUrl())
+                .userType(UserType.STUDENT)
+                .active(user.getActive() != null ? user.getActive() : true)
+                .build();
     }
 }

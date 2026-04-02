@@ -34,3 +34,6 @@ build/
 
 ### Environment file ###
 .env
+
+### Local config (chứa password, không commit) ###
+**/application-local.properties
