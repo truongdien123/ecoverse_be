@@ -9,6 +9,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
 
 @Component
 public class DataSeeder implements ApplicationRunner {
@@ -17,6 +18,12 @@ public class DataSeeder implements ApplicationRunner {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
+    @Value("${app.admin.email}")
+    private String adminEmailStr;
+
+    @Value("${app.admin.password}")
+    private String adminPasswordStr;
 
     public DataSeeder(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
@@ -29,22 +36,18 @@ public class DataSeeder implements ApplicationRunner {
     }
 
     private void seedAdmin() {
-        String adminEmail = "admin@ecoverse.com";
-
-        if (userRepository.findByEmail(adminEmail).isPresent()) {
+        if (userRepository.findByEmail(adminEmailStr).isPresent()) {
             log.info("Admin already exists, skipping seed.");
             return;
         }
-
         User admin = new User();
-        admin.setEmail(adminEmail);
-        admin.setPassword(passwordEncoder.encode("Admin@123"));
+        admin.setEmail(adminEmailStr);
+        admin.setPassword(passwordEncoder.encode(adminPasswordStr));
         admin.setFullName("Super Admin");
         admin.setPhoneNumber("0900000000");
         admin.setRole(UserType.ADMIN);
         admin.setActive(true);
-
         userRepository.save(admin);
-        log.info("✅ Admin seeded: email={}, password=Admin@123", adminEmail);
+        log.info("✅ Admin seeded: email={}, password=***", adminEmailStr);
     }
 }
