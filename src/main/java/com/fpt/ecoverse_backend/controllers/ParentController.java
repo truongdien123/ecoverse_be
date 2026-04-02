@@ -37,4 +37,9 @@ public class ParentController {
     public ResponseEntity<?> getParentDetail(@PathVariable("parent_id") String parentId) {
         return ResponseUtil.success("Get parent by id successfully", parentService.getParentDetail(parentId));
     }
+
+    @DeleteMapping("{parent_id}")
+    public ResponseEntity<?> deleteParent(@PathVariable("parent_id") String parentId) {
+        return ResponseUtil.success("Delete parent successfully", parentService.deleteParent(parentId));
+    }
 }
