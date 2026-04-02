@@ -149,6 +149,28 @@ public class GameServiceImp implements GameService {
         return gameAttemptMapper.toGameAttemptResponse(gameAttempt);
     }
 
+    @Override
+    public List<GameAttemptResponseDto> getGameAttempts(String gameRoundId, String studentId, PageFilterRequestDto pageFilterRequestDto) {
+        Optional<GameRound> gameRound = gameRoundRepository.findById(gameRoundId);
+        if (gameRound.isEmpty()) {
+            throw new NotFoundException("Game round not found");
+        }
+        Optional<Student> student = studentRepository.findById(studentId);
+        if (student.isEmpty()) {
+            throw new NotFoundException("Student not found");
+        }
+        Pageable pageable = PageRequest.of(
+                pageFilterRequestDto.getPageNo()-1,
+                pageFilterRequestDto.getPageSize(),
+                Sort.by(pageFilterRequestDto.getSorting()).descending());
+        Page<GameAttempt> gameAttemptPage = gameAttemptRepository.findGameAttempts(gameRoundId, studentId, pageable);
+        List<GameAttemptResponseDto> response = new ArrayList<>();
+        for (GameAttempt gameAttempt : gameAttemptPage.getContent()) {
+            response.add(gameAttemptMapper.toGameAttemptResponse(gameAttempt));
+        }
+        return response;
+    }
+
     private static GameRound getGameRound(String userId, Optional<GameRound> gameRoundOpt, Optional<User> userOpt) {
         GameRound gameRound = gameRoundOpt.get();
         if (gameRound.getCreatedBy() == CreatedBy.ADMIN &&

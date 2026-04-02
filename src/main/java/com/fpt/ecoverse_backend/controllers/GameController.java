@@ -46,4 +46,9 @@ public class GameController {
     public ResponseEntity<?> createGameAttempt(@PathVariable("game_round_id") String gameRoundId, @PathVariable("student_id") String studentId, GameAttemptRequestDto request) {
         return ResponseUtil.success("Create game attempt successfully", gameService.createGameAttempt(gameRoundId, studentId, request));
     }
+
+    @GetMapping("/rounds/{game_round_id}/students/{student_id}/attempts")
+    public ResponseEntity<?> getGameAttempts(@PathVariable("game_round_id") String gameRoundId, @PathVariable("student_id") String studentId, PageFilterRequestDto pageFilterRequestDto) {
+        return ResponseUtil.success("Get game attempts successfully", gameService.getGameAttempts(gameRoundId, studentId, pageFilterRequestDto));
+    }
 }

@@ -72,13 +72,13 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                         // Partnership endpoints
-                        .requestMatchers("/api/partnership/**").hasAnyRole("PARTNERSHIP", "ADMIN")
+                        .requestMatchers("/partnership/**").hasAnyRole("PARTNERSHIP", "ADMIN")
 
                         // Parent endpoints
-                        .requestMatchers("/api/parent/**").hasAnyRole("PARENT", "ADMIN")
+                        .requestMatchers("/parent/**").hasAnyRole("PARENT", "ADMIN")
 
                         // Student endpoints
-                        .requestMatchers("/api/student/**").hasAnyRole("STUDENT", "PARENT", "ADMIN", "PARTNERSHIP")
+                        .requestMatchers("/student/**").hasAnyRole("STUDENT", "PARENT", "ADMIN", "PARTNERSHIP")
 
                         // All other requests need authentication
                         .anyRequest().authenticated()
