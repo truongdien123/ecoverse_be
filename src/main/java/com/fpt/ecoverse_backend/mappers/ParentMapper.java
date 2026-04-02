@@ -19,4 +19,6 @@ public interface ParentMapper {
             @Mapping(target = "parentId", source = "parent.id")
     })
     ParentResponseDto toParentResponse(Parent parent, User user);
+
+
 }
