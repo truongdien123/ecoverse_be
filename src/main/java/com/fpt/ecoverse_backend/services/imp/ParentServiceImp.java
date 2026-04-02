@@ -97,5 +97,16 @@ public class ParentServiceImp implements ParentService {
         return parentMapper.toParentResponse(parent.get(), user);
     }
 
+    @Override
+    public ParentResponseDto deleteParent(String parentId) {
+        Optional<Parent> parentOpt = parentRepository.findById(parentId);
+        if (parentOpt.isEmpty()) {
+            throw new NotFoundException("Parent not found");
+        }
+        parentRepository.delete(parentOpt.get());
+        userRepository.delete(parentOpt.get().getUser());
+        return parentMapper.toParentResponse(parentOpt.get(), parentOpt.get().getUser());
+    }
+
 
 }

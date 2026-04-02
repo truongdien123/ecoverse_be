@@ -11,4 +11,5 @@ public interface ParentService {
     List<StudentResponseDto> getListStudent(String parentId);
     ParentResponseDto getParentDetail(String parentId);
     ParentResponseDto updateParent(String parentId, ParentRequestDto request);
+    ParentResponseDto deleteParent(String parentId);
 }
