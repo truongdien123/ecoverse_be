@@ -21,7 +21,7 @@ public class OpenApiConfig {
         return new OpenAPI().info(new Info().title("Ecoverse API")
                 .version("1.0")
                 .description("API documentation for Ecoverse Backend"))
-                .servers(List.of(new Server().url("http://14.225.222.111/:8080").description("Local server")))
+                .servers(List.of(new Server().url("http://14.225.222.111:8080").description("Local server")))
                 .components(
                         new Components().addSecuritySchemes("bearerAuth",
                                 new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")))
