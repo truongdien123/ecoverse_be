@@ -1,6 +1,8 @@
 package com.fpt.ecoverse_backend.services;
 
+import com.fpt.ecoverse_backend.dtos.responses.PartnerResponseDto;
+
 public interface AdminService {
-    void createAdmin(String email, String password);
+    PartnerResponseDto verifyPartner(String adminId, String partnerId, Boolean isApproved);
 
 }
