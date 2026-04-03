@@ -25,7 +25,9 @@ public interface StudentMapper {
     StudentResponseDto toStudentResponse(Student student, User user);
 
     @Mappings({
-            @Mapping(target = "grade", source = "grade")
+            @Mapping(target = "grade", source = "request.grade"),
+            @Mapping(target = "id", source = "id"),
+            @Mapping(target = "studentCode", source = "request.studentCode")
     })
-    Student toStudent(StudentRequestDto request);
+    Student toStudent(StudentRequestDto request, String id);
 }
