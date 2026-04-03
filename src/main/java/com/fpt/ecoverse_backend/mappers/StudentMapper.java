@@ -26,8 +26,7 @@ public interface StudentMapper {
 
     @Mappings({
             @Mapping(target = "grade", source = "request.grade"),
-            @Mapping(target = "id", source = "id"),
-            @Mapping(target = "studentCode", source = "request.studentCode")
+            @Mapping(target = "id", source = "id")
     })
     Student toStudent(StudentRequestDto request, String id);
 }
