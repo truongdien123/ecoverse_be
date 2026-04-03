@@ -357,7 +357,7 @@ public class PartnerServiceImp implements PartnerService {
         }
         List<Student> students = studentRequestDtos.stream().map(dto -> {
             User user = userMapper.toUser(dto, null, uploadFile);
-            Student student = studentMapper.toStudent(dto);
+            Student student = studentMapper.toStudent(dto, user.getId());
             User savedUser = userRepository.save(user);
             student.setUser(savedUser);
             student.setPartner(partner.get());
