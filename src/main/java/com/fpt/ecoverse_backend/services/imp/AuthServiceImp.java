@@ -88,7 +88,7 @@ public class AuthServiceImp implements AuthService {
     @Override
     public LoginResponseDto<?> studentLogin(StudentLoginRequestDto request) {
         // Load student by student_code (không cần password)
-        UserDetails userDetails = customUserDetailsService.loadStudentByCode(request.getStudentCode());
+        UserDetails userDetails = customUserDetailsService.loadStudent(request.getStudentCode());
         CustomUserDetails customUser = (CustomUserDetails) userDetails;
 
         if (!customUser.isEnabled()) {

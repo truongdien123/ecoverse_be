@@ -71,16 +71,16 @@ public class SecurityConfig {
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
 
                         // Admin endpoints
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/admins/**").hasRole("ADMIN")
 
                         // Partnership endpoints
-                        .requestMatchers("/partnership/**").hasAnyRole("PARTNERSHIP", "ADMIN")
+                        .requestMatchers("/partnerships/**").hasAnyRole("PARTNERSHIP", "ADMIN")
 
                         // Parent endpoints
-                        .requestMatchers("/parent/**").hasAnyRole("PARENT", "ADMIN")
+                        .requestMatchers("/parents/**").hasAnyRole("PARENT", "ADMIN")
 
                         // Student endpoints
-                        .requestMatchers("/student/**").hasAnyRole("STUDENT", "PARENT", "ADMIN", "PARTNERSHIP")
+                        .requestMatchers("/students/**").hasAnyRole("STUDENT", "PARENT", "ADMIN", "PARTNERSHIP")
 
                         // All other requests need authentication
                         .anyRequest().authenticated()
