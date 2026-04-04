@@ -11,6 +11,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PartnerRepository extends JpaRepository<Partner, String> {
 
-    @Query("select p from Partner p where (:status is null or p.status = upper(:status))")
+    @Query("select p from Partner p where (:status is null or p.status = :status)")
     Page<Partner> findPartnersByStatus(@Param("status") String status, Pageable pageable);
 }
