@@ -19,6 +19,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -62,9 +63,8 @@ public class AdminServiceImp implements AdminService {
         }
         Pageable pageable = PageRequest.of(
                 pageFilterRequestDto.getPageNo()-1,
-                pageFilterRequestDto.getPageSize(),
-                Sort.by(pageFilterRequestDto.getSorting()).descending());
-        Page<Partner> partnerPage = partnerRepository.findParntersByStatus(status.toUpperCase(), pageable);
+                pageFilterRequestDto.getPageSize());
+        Page<Partner> partnerPage = partnerRepository.findPartnersByStatus(status.equalsIgnoreCase("all") ? null : status, pageable);
         List<Partner> partners = partnerPage.getContent();
         return partners.stream()
                 .map(partner -> partnerMapper.toPartnerResponse(partner, partner.getUser()))

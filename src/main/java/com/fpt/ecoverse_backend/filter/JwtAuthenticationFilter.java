@@ -40,7 +40,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 UserDetails userDetails;
                 if (userType == com.fpt.ecoverse_backend.enums.UserType.STUDENT) {
                     // STUDENT không có email trong token, load bằng userId
-                    userDetails = userDetailsService.loadUserByEmailAndType(userId, userType);
+                    userDetails = userDetailsService.loadStudent(userId);
                 } else {
                     userDetails = userDetailsService.loadUserByEmailAndType(email, userType);
                 }

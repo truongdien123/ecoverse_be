@@ -315,8 +315,7 @@ public class PartnerServiceImp implements PartnerService {
     public UserListResponseDto<?> getListUser(String partnerId, PageFilterRequestDto pageFilterRequestDto) {
         Pageable pageable = PageRequest.of(
                 pageFilterRequestDto.getPageNo()-1,
-                pageFilterRequestDto.getPageSize(),
-                Sort.by(pageFilterRequestDto.getSorting()).descending());
+                pageFilterRequestDto.getPageSize());
         if (pageFilterRequestDto.getType().equalsIgnoreCase("student")) {
             Page<Object[]> students = studentRepository.searchStudents(
                     partnerId, pageFilterRequestDto.getSearching(), pageFilterRequestDto.getGrade(), pageable);
@@ -333,7 +332,7 @@ public class PartnerServiceImp implements PartnerService {
                     students.getTotalPages());
         } else if (pageFilterRequestDto.getType().equalsIgnoreCase("parent")) {
             Page<Object[]> parents = parentRepository.searchParents(
-                    partnerId, pageFilterRequestDto.getSearching(), pageFilterRequestDto.isHasChildren(), pageable);
+                    partnerId, pageFilterRequestDto.getSearching(), pageFilterRequestDto.getHasChildren(), pageable);
             List<ParentResponseDto> list = parents.getContent().stream().map(row -> {
                 Parent parent = (Parent) row[0];
                 User user = (User) row[1];
