@@ -30,7 +30,6 @@ public class PartnerController {
     }
 
     @PostMapping(value = "/register")
-    @PreAuthorize("hasRole('PARTNERSHIP')")
     public ResponseEntity<?> createPartner(@Valid PartnerRegisterRequestDto request) {
         PartnerResponseDto response = partnerService.createPartner(request);
         return ResponseUtil.success("Create partner successfully", response);

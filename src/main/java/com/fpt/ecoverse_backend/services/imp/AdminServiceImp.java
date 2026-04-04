@@ -64,7 +64,7 @@ public class AdminServiceImp implements AdminService {
         Pageable pageable = PageRequest.of(
                 pageFilterRequestDto.getPageNo()-1,
                 pageFilterRequestDto.getPageSize());
-        Page<Partner> partnerPage = partnerRepository.findPartnersByStatus(status.equalsIgnoreCase("all") ? null : status, pageable);
+        Page<Partner> partnerPage = partnerRepository.findPartnersByStatus(status.equalsIgnoreCase("all") ? null : status.toUpperCase(), pageable);
         List<Partner> partners = partnerPage.getContent();
         return partners.stream()
                 .map(partner -> partnerMapper.toPartnerResponse(partner, partner.getUser()))
