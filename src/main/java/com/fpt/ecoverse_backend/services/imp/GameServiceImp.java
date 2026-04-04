@@ -83,8 +83,7 @@ public class GameServiceImp implements GameService {
     public List<GameRoundResponseDto> getGameRounds(String userId, PageFilterRequestDto pageFilterRequestDto) {
         Pageable pageable = PageRequest.of(
                 pageFilterRequestDto.getPageNo()-1,
-                pageFilterRequestDto.getPageSize(),
-                Sort.by(pageFilterRequestDto.getSorting()).descending());
+                pageFilterRequestDto.getPageSize());
         Page<GameRound> gameRoundPage = gameRoundRepository.findGameRounds(
                 userId, pageFilterRequestDto.getSearching(), getUserRole(userId).name(), pageable);
         List<GameRoundResponseDto> response = new ArrayList<>();
@@ -161,8 +160,7 @@ public class GameServiceImp implements GameService {
         }
         Pageable pageable = PageRequest.of(
                 pageFilterRequestDto.getPageNo()-1,
-                pageFilterRequestDto.getPageSize(),
-                Sort.by(pageFilterRequestDto.getSorting()).descending());
+                pageFilterRequestDto.getPageSize());
         Page<GameAttempt> gameAttemptPage = gameAttemptRepository.findGameAttempts(gameRoundId, studentId, pageable);
         List<GameAttemptResponseDto> response = new ArrayList<>();
         for (GameAttempt gameAttempt : gameAttemptPage.getContent()) {
