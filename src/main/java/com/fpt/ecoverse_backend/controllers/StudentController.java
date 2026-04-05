@@ -3,7 +3,9 @@ package com.fpt.ecoverse_backend.controllers;
 import com.fpt.ecoverse_backend.dtos.requests.StudentRequestDto;
 import com.fpt.ecoverse_backend.services.StudentService;
 import com.fpt.ecoverse_backend.utils.ResponseUtil;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,12 +19,14 @@ public class StudentController {
     }
 
     @GetMapping("/{student_id}")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> getStudentDetail(@PathVariable("student_id") String studentId) {
         return ResponseUtil.success("Get student details successfully", studentService.getStudentDetails(studentId));
     }
 
-    @PutMapping("/{student_id}")
-    public ResponseEntity<?> updateStudent(@PathVariable("student_id") String studentId, StudentRequestDto request) {
+    @PutMapping(value = "/{student_id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<?> updateStudent(@PathVariable("student_id") String studentId, @ModelAttribute StudentRequestDto request) {
         return ResponseUtil.success("Update student details successfully", studentService.updateStudentDetails(studentId, request));
     }
 }

@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
@@ -21,6 +20,4 @@ public class StudentRequestDto {
     @JsonProperty("class_number")
     private String classNumber;
 
-    @JsonProperty("avatar")
-    private MultipartFile avatar;
 }
