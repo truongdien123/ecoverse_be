@@ -33,10 +33,9 @@ public interface UserMapper {
 
     @Mappings({
             @Mapping(target = "fullName", source = "request.fullName"),
-            @Mapping(target = "id", source = "id"),
-            @Mapping(target = "avatarUrl", source = "request.avatar", qualifiedByName = "convertImg")
+            @Mapping(target = "id", source = "id")
     })
-    User toUser(StudentRequestDto request, String id, @Context UploadFile uploadFile);
+    User toUser(StudentRequestDto request, String id);
 
     @Mappings({
             @Mapping(target = "fullName", source = "request.fullName"),
