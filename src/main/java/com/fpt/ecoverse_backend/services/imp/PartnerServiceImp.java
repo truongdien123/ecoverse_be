@@ -349,6 +349,7 @@ public class PartnerServiceImp implements PartnerService {
     }
 
     @Override
+    @Transactional
     public List<StudentResponseDto> createStudents(String partnerId, List<StudentRequestDto> studentRequestDtos) {
         Optional<Partner> partner = partnerRepository.findById(partnerId);
         if (partner.isEmpty()) {
@@ -356,8 +357,9 @@ public class PartnerServiceImp implements PartnerService {
         }
         List<Student> students = studentRequestDtos.stream().map(dto -> {
             User user = userMapper.toUser(dto, null, uploadFile);
+            user.setRole(UserType.STUDENT);
             User savedUser = userRepository.save(user);
-            Student student = studentMapper.toStudent(dto, savedUser.getId());
+            Student student = studentMapper.toStudent(dto, null);
             student.setUser(savedUser);
             student.setPartner(partner.get());
             String studentCode = generateStudentCode(

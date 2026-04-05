@@ -29,34 +29,46 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        try {
             String jwt = parseJwt(request);
 
-            if (jwt != null && jwtUtils.validateToken(jwt)) {
-                String userId = jwtUtils.extractUserId(jwt);
-                String email = jwtUtils.extractEmail(jwt);
-                var userType = jwtUtils.extractUserType(jwt);
+        if (jwt == null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-                UserDetails userDetails;
-                if (userType == com.fpt.ecoverse_backend.enums.UserType.STUDENT) {
-                    // STUDENT không có email trong token, load bằng userId
-                    userDetails = userDetailsService.loadStudent(userId);
-                } else {
-                    userDetails = userDetailsService.loadUserByEmailAndType(email, userType);
-                }
-
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
-
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+        try {
+            // 2. Token không hợp lệ → 401
+            if (!jwtUtils.validateToken(jwt)) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Invalid token");
+                return;
             }
+
+            String userId = jwtUtils.extractUserId(jwt);
+            String email = jwtUtils.extractEmail(jwt);
+            var userType = jwtUtils.extractUserType(jwt);
+
+            UserDetails userDetails;
+            if (userType == com.fpt.ecoverse_backend.enums.UserType.STUDENT) {
+                userDetails = userDetailsService.loadStudent(userId);
+            } else {
+                userDetails = userDetailsService.loadUserByEmailAndType(email, userType);
+            }
+
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
         } catch (Exception e) {
-            logger.error("Cannot set user authentication: {}", e);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Authentication failed");
+            return;
         }
 
         filterChain.doFilter(request, response);
