@@ -48,7 +48,7 @@ public class StudentServiceImp implements StudentService {
             throw new NotFoundException("Student not found");
         }
         Student student = studentMapper.toStudent(request, studentOpt.get().getId());
-        User user = userMapper.toUser(request, studentOpt.get().getId(), uploadFile);
+        User user = userMapper.toUser(request, studentOpt.get().getId());
         userRepository.save(user);
         studentRepository.save(student);
         return studentMapper.toStudentResponse(student, user);
