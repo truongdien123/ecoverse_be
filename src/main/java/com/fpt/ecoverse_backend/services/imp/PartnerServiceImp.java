@@ -356,7 +356,7 @@ public class PartnerServiceImp implements PartnerService {
             throw new NotFoundException("Not found partner");
         }
         List<Student> students = studentRequestDtos.stream().map(dto -> {
-            User user = userMapper.toUser(dto, null, uploadFile);
+            User user = userMapper.toUser(dto, null);
             user.setRole(UserType.STUDENT);
             User savedUser = userRepository.save(user);
             Student student = studentMapper.toStudent(dto, null);

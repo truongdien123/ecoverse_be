@@ -84,5 +84,11 @@ public class ExceptionHandlerConfig {
         LOG.error(ex.getMessage(), ex);
         return ResponseUtil.error(HttpStatus.UNAUTHORIZED, "Authentication failed: " + ex.getMessage());
     }
+
+    @ExceptionHandler(value = MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<?> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        LOG.error(ex.getMessage(), ex);
+        return ResponseUtil.error(HttpStatus.BAD_REQUEST, "Invalid parameter type: " + ex.getMessage());
+    }
 }
 

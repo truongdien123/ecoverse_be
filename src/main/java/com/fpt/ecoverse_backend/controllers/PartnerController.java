@@ -29,8 +29,8 @@ public class PartnerController {
         this.partnerService = partnerService;
     }
 
-    @PostMapping(value = "/register")
-    public ResponseEntity<?> createPartner(@Valid PartnerRegisterRequestDto request) {
+    @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> createPartner(@Valid @ModelAttribute PartnerRegisterRequestDto request) {
         PartnerResponseDto response = partnerService.createPartner(request);
         return ResponseUtil.success("Create partner successfully", response);
     }
