@@ -1,6 +1,8 @@
 package com.fpt.ecoverse_backend.repositories;
 
 import com.fpt.ecoverse_backend.entities.Partner;
+import com.fpt.ecoverse_backend.enums.ApprovalStatus;
+import com.fpt.ecoverse_backend.enums.PartnerStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,5 +14,5 @@ import org.springframework.stereotype.Repository;
 public interface PartnerRepository extends JpaRepository<Partner, String> {
 
     @Query("select p from Partner p where (:status is null or p.status = :status)")
-    Page<Partner> findPartnersByStatus(@Param("status") String status, Pageable pageable);
+    Page<Partner> findPartnersByStatus(@Param("status") PartnerStatus status, Pageable pageable);
 }
