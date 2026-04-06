@@ -22,7 +22,7 @@ public interface StudentRepository extends JpaRepository<Student, String> {
     @Query(
             "select s, u from Student s join s.user u " +
                     "where s.partner.id = :partnerId " +
-                    "and (:searching is null or lower(u.fullName) like lower(concat('%', :searching, '%'))) " +
+                    "and (:searching is null or u.fullName ilike '%' || cast(:searching as string ) || '%') " +
                     "and (:grade is null or s.grade = :grade)"
     )
     Page<Object[]> searchStudents(@Param("partnerId") String partnerId, @Param("searching") String searching, @Param("grade") String grade, Pageable pageable);
