@@ -1,6 +1,7 @@
 package com.fpt.ecoverse_backend.controllers;
 
 import com.fpt.ecoverse_backend.dtos.requests.GameAttemptRequestDto;
+import com.fpt.ecoverse_backend.dtos.requests.GamePlacementRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.GameRoundRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.PageFilterRequestDto;
 import com.fpt.ecoverse_backend.dtos.responses.GameRoundResponseDto;
@@ -9,6 +10,8 @@ import com.fpt.ecoverse_backend.utils.ResponseUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/games")
@@ -57,5 +60,23 @@ public class GameController {
     @PreAuthorize("hasAnyRole('ADMIN', 'PARTNERSHIP', 'STUDENT')")
     public ResponseEntity<?> getGameAttempts(@PathVariable("game_round_id") String gameRoundId, @PathVariable("student_id") String studentId, PageFilterRequestDto pageFilterRequestDto) {
         return ResponseUtil.success("Get game attempts successfully", gameService.getGameAttempts(gameRoundId, studentId, pageFilterRequestDto));
+    }
+
+    @PutMapping("/attempts/{game_attempt_id}")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<?> updateGameAttempt(@PathVariable("game_attempt_id") String gameAttemptId, @RequestBody GameAttemptRequestDto request) {
+        return ResponseUtil.success("Update game attempt successfully", gameService.updateGameAttempt(gameAttemptId, request));
+    }
+
+    @PostMapping("/rounds/{game_round_id}/attempts/{game_attempt_id}/placements")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<?> createGamePlacements(@PathVariable("game_round_id") String gameRoundId, @PathVariable("game_attempt_id") String gameAttemptId, @RequestBody List<GamePlacementRequestDto> requests) {
+        return ResponseUtil.success("Create game placements successfully", gameService.createGamePlacements(gameRoundId, gameAttemptId, requests));
+    }
+
+    @GetMapping("/attempts/{game_attempt_id}/placements")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<?> getGamePlacements(@PathVariable("game_attempt_id") String gameAttemptId) {
+        return ResponseUtil.success("Get game placements successfully", gameService.getGamePlacements(gameAttemptId));
     }
 }

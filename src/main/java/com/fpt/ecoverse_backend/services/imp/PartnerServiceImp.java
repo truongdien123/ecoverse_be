@@ -1,10 +1,7 @@
 package com.fpt.ecoverse_backend.services.imp;
 
 import com.fpt.ecoverse_backend.dtos.*;
-import com.fpt.ecoverse_backend.dtos.requests.PageFilterRequestDto;
-import com.fpt.ecoverse_backend.dtos.requests.PartnerRegisterRequestDto;
-import com.fpt.ecoverse_backend.dtos.requests.PartnerUpdateRequestDto;
-import com.fpt.ecoverse_backend.dtos.requests.StudentRequestDto;
+import com.fpt.ecoverse_backend.dtos.requests.*;
 import com.fpt.ecoverse_backend.dtos.responses.*;
 import com.fpt.ecoverse_backend.entities.Parent;
 import com.fpt.ecoverse_backend.entities.Partner;
@@ -387,6 +384,28 @@ public class PartnerServiceImp implements PartnerService {
         partnerRepository.delete(partner.get());
         userRepository.delete(partner.get().getUser());
         return partnerMapper.toPartnerResponse(partner.get(), partner.get().getUser());
+    }
+
+    @Override
+    public List<ParentResponseDto> createParents(String partnerId, List<ParentRequestDto> request) {
+        Optional<Partner> partner = partnerRepository.findById(partnerId);
+        if (partner.isEmpty()) {
+            throw new NotFoundException("Not found partner");
+        }
+        List<Parent> parents = request.stream().map(dto -> {
+            User user = userMapper.toUser(dto, null, uploadFile);
+            user.setRole(UserType.PARENT);
+            User savedUser = userRepository.save(user);
+            Parent parent = new Parent();
+            parent.setUser(savedUser);
+            parent.setPartner(partner.get());
+            return parentRepository.save(parent);
+        }).toList();
+        List<ParentResponseDto> response = new ArrayList<>();
+        for (Parent parent : parents) {
+            response.add(parentMapper.toParentResponse(parent, parent.getUser()));
+        }
+        return response;
     }
 
     private String generateReportFile(

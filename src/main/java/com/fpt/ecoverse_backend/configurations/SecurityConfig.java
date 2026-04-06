@@ -49,7 +49,8 @@ public class SecurityConfig {
             "/api-docs.yaml",
             "/webjars/**",
             "/",
-            "/partnerships/register"
+            "/partnerships/register",
+            "/error"
     };
 
     @Bean
@@ -83,6 +84,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/partnerships/{partnership_id}/accounts").hasAnyRole("PARTNERSHIP", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/partnerships/{partnership_id}/students").hasRole("PARTNERSHIP")
                         .requestMatchers(HttpMethod.DELETE, "/partnerships/{partnership_id}").hasAnyRole("PARTNERSHIP", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/partnerships/{partnership_id}/parents").hasRole("PARTNERSHIP")
 
                         // Parent endpoints
                         .requestMatchers(HttpMethod.POST, "/parents/{parent_id}/students/{student_id}/link-student").hasRole("PARENT")
@@ -110,6 +112,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/games/rounds/{game_round_id}/users/{user_id}").hasAnyRole("PARTNERSHIP", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/games/rounds/{game_round_id}/students/{student_id}/attempts").hasRole("STUDENT")
                         .requestMatchers(HttpMethod.GET, "/games/rounds/{game_round_id}/students/{student_id}/attempts").hasAnyRole("STUDENT", "PARTNERSHIP", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/games/attempts/{game_attempt_id}").hasRole("STUDENT")
+                        .requestMatchers(HttpMethod.POST, "/games/rounds/{game_round_id}/attempts/{game_attempt_id}/placements").hasRole("STUDENT")
+                        .requestMatchers(HttpMethod.GET, "/games/attempts/{game_attempt_id}/placements").hasRole("STUDENT")
 
                         // Reward endpoints
                         .requestMatchers(HttpMethod.POST, "/rewards/{partner_id}").hasRole("PARTNERSHIP")
