@@ -3,6 +3,7 @@ package com.fpt.ecoverse_backend.services.imp;
 import com.fpt.ecoverse_backend.entities.Partner;
 import com.fpt.ecoverse_backend.entities.User;
 import com.fpt.ecoverse_backend.enums.UserType;
+import com.fpt.ecoverse_backend.exceptions.BadRequestException;
 import com.fpt.ecoverse_backend.exceptions.NotFoundException;
 import com.fpt.ecoverse_backend.filter.CustomUserDetails;
 import com.fpt.ecoverse_backend.repositories.ParentRepository;
@@ -44,12 +45,14 @@ public class CustomUserDetailsServiceImp implements CustomUserDetailsService, Us
     }
 
     @Override
-    public UserDetails loadStudent(String studentId) {
-        var student = studentRepository.findById(studentId)
+    public UserDetails loadStudent(String studentCode) {
+        var student = studentRepository.findByStudentCode(studentCode)
                 .orElseThrow(() -> new NotFoundException("Student not found"));
         Optional<User> userOpt = userRepository.findById(student.getId());
         if (userOpt.isEmpty()) {
             throw new NotFoundException("User not found");
+        } else if (userOpt.get().getRole() != UserType.STUDENT) {
+            throw new BadRequestException("User is not a student");
         }
         return CustomUserDetails.builder()
                 .id(student.getId())

@@ -395,10 +395,14 @@ public class PartnerServiceImp implements PartnerService {
         List<Parent> parents = request.stream().map(dto -> {
             User user = userMapper.toUser(dto, null, uploadFile);
             user.setRole(UserType.PARENT);
+            String password = generatePassword();
+            user.setPassword(passwordEncoder.encode(password));
             User savedUser = userRepository.save(user);
             Parent parent = new Parent();
             parent.setUser(savedUser);
             parent.setPartner(partner.get());
+            ParentCredentialMail mail = new ParentCredentialMail(savedUser.getEmail(), savedUser.getFullName(), password);
+            eventPublisher.publishEvent(new ParentsCreatedEvent(List.of(mail)));
             return parentRepository.save(parent);
         }).toList();
         List<ParentResponseDto> response = new ArrayList<>();
