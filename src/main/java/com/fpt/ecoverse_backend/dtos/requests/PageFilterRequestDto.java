@@ -11,6 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PageFilterRequestDto {
+
     @JsonProperty("type")
     private String type;
 
