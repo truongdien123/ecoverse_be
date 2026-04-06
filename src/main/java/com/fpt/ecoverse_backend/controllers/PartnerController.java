@@ -5,6 +5,7 @@ import com.fpt.ecoverse_backend.dtos.responses.*;
 import com.fpt.ecoverse_backend.services.PartnerService;
 import com.fpt.ecoverse_backend.utils.ResponseUtil;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -64,7 +65,7 @@ public class PartnerController {
         return ResponseUtil.success("Change status student successfully", response);
     }
 
-    @GetMapping("/{partnership_id}/accounts")
+    @PostMapping("/{partnership_id}/accounts")
     @PreAuthorize("hasAnyRole('PARTNERSHIP', 'ADMIN')")
     public ResponseEntity<?> getListUser(@PathVariable("partnership_id") String partnerId, @RequestBody PageFilterRequestDto pageFilterRequestDto) {
         UserListResponseDto<?> list = partnerService.getListUser(partnerId, pageFilterRequestDto);
