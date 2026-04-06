@@ -48,7 +48,8 @@ public class SecurityConfig {
             "/api-docs.yaml",
             "/webjars/**",
             "/partnerships/{partnership_id}",
-            "/partnerships/{partnership_id}/profile"
+            "/partnerships/{partnership_id}/profile",
+            "/error"
     };
 
     @Bean
