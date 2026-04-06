@@ -12,4 +12,5 @@ public interface RewardService {
     RewardItemResponseDto getRewardItemById(String partnerId, String rewardItemId);
     RewardItemResponseDto updateRewardItem(String partnerId, String rewardItemId, RewardItemRequestDto request);
     RewardItemResponseDto deleteRewardItem(String partnerId, String rewardItemId);
+    
 }
