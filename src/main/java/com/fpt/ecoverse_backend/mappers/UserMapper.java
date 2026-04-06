@@ -41,7 +41,6 @@ public interface UserMapper {
             @Mapping(target = "fullName", source = "request.fullName"),
             @Mapping(target = "address", source = "request.address"),
             @Mapping(target = "phoneNumber", source = "request.phoneNumber"),
-            @Mapping(target = "avatarUrl", source = "request.avatar", qualifiedByName = "convertImg"),
             @Mapping(target = "id", source = "id")
     })
     User toUser(ParentRequestDto request, String id, @Context UploadFile uploadFile);

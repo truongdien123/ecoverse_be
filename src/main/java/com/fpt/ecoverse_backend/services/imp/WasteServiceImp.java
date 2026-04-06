@@ -4,9 +4,7 @@ import com.fpt.ecoverse_backend.dtos.requests.WasteBinRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.WasteItemRequestDto;
 import com.fpt.ecoverse_backend.dtos.responses.WasteBinResponseDto;
 import com.fpt.ecoverse_backend.dtos.responses.WasteItemResponseDto;
-import com.fpt.ecoverse_backend.entities.User;
-import com.fpt.ecoverse_backend.entities.WasteBin;
-import com.fpt.ecoverse_backend.entities.WasteItem;
+import com.fpt.ecoverse_backend.entities.*;
 import com.fpt.ecoverse_backend.enums.CreatedBy;
 import com.fpt.ecoverse_backend.enums.UserType;
 import com.fpt.ecoverse_backend.enums.WasteBinCode;
@@ -15,10 +13,7 @@ import com.fpt.ecoverse_backend.exceptions.NotFoundException;
 import com.fpt.ecoverse_backend.mappers.WasteBinMapper;
 import com.fpt.ecoverse_backend.mappers.WasteItemMapper;
 import com.fpt.ecoverse_backend.projections.WasteItemWithOrderProjection;
-import com.fpt.ecoverse_backend.repositories.PartnerRepository;
-import com.fpt.ecoverse_backend.repositories.UserRepository;
-import com.fpt.ecoverse_backend.repositories.WasteBinRepository;
-import com.fpt.ecoverse_backend.repositories.WasteItemRepository;
+import com.fpt.ecoverse_backend.repositories.*;
 import com.fpt.ecoverse_backend.services.WasteService;
 import com.fpt.ecoverse_backend.utils.UploadFile;
 import org.springframework.stereotype.Service;
@@ -36,8 +31,11 @@ public class WasteServiceImp implements WasteService {
     private final UploadFile uploadFile;
     private final WasteBinRepository wasteBinRepository;
     private final WasteBinMapper wasteBinMapper;
+    private final GameAttemptRepository gameAttemptRepository;
+    private final GameRoundRepository gameRoundRepository;
+    private final StudentRepository studentRepository;
 
-    public WasteServiceImp(WasteItemRepository wasteItemRepository, WasteItemMapper wasteItemMapper, UserRepository userRepository, PartnerRepository partnerRepository, UploadFile uploadFile, WasteBinRepository wasteBinRepository, WasteBinMapper wasteBinMapper) {
+    public WasteServiceImp(WasteItemRepository wasteItemRepository, WasteItemMapper wasteItemMapper, UserRepository userRepository, PartnerRepository partnerRepository, UploadFile uploadFile, WasteBinRepository wasteBinRepository, WasteBinMapper wasteBinMapper, GameAttemptRepository gameAttemptRepository, GameRoundRepository gameRoundRepository, StudentRepository studentRepository) {
         this.wasteItemRepository = wasteItemRepository;
         this.wasteItemMapper = wasteItemMapper;
         this.userRepository = userRepository;
@@ -45,6 +43,9 @@ public class WasteServiceImp implements WasteService {
         this.uploadFile = uploadFile;
         this.wasteBinRepository = wasteBinRepository;
         this.wasteBinMapper = wasteBinMapper;
+        this.gameAttemptRepository = gameAttemptRepository;
+        this.gameRoundRepository = gameRoundRepository;
+        this.studentRepository = studentRepository;
     }
 
     @Override
@@ -94,6 +95,18 @@ public class WasteServiceImp implements WasteService {
         if (wasteItemWithOrder.isEmpty()) {
             throw new NotFoundException("Waste items not found");
         }
+        GameAttempt gameAttempt = new GameAttempt();
+        Optional<GameRound> gameRoundOptional = gameRoundRepository.findById(gameRoundId);
+        if (gameRoundOptional.isEmpty()) {
+            throw new NotFoundException("Game round not found");
+        }
+        gameAttempt.setGameRound(gameRoundOptional.get());
+        Optional<Student> student = studentRepository.findById(userId);
+        if (student.isEmpty()) {
+            throw new NotFoundException("Student not found");
+        }
+        gameAttempt.setStudent(student.get());
+        gameAttemptRepository.save(gameAttempt);
         return wasteItemWithOrder.stream().map(projection ->
                 wasteItemMapper.toWasteItemResponse(projection.getWasteItem(), projection.getOrderIndex())).toList();
     }
