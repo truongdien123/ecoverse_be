@@ -44,12 +44,12 @@ public class CustomUserDetailsServiceImp implements CustomUserDetailsService, Us
     }
 
     @Override
-    public UserDetails loadStudentByCode(String studentCode) {
-        var student = studentRepository.findByStudentCode(studentCode)
-                .orElseThrow(() -> new NotFoundException("Student not found with code: " + studentCode));
+    public UserDetails loadStudent(String studentId) {
+        var student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new NotFoundException("Student not found"));
         Optional<User> userOpt = userRepository.findById(student.getId());
         if (userOpt.isEmpty()) {
-            throw new NotFoundException("User not found for student with code: " + studentCode);
+            throw new NotFoundException("User not found");
         }
         return CustomUserDetails.builder()
                 .id(student.getId())

@@ -6,8 +6,10 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -52,11 +54,13 @@ public class ExceptionHandlerConfig {
 
     @ExceptionHandler(value = BadCredentialsException.class)
     public ResponseEntity<?> handleBadCredentials(BadCredentialsException ex) {
+        LOG.error(ex.getMessage(), ex);
         return ResponseUtil.error(HttpStatus.UNAUTHORIZED, ex.getMessage());
     }
 
     @ExceptionHandler(value = DisabledException.class)
     public ResponseEntity<?> handleDisabled(DisabledException ex) {
+        LOG.error(ex.getMessage(), ex);
         return ResponseUtil.error(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 
@@ -67,6 +71,24 @@ public class ExceptionHandlerConfig {
                 .findFirst()
                 .orElse("Validation failed");
         return ResponseUtil.error(HttpStatus.BAD_REQUEST, message);
+    }
+
+    @ExceptionHandler(value = AccessDeniedException.class)
+    public ResponseEntity<?> handleAccessDenied(AccessDeniedException ex) {
+        LOG.error(ex.getMessage(), ex);
+        return ResponseUtil.error(HttpStatus.FORBIDDEN, "Access denied: " + ex.getMessage());
+    }
+
+    @ExceptionHandler(value = AuthenticationException.class)
+    public ResponseEntity<?> handleAuthenticationException(AuthenticationException ex) {
+        LOG.error(ex.getMessage(), ex);
+        return ResponseUtil.error(HttpStatus.UNAUTHORIZED, "Authentication failed: " + ex.getMessage());
+    }
+
+    @ExceptionHandler(value = MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<?> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        LOG.error(ex.getMessage(), ex);
+        return ResponseUtil.error(HttpStatus.BAD_REQUEST, "Invalid parameter type: " + ex.getMessage());
     }
 }
 

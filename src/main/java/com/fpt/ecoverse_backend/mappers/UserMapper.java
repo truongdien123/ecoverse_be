@@ -1,5 +1,6 @@
 package com.fpt.ecoverse_backend.mappers;
 
+import com.fpt.ecoverse_backend.dtos.requests.ParentRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.PartnerRegisterRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.PartnerUpdateRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.StudentRequestDto;
@@ -14,25 +15,36 @@ import java.util.List;
 public interface UserMapper {
 
     @Mappings({
-        @Mapping(target = "email", source = "email"),
-        @Mapping(target = "phoneNumber", source = "phoneNumber"),
-        @Mapping(target = "password", source = "password"),
-        @Mapping(target = "address", source = "address"),
-        @Mapping(target = "avatarUrl", source = "avatar", qualifiedByName = "convertImg")
+        @Mapping(target = "email", source = "request.email"),
+        @Mapping(target = "phoneNumber", source = "request.phoneNumber"),
+        @Mapping(target = "password", source = "request.password"),
+        @Mapping(target = "address", source = "request.address"),
+        @Mapping(target = "id", source = "id"),
+        @Mapping(target = "avatarUrl", source = "request.avatar", qualifiedByName = "convertImg"),
     })
-    User toUser(PartnerRegisterRequestDto request, @Context UploadFile uploadFile);
+    User toUser(PartnerRegisterRequestDto request, String id, @Context UploadFile uploadFile);
 
     @Mappings({
-            @Mapping(target = "address", source = "address"),
-            @Mapping(target = "avatarUrl", source = "avatar", qualifiedByName = "convertImg")
+            @Mapping(target = "address", source = "request.address"),
+            @Mapping(target = "id", source = "id"),
+            @Mapping(target = "avatarUrl", source = "request.avatar", qualifiedByName = "convertImg")
     })
-    User toUser(PartnerUpdateRequestDto request, @Context UploadFile uploadFile);
+    User toUser(PartnerUpdateRequestDto request, String id, @Context UploadFile uploadFile);
 
     @Mappings({
-            @Mapping(target = "fullName", source = "fullName"),
-            @Mapping(target = "avatarUrl", source = "avatar", qualifiedByName = "convertImg")
+            @Mapping(target = "fullName", source = "request.fullName"),
+            @Mapping(target = "id", source = "id")
     })
-    User toUser(StudentRequestDto reuquest, @Context UploadFile uploadFile);
+    User toUser(StudentRequestDto request, String id);
+
+    @Mappings({
+            @Mapping(target = "fullName", source = "request.fullName"),
+            @Mapping(target = "address", source = "request.address"),
+            @Mapping(target = "phoneNumber", source = "request.phoneNumber"),
+            @Mapping(target = "avatarUrl", source = "request.avatar", qualifiedByName = "convertImg"),
+            @Mapping(target = "id", source = "id")
+    })
+    User toUser(ParentRequestDto request, String id, @Context UploadFile uploadFile);
 
     @Named("convertImg")
     static String convertImg(MultipartFile multipartFile, @Context UploadFile uploadFile) {

@@ -1,6 +1,7 @@
 package com.fpt.ecoverse_backend.dtos.requests;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fpt.ecoverse_backend.enums.WasteBinCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,18 +14,9 @@ import org.springframework.web.multipart.MultipartFile;
 @AllArgsConstructor
 public class WasteBinRequestDto {
 
-    @JsonProperty("code")
-    private String code;
-
-    @JsonProperty("display_name")
+    private WasteBinCode code;
     private String displayName;
-
-    @JsonProperty("color_hex")
     private String colorHex;
-
-    @JsonProperty("description")
     private String description;
-
-    @JsonProperty("icon")
     private MultipartFile icon;
 }

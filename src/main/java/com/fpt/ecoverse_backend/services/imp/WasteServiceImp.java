@@ -9,6 +9,7 @@ import com.fpt.ecoverse_backend.entities.WasteBin;
 import com.fpt.ecoverse_backend.entities.WasteItem;
 import com.fpt.ecoverse_backend.enums.CreatedBy;
 import com.fpt.ecoverse_backend.enums.UserType;
+import com.fpt.ecoverse_backend.enums.WasteBinCode;
 import com.fpt.ecoverse_backend.exceptions.ForbiddenException;
 import com.fpt.ecoverse_backend.exceptions.NotFoundException;
 import com.fpt.ecoverse_backend.mappers.WasteBinMapper;
@@ -68,6 +69,13 @@ public class WasteServiceImp implements WasteService {
         Optional<User> admin = userRepository.findById(adminId);
         if (admin.isEmpty()) {
             throw new NotFoundException("Admin not found");
+        }
+        if (admin.get().getRole() != UserType.ADMIN) {
+            throw new ForbiddenException("Only admin can create waste bin");
+        }
+        Optional<WasteBin> wasteBinExisting = wasteBinRepository.findByCode(request.getCode());
+        if (wasteBinExisting.isPresent()) {
+            throw new ForbiddenException("Waste bin code already exist");
         }
         WasteBin wasteBin = wasteBinMapper.toWasteBin(request, null, uploadFile);
         wasteBinRepository.save(wasteBin);
@@ -159,7 +167,7 @@ public class WasteServiceImp implements WasteService {
         } else if (userOpt.get().getRole() == UserType.PARTNERSHIP) {
             return CreatedBy.PARTNERSHIP;
         }
-        return null;
+        throw new ForbiddenException("Only partnership and admin can create waste item");
     }
 }
 

@@ -1,13 +1,7 @@
 package com.fpt.ecoverse_backend.services;
 
-import com.fpt.ecoverse_backend.dtos.requests.PageFilterRequestDto;
-import com.fpt.ecoverse_backend.dtos.requests.PartnerRegisterRequestDto;
-import com.fpt.ecoverse_backend.dtos.requests.PartnerUpdateRequestDto;
-import com.fpt.ecoverse_backend.dtos.requests.StudentRequestDto;
-import com.fpt.ecoverse_backend.dtos.responses.BulkCreateReportResponseDto;
-import com.fpt.ecoverse_backend.dtos.responses.PartnerResponseDto;
-import com.fpt.ecoverse_backend.dtos.responses.StudentResponseDto;
-import com.fpt.ecoverse_backend.dtos.responses.UserListResponseDto;
+import com.fpt.ecoverse_backend.dtos.requests.*;
+import com.fpt.ecoverse_backend.dtos.responses.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -21,4 +15,6 @@ public interface PartnerService {
     StudentResponseDto changeStatusStudent(String partnerId, String studentId, String status);
     UserListResponseDto<?> getListUser(String partnerId, PageFilterRequestDto pageFilterRequestDto);
     List<StudentResponseDto> createStudents(String partnerId, List<StudentRequestDto> studentRequestDtos);
+    PartnerResponseDto deletePartner(String partnerId);
+    List<ParentResponseDto> createParents(String partnerId, List<ParentRequestDto> request);
 }
