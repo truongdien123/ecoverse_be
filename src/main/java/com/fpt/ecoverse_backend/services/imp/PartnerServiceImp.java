@@ -30,7 +30,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -146,12 +148,12 @@ public class PartnerServiceImp implements PartnerService {
 
     @Override
     @Transactional
-    public BulkCreateReportResponseDto bulkCreate(MultipartFile file, String partnerId) {
+    public BulkCreateReportResponseDto bulkCreate(byte[] bytes, String partnerId) {
         Optional<Partner> partner = partnerRepository.findById(partnerId);
         if (partner.isEmpty()) {
             throw new NotFoundException("Not found partner");
         }
-        ParsedTwoSheets parsed = readTwoSheets(file);
+        ParsedTwoSheets parsed = readTwoSheets(bytes);
         List<RowResult<ParentExcelRowDto>> parentResults = new ArrayList<>();
         List<RowResult<StudentExcelRowDto>> studentResults = new ArrayList<>();
         List<ParentCredentialMail> createdParentMails = new ArrayList<>();
@@ -189,6 +191,7 @@ public class PartnerServiceImp implements PartnerService {
             user.setAddress(dto.getAddress().trim());
             user.setPassword(rawPassword);
             parent.setPartner(partner.get());
+            user.setRole(UserType.PARENT);
             userRepository.save(user);
             parent.setUser(user);
             parentRepository.save(parent);
@@ -215,6 +218,7 @@ public class PartnerServiceImp implements PartnerService {
             student.setGrade(dto.getGrade());
             student.setStudentCode(studentCode);
             student.setPartner(partner.get());
+            user.setRole(UserType.STUDENT);
             userRepository.save(user);
             student.setUser(user);
             studentRepository.save(student);
@@ -488,8 +492,13 @@ public class PartnerServiceImp implements PartnerService {
         return null;
     }
 
-    private ParsedTwoSheets readTwoSheets(MultipartFile file) {
-        try(Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+    private ParsedTwoSheets readTwoSheets(byte[] bytes) {
+        try {
+            InputStream inputStream = new ByteArrayInputStream(bytes);
+            Workbook workbook = WorkbookFactory.create(inputStream);
+            if (workbook.getNumberOfSheets() < 2) {
+                throw new FileHandlingException("Excel file must contain at least 2 sheets");
+            }
             DataFormatter fmt = new DataFormatter();
             Sheet parentSheet = workbook.getSheetAt(0);
             Sheet studentSheet = workbook.getSheetAt(1);
