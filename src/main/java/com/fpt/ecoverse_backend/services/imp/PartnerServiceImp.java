@@ -1,10 +1,7 @@
 package com.fpt.ecoverse_backend.services.imp;
 
 import com.fpt.ecoverse_backend.dtos.*;
-import com.fpt.ecoverse_backend.dtos.requests.PageFilterRequestDto;
-import com.fpt.ecoverse_backend.dtos.requests.PartnerRegisterRequestDto;
-import com.fpt.ecoverse_backend.dtos.requests.PartnerUpdateRequestDto;
-import com.fpt.ecoverse_backend.dtos.requests.StudentRequestDto;
+import com.fpt.ecoverse_backend.dtos.requests.*;
 import com.fpt.ecoverse_backend.dtos.responses.*;
 import com.fpt.ecoverse_backend.entities.Parent;
 import com.fpt.ecoverse_backend.entities.Partner;
@@ -87,7 +84,7 @@ public class PartnerServiceImp implements PartnerService {
                 throw new BadRequestException("Phone number already exist");
             }
         }
-        User user = userMapper.toUser(request, uploadFile);
+        User user = userMapper.toUser(request, null, uploadFile);
         Partner partner = partnerMapper.toPartner(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(UserType.PARTNERSHIP);
@@ -315,8 +312,7 @@ public class PartnerServiceImp implements PartnerService {
     public UserListResponseDto<?> getListUser(String partnerId, PageFilterRequestDto pageFilterRequestDto) {
         Pageable pageable = PageRequest.of(
                 pageFilterRequestDto.getPageNo()-1,
-                pageFilterRequestDto.getPageSize(),
-                Sort.by(pageFilterRequestDto.getSorting()).descending());
+                pageFilterRequestDto.getPageSize());
         if (pageFilterRequestDto.getType().equalsIgnoreCase("student")) {
             Page<Object[]> students = studentRepository.searchStudents(
                     partnerId, pageFilterRequestDto.getSearching(), pageFilterRequestDto.getGrade(), pageable);
@@ -333,7 +329,7 @@ public class PartnerServiceImp implements PartnerService {
                     students.getTotalPages());
         } else if (pageFilterRequestDto.getType().equalsIgnoreCase("parent")) {
             Page<Object[]> parents = parentRepository.searchParents(
-                    partnerId, pageFilterRequestDto.getSearching(), pageFilterRequestDto.isHasChildren(), pageable);
+                    partnerId, pageFilterRequestDto.getSearching(), pageFilterRequestDto.getHasChildren(), pageable);
             List<ParentResponseDto> list = parents.getContent().stream().map(row -> {
                 Parent parent = (Parent) row[0];
                 User user = (User) row[1];
@@ -350,15 +346,17 @@ public class PartnerServiceImp implements PartnerService {
     }
 
     @Override
+    @Transactional
     public List<StudentResponseDto> createStudents(String partnerId, List<StudentRequestDto> studentRequestDtos) {
         Optional<Partner> partner = partnerRepository.findById(partnerId);
         if (partner.isEmpty()) {
             throw new NotFoundException("Not found partner");
         }
         List<Student> students = studentRequestDtos.stream().map(dto -> {
-            User user = userMapper.toUser(dto, uploadFile);
-            Student student = studentMapper.toStudent(dto);
+            User user = userMapper.toUser(dto, null);
+            user.setRole(UserType.STUDENT);
             User savedUser = userRepository.save(user);
+            Student student = studentMapper.toStudent(dto, null);
             student.setUser(savedUser);
             student.setPartner(partner.get());
             String studentCode = generateStudentCode(
@@ -373,6 +371,39 @@ public class PartnerServiceImp implements PartnerService {
         List<StudentResponseDto> response = new ArrayList<>();
         for (Student student : students) {
             response.add(studentMapper.toStudentResponse(student, student.getUser()));
+        }
+        return response;
+    }
+
+    @Override
+    public PartnerResponseDto deletePartner(String partnerId) {
+        Optional<Partner> partner = partnerRepository.findById(partnerId);
+        if (partner.isEmpty()) {
+            throw new NotFoundException("Not found partner");
+        }
+        partnerRepository.delete(partner.get());
+        userRepository.delete(partner.get().getUser());
+        return partnerMapper.toPartnerResponse(partner.get(), partner.get().getUser());
+    }
+
+    @Override
+    public List<ParentResponseDto> createParents(String partnerId, List<ParentRequestDto> request) {
+        Optional<Partner> partner = partnerRepository.findById(partnerId);
+        if (partner.isEmpty()) {
+            throw new NotFoundException("Not found partner");
+        }
+        List<Parent> parents = request.stream().map(dto -> {
+            User user = userMapper.toUser(dto, null, uploadFile);
+            user.setRole(UserType.PARENT);
+            User savedUser = userRepository.save(user);
+            Parent parent = new Parent();
+            parent.setUser(savedUser);
+            parent.setPartner(partner.get());
+            return parentRepository.save(parent);
+        }).toList();
+        List<ParentResponseDto> response = new ArrayList<>();
+        for (Parent parent : parents) {
+            response.add(parentMapper.toParentResponse(parent, parent.getUser()));
         }
         return response;
     }

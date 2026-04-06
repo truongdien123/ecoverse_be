@@ -15,13 +15,10 @@ public class PageFilterRequestDto {
     private String type;
 
     @JsonProperty("page_no")
-    private int pageNo;
+    private Integer pageNo;
 
     @JsonProperty("page_size")
-    private int pageSize;
-
-    @JsonProperty("sorting")
-    private String sorting;
+    private Integer pageSize;
 
     @JsonProperty("searching")
     private String searching;
@@ -30,6 +27,6 @@ public class PageFilterRequestDto {
     private String grade;
 
     @JsonProperty("has_children")
-    private boolean hasChildren;
+    private Boolean hasChildren;
 }
 

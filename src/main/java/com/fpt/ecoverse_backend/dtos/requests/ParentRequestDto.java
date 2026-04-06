@@ -10,14 +10,14 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class StudentRequestDto {
+public class ParentRequestDto {
     @JsonProperty("full_name")
     private String fullName;
 
-    @JsonProperty("grade")
-    private String grade;
+    @JsonProperty("address")
+    private String address;
 
-    @JsonProperty("class_number")
-    private String classNumber;
+    @JsonProperty("phone_number")
+    private String phoneNumber;
 
 }
