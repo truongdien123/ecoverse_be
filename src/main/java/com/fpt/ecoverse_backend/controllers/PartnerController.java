@@ -1,13 +1,7 @@
 package com.fpt.ecoverse_backend.controllers;
 
-import com.fpt.ecoverse_backend.dtos.requests.PageFilterRequestDto;
-import com.fpt.ecoverse_backend.dtos.requests.PartnerRegisterRequestDto;
-import com.fpt.ecoverse_backend.dtos.requests.PartnerUpdateRequestDto;
-import com.fpt.ecoverse_backend.dtos.requests.StudentRequestDto;
-import com.fpt.ecoverse_backend.dtos.responses.BulkCreateReportResponseDto;
-import com.fpt.ecoverse_backend.dtos.responses.PartnerResponseDto;
-import com.fpt.ecoverse_backend.dtos.responses.StudentResponseDto;
-import com.fpt.ecoverse_backend.dtos.responses.UserListResponseDto;
+import com.fpt.ecoverse_backend.dtos.requests.*;
+import com.fpt.ecoverse_backend.dtos.responses.*;
 import com.fpt.ecoverse_backend.services.PartnerService;
 import com.fpt.ecoverse_backend.utils.ResponseUtil;
 import jakarta.validation.Valid;
@@ -89,6 +83,13 @@ public class PartnerController {
     public ResponseEntity<?> deletePartner(@PathVariable("partnership_id") String partnerId) {
         PartnerResponseDto response = partnerService.deletePartner(partnerId);
         return ResponseUtil.success("Delete partner successfully", response);
+    }
+
+    @PostMapping("/{partnership_id}/parents")
+    @PreAuthorize("hasRole('PARTNERSHIP')")
+    public ResponseEntity<?> createParents(@PathVariable("partnership_id") String partnerId, @RequestBody List<ParentRequestDto> request) {
+        List<ParentResponseDto> response = partnerService.createParents(partnerId, request);
+        return ResponseUtil.success("Create parents successfully", response);
     }
 }
 

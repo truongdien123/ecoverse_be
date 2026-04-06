@@ -83,6 +83,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/partnerships/{partnership_id}/accounts").hasAnyRole("PARTNERSHIP", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/partnerships/{partnership_id}/students").hasRole("PARTNERSHIP")
                         .requestMatchers(HttpMethod.DELETE, "/partnerships/{partnership_id}").hasAnyRole("PARTNERSHIP", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/partnerships/{partnership_id}/parents").hasRole("PARTNERSHIP")
 
                         // Parent endpoints
                         .requestMatchers(HttpMethod.POST, "/parents/{parent_id}/students/{student_id}/link-student").hasRole("PARENT")
