@@ -151,6 +151,7 @@ public class GameServiceImp implements GameService {
         } else {
             gameAttempt.setAttemptNumber(gameAttempt.getAttemptNumber()+1);
         }
+        gameAttempt.setPointsEarned(gameAttempt.getPointsEarned()+request.getPointsEarned());
         gameAttemptRepository.save(gameAttempt);
         return gameAttemptMapper.toGameAttemptResponse(gameAttempt);
     }

@@ -24,7 +24,7 @@ public interface ParentRepository extends JpaRepository<Parent, String> {
     @Query(
             "select p, u from Parent p join p.user u " +
                     "where p.partner.id = :partnerId " +
-                    "and (:searching is null or lower(u.fullName) like lower(concat('%',:searching,'%'))) " +
+                    "and (:searching is null or u.fullName ilike '%' || cast(:searching as string ) || '%') " +
                     "and (:hasChildren = false or (:hasChildren = true " +
                     "and exists (select s from Student s where s.parent.id = p.id)))"
     )

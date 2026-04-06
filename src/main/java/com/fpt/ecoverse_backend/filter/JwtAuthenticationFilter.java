@@ -46,7 +46,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             var userType = jwtUtils.extractUserType(jwt);
             UserDetails userDetails;
             if (userType == com.fpt.ecoverse_backend.enums.UserType.STUDENT) {
-                userDetails = userDetailsService.loadStudent(userId);
+                userDetails = userDetailsService.loadUserByEmailAndType(email, userType);
             } else {
                 userDetails = userDetailsService.loadUserByEmailAndType(email, userType);
             }
