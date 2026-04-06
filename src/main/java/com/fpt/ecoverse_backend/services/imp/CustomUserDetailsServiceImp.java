@@ -67,6 +67,10 @@ public class CustomUserDetailsServiceImp implements CustomUserDetailsService, Us
     public UserDetails loadAdmin(String email) {
         var admin = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("Admin not found with email: " + email));
+                
+        if (admin.getRole() != UserType.ADMIN) {
+            throw new org.springframework.security.authentication.BadCredentialsException("Mismatch user type. This account is not an Admin");
+        }
 
         return CustomUserDetails.builder()
                 .id(admin.getId())
@@ -83,6 +87,11 @@ public class CustomUserDetailsServiceImp implements CustomUserDetailsService, Us
     public UserDetails loadParent(String email) {
         var parent = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("Parent not found with email: " + email));
+                
+        if (parent.getRole() != UserType.PARENT) {
+            throw new org.springframework.security.authentication.BadCredentialsException("Mismatch user type. This account is not a Parent");
+        }
+                
         return CustomUserDetails.builder()
                 .id(parent.getId())
                 .email(parent.getEmail())
@@ -98,6 +107,11 @@ public class CustomUserDetailsServiceImp implements CustomUserDetailsService, Us
     public UserDetails loadPartnership(String email) {
         var user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User not found with email: " + email));
+                
+        if (user.getRole() != UserType.PARTNERSHIP) {
+            throw new org.springframework.security.authentication.BadCredentialsException("Mismatch user type. This account is not a Partner");
+        }
+                
         Optional<Partner> partner = partnerRepository.findById(user.getId());
         if (partner.isEmpty()) {
             throw new NotFoundException("Partner not found");
