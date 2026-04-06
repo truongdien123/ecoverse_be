@@ -17,6 +17,9 @@ public class GameAttemptResponseDto {
     @JsonProperty("game_round_id")
     private String gameRoundId;
 
+    @JsonProperty("title_game_round")
+    private String titleGameRound;
+
     @JsonProperty("student_id")
     private String studentId;
 

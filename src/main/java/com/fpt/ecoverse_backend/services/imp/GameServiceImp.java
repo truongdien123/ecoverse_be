@@ -1,9 +1,11 @@
 package com.fpt.ecoverse_backend.services.imp;
 
 import com.fpt.ecoverse_backend.dtos.requests.GameAttemptRequestDto;
+import com.fpt.ecoverse_backend.dtos.requests.GamePlacementRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.GameRoundRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.PageFilterRequestDto;
 import com.fpt.ecoverse_backend.dtos.responses.GameAttemptResponseDto;
+import com.fpt.ecoverse_backend.dtos.responses.GamePlacementResponseDto;
 import com.fpt.ecoverse_backend.dtos.responses.GameRoundItemResponseDto;
 import com.fpt.ecoverse_backend.dtos.responses.GameRoundResponseDto;
 import com.fpt.ecoverse_backend.entities.*;
@@ -11,6 +13,7 @@ import com.fpt.ecoverse_backend.enums.CreatedBy;
 import com.fpt.ecoverse_backend.enums.UserType;
 import com.fpt.ecoverse_backend.exceptions.NotFoundException;
 import com.fpt.ecoverse_backend.mappers.GameAttemptMapper;
+import com.fpt.ecoverse_backend.mappers.GamePlacementMapper;
 import com.fpt.ecoverse_backend.mappers.GameRoundMapper;
 import com.fpt.ecoverse_backend.repositories.*;
 import com.fpt.ecoverse_backend.services.GameService;
@@ -35,8 +38,10 @@ public class GameServiceImp implements GameService {
     private final StudentRepository studentRepository;
     private final GameAttemptRepository gameAttemptRepository;
     private final GameAttemptMapper gameAttemptMapper;
+    private final GamePlacementMapper gamePlacementMapper;
+    private final GamePlacementRepository gamePlacementRepository;
 
-    public GameServiceImp(UserRepository userRepository, PartnerRepository partnerRepository, GameRoundRepository gameRoundRepository, GameRoundMapper gameRoundMapper, WasteItemRepository wasteItemRepository, StudentRepository studentRepository, GameAttemptRepository gameAttemptRepository, GameAttemptMapper gameAttemptMapper) {
+    public GameServiceImp(UserRepository userRepository, PartnerRepository partnerRepository, GameRoundRepository gameRoundRepository, GameRoundMapper gameRoundMapper, WasteItemRepository wasteItemRepository, StudentRepository studentRepository, GameAttemptRepository gameAttemptRepository, GameAttemptMapper gameAttemptMapper, GamePlacementMapper gamePlacementMapper, GamePlacementRepository gamePlacementRepository) {
         this.userRepository = userRepository;
         this.partnerRepository = partnerRepository;
         this.gameRoundRepository = gameRoundRepository;
@@ -45,6 +50,8 @@ public class GameServiceImp implements GameService {
         this.studentRepository = studentRepository;
         this.gameAttemptRepository = gameAttemptRepository;
         this.gameAttemptMapper = gameAttemptMapper;
+        this.gamePlacementMapper = gamePlacementMapper;
+        this.gamePlacementRepository = gamePlacementRepository;
     }
 
     @Override
@@ -149,6 +156,16 @@ public class GameServiceImp implements GameService {
     }
 
     @Override
+    public GameAttemptResponseDto updateGameAttempt(String gameAttemptId, GameAttemptRequestDto request) {
+        Optional<GameAttempt> gameAttemptOpt = gameAttemptRepository.findById(gameAttemptId);
+        if (gameAttemptOpt.isEmpty()) {
+            throw new NotFoundException("Game attempt not found");
+        }
+        GameAttempt gameAttempt = gameAttemptMapper.toGameAttempt(request, gameAttemptOpt.get().getId());
+        return gameAttemptMapper.toGameAttemptResponse(gameAttemptRepository.save(gameAttempt));
+    }
+
+    @Override
     public List<GameAttemptResponseDto> getGameAttempts(String gameRoundId, String studentId, PageFilterRequestDto pageFilterRequestDto) {
         Optional<GameRound> gameRound = gameRoundRepository.findById(gameRoundId);
         if (gameRound.isEmpty()) {
@@ -164,9 +181,42 @@ public class GameServiceImp implements GameService {
         Page<GameAttempt> gameAttemptPage = gameAttemptRepository.findGameAttempts(gameRoundId, studentId, pageable);
         List<GameAttemptResponseDto> response = new ArrayList<>();
         for (GameAttempt gameAttempt : gameAttemptPage.getContent()) {
-            response.add(gameAttemptMapper.toGameAttemptResponse(gameAttempt));
+            GameAttemptResponseDto gameAttemptResponse = gameAttemptMapper.toGameAttemptResponse(gameAttempt);
+            gameAttemptResponse.setTitleGameRound(gameRound.get().getTitle());
+            response.add(gameAttemptResponse);
         }
         return response;
+    }
+
+    @Override
+    public List<GamePlacementResponseDto> createGamePlacements(String gameRoundId, String gameAttemptId, List<GamePlacementRequestDto> requests) {
+        Optional<GameRound> gameRoundOpt = gameRoundRepository.findById(gameRoundId);
+        if (gameRoundOpt.isEmpty()) {
+            throw new NotFoundException("Game round not found");
+        }
+        Optional<GameAttempt> gameAttemptOpt = gameAttemptRepository.findById(gameAttemptId);
+        if (gameAttemptOpt.isEmpty()) {
+            throw new NotFoundException("Game attempt not found");
+        }
+        List<GamePlacement> gamePlacements = requests.stream().map(request -> {
+            GamePlacement gamePlacement = gamePlacementMapper.toGamePlacement(request, null);
+            gamePlacement.setGameAttempt(gameAttemptOpt.get());
+            WasteItem wasteItem = wasteItemRepository.findById(request.getWasteItemId())
+                    .orElseThrow(() -> new NotFoundException("Waste item not found"));
+            gamePlacement.setWasteItem(wasteItem);
+            return gamePlacementRepository.save(gamePlacement);
+        }).toList();
+        return gamePlacements.stream().map(gamePlacementMapper::toGamePlacementResponse).toList();
+    }
+
+    @Override
+    public List<GamePlacementResponseDto> getGamePlacements(String gameAttemptId) {
+        Optional<GameAttempt> gameAttemptOpt = gameAttemptRepository.findById(gameAttemptId);
+        if (gameAttemptOpt.isEmpty()) {
+            throw new NotFoundException("Game attempt not found");
+        }
+        List<GamePlacement> gamePlacements = gamePlacementRepository.findByGameAttemptId(gameAttemptId);
+        return gamePlacements.stream().map(gamePlacementMapper::toGamePlacementResponse).toList();
     }
 
     private static GameRound getGameRound(String userId, Optional<GameRound> gameRoundOpt, Optional<User> userOpt) {
