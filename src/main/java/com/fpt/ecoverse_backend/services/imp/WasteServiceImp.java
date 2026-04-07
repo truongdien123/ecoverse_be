@@ -51,6 +51,7 @@ public class WasteServiceImp implements WasteService {
     @Override
     public WasteItemResponseDto createWasteItem(String userId, WasteItemRequestDto request) {
         CreatedBy userRole = getUserRole(userId);
+
         WasteItem wasteItem = wasteItemMapper.toWasteItem(request, null, uploadFile);
         wasteItem.setCreatedBy(userRole);
         Optional<WasteBin> wasteBin = wasteBinRepository.findByCode(request.getCorrectBinCode());
@@ -58,6 +59,13 @@ public class WasteServiceImp implements WasteService {
             throw new NotFoundException("Not found waste bin or waste bin is not active");
         }
         wasteItem.setWasteBin(wasteBin.get());
+        if (userRole == CreatedBy.PARTNERSHIP) {
+            Optional<Partner> partnerOpt = partnerRepository.findById(userId);
+            if (partnerOpt.isEmpty()) {
+                throw new NotFoundException("Partner not found");
+            }
+            wasteItem.setPartner(partnerOpt.get());
+        }
         wasteItemRepository.save(wasteItem);
         WasteItemResponseDto response = wasteItemMapper.toWasteItemResponse(wasteItem, null);
         response.setCorrectBinCode(wasteBin.get().getCode());

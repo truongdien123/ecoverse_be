@@ -118,10 +118,16 @@ public class SecurityConfig {
 
                         // Reward endpoints
                         .requestMatchers(HttpMethod.POST, "/rewards/{partner_id}").hasRole("PARTNERSHIP")
-                        .requestMatchers(HttpMethod.GET, "/rewards/{partner_id}").hasAnyRole("STUDENT", "PARTNERSHIP")
+                        .requestMatchers(HttpMethod.POST, "/rewards/{partner_id}/get-list").hasAnyRole("STUDENT", "PARTNERSHIP")
                         .requestMatchers(HttpMethod.GET, "/rewards/items/{reward_item_id}/partners/{partner_id}").hasAnyRole("STUDENT", "PARTNERSHIP")
                         .requestMatchers(HttpMethod.PUT, "/rewards/items/{reward_item_id}/partners/{partner_id}").hasRole("PARTNERSHIP")
                         .requestMatchers(HttpMethod.DELETE, "/rewards/items/{reward_item_id}/partners/{partner_id}").hasRole("PARTNERSHIP")
+
+                        // Achievement endpoints
+                        .requestMatchers(HttpMethod.GET, "/api/achievements", "/api/achievements/**").hasAnyRole("STUDENT", "PARTNERSHIP", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/achievements").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/achievements/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/achievements/**").hasRole("ADMIN")
 
                         // All other requests need authentication
                         .anyRequest().authenticated()
