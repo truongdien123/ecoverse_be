@@ -118,7 +118,7 @@ public class SecurityConfig {
 
                         // Reward endpoints
                         .requestMatchers(HttpMethod.POST, "/rewards/{partner_id}").hasRole("PARTNERSHIP")
-                        .requestMatchers(HttpMethod.GET, "/rewards/{partner_id}").hasAnyRole("STUDENT", "PARTNERSHIP")
+                        .requestMatchers(HttpMethod.POST, "/rewards/{partner_id}/get-list").hasAnyRole("STUDENT", "PARTNERSHIP")
                         .requestMatchers(HttpMethod.GET, "/rewards/items/{reward_item_id}/partners/{partner_id}").hasAnyRole("STUDENT", "PARTNERSHIP")
                         .requestMatchers(HttpMethod.PUT, "/rewards/items/{reward_item_id}/partners/{partner_id}").hasRole("PARTNERSHIP")
                         .requestMatchers(HttpMethod.DELETE, "/rewards/items/{reward_item_id}/partners/{partner_id}").hasRole("PARTNERSHIP")
