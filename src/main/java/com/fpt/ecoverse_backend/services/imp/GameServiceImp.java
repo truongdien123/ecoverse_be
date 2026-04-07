@@ -11,6 +11,7 @@ import com.fpt.ecoverse_backend.dtos.responses.GameRoundResponseDto;
 import com.fpt.ecoverse_backend.entities.*;
 import com.fpt.ecoverse_backend.enums.CreatedBy;
 import com.fpt.ecoverse_backend.enums.UserType;
+import com.fpt.ecoverse_backend.exceptions.BadRequestException;
 import com.fpt.ecoverse_backend.exceptions.NotFoundException;
 import com.fpt.ecoverse_backend.mappers.GameAttemptMapper;
 import com.fpt.ecoverse_backend.mappers.GamePlacementMapper;
@@ -242,10 +243,10 @@ public class GameServiceImp implements GameService {
         }
         if (userOpt.get().getRole() == UserType.ADMIN) {
             return CreatedBy.ADMIN;
-        } else if (userOpt.get().getRole() == UserType.PARENT) {
+        } else if (userOpt.get().getRole() == UserType.PARTNERSHIP) {
             return CreatedBy.PARTNERSHIP;
         } else {
-            throw new NotFoundException("User not found");
+            throw new BadRequestException("User role not supported for game round creation");
         }
     }
 }
