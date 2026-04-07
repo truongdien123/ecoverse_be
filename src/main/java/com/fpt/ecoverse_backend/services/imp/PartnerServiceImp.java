@@ -24,11 +24,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -397,6 +395,14 @@ public class PartnerServiceImp implements PartnerService {
             throw new NotFoundException("Not found partner");
         }
         List<Parent> parents = request.stream().map(dto -> {
+            Optional<User> userOptional = userRepository.findByEmail(dto.getEmail());
+            if (userOptional.isPresent()) {
+                throw new BadRequestException("Email already exist: " + dto.getEmail());
+            }
+            Optional<User> phoneOptional = userRepository.findByPhoneNumber(dto.getPhoneNumber());
+            if (phoneOptional.isPresent()) {
+                throw new BadRequestException("Phone number already exist: " + dto.getPhoneNumber());
+            }
             User user = userMapper.toUser(dto, null, uploadFile);
             user.setRole(UserType.PARENT);
             String password = generatePassword();
