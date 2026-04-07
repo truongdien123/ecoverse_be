@@ -24,4 +24,5 @@ public class ParentRequestDto {
     @JsonProperty("phone_number")
     private String phoneNumber;
 
+    private org.springframework.web.multipart.MultipartFile avatar;
 }
