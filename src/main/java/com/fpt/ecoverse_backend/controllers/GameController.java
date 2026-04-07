@@ -25,7 +25,7 @@ public class GameController {
 
     @PostMapping("/rounds/users/{user_id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'PARTNERSHIP')")
-    public ResponseEntity<?> createGameRound(@PathVariable("user_id") String userId, GameRoundRequestDto request) {
+    public ResponseEntity<?> createGameRound(@PathVariable("user_id") String userId, @RequestBody GameRoundRequestDto request) {
         GameRoundResponseDto response = gameService.createGameRound(userId, request);
         return ResponseUtil.success("Create game round successfully", response);
     }
