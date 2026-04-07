@@ -123,6 +123,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/rewards/items/{reward_item_id}/partners/{partner_id}").hasRole("PARTNERSHIP")
                         .requestMatchers(HttpMethod.DELETE, "/rewards/items/{reward_item_id}/partners/{partner_id}").hasRole("PARTNERSHIP")
 
+                        // Question endpoints
+                        .requestMatchers(HttpMethod.GET, "/api/questions", "/api/questions/**").hasAnyRole("STUDENT", "PARTNERSHIP", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/questions").hasAnyRole("PARTNERSHIP", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/questions/**").hasAnyRole("PARTNERSHIP", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/questions/**").hasAnyRole("PARTNERSHIP", "ADMIN")
+
                         // All other requests need authentication
                         .anyRequest().authenticated()
                 )
