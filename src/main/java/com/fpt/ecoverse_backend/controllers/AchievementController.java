@@ -24,7 +24,7 @@ public class AchievementController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<AchievementResponseDto>> createAchievement(
-            @Valid @RequestBody AchievementRequestDto requestDto) {
+            @Valid @ModelAttribute AchievementRequestDto requestDto) {
         AchievementResponseDto created = achievementService.createAchievement(requestDto);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new ApiResponse<>("Thêm thành tựu thành công", created));
@@ -48,7 +48,7 @@ public class AchievementController {
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<AchievementResponseDto>> updateAchievement(
             @PathVariable String id,
-            @Valid @RequestBody AchievementRequestDto requestDto) {
+            @Valid @ModelAttribute AchievementRequestDto requestDto) {
         AchievementResponseDto updated = achievementService.updateAchievement(id, requestDto);
         return ResponseEntity.ok(new ApiResponse<>("Cập nhật thành tựu thành công", updated));
     }

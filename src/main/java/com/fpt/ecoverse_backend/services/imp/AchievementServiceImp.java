@@ -1,6 +1,7 @@
 package com.fpt.ecoverse_backend.services.imp;
 
 import com.fpt.ecoverse_backend.dtos.requests.AchievementRequestDto;
+import com.fpt.ecoverse_backend.utils.UploadFile;
 import com.fpt.ecoverse_backend.dtos.responses.AchievementResponseDto;
 import com.fpt.ecoverse_backend.entities.Achievement;
 import com.fpt.ecoverse_backend.exceptions.NotFoundException;
@@ -14,9 +15,11 @@ import org.springframework.stereotype.Service;
 public class AchievementServiceImp implements AchievementService {
 
     private final AchievementRepository achievementRepository;
+    private final UploadFile uploadFile;
 
-    public AchievementServiceImp(AchievementRepository achievementRepository) {
+    public AchievementServiceImp(AchievementRepository achievementRepository, UploadFile uploadFile) {
         this.achievementRepository = achievementRepository;
+        this.uploadFile = uploadFile;
     }
 
     @Override
@@ -25,7 +28,9 @@ public class AchievementServiceImp implements AchievementService {
         achievement.setName(requestDto.getName());
         achievement.setDescription(requestDto.getDescription());
         achievement.setPointsRequired(requestDto.getPointsRequired());
-        achievement.setBadgeImageUrl(requestDto.getBadgeImageUrl());
+        if (requestDto.getBadgeImage() != null && !requestDto.getBadgeImage().isEmpty()) {
+            achievement.setBadgeImageUrl(uploadFile.imageToUrl(requestDto.getBadgeImage()));
+        }
 
         Achievement saved = achievementRepository.save(achievement);
         return mapToResponseDto(saved);
@@ -52,7 +57,9 @@ public class AchievementServiceImp implements AchievementService {
         achievement.setName(requestDto.getName());
         achievement.setDescription(requestDto.getDescription());
         achievement.setPointsRequired(requestDto.getPointsRequired());
-        achievement.setBadgeImageUrl(requestDto.getBadgeImageUrl());
+        if (requestDto.getBadgeImage() != null && !requestDto.getBadgeImage().isEmpty()) {
+            achievement.setBadgeImageUrl(uploadFile.imageToUrl(requestDto.getBadgeImage()));
+        }
 
         Achievement updated = achievementRepository.save(achievement);
         return mapToResponseDto(updated);

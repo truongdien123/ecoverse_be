@@ -3,6 +3,7 @@ package com.fpt.ecoverse_backend.dtos.requests;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.web.multipart.MultipartFile;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,5 +22,5 @@ public class AchievementRequestDto {
     @Min(value = 0, message = "Số điểm yêu cầu phải lớn hơn hoặc bằng 0")
     private Integer pointsRequired;
 
-    private String badgeImageUrl;
+    private MultipartFile badgeImage;
 }
