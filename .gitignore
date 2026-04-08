@@ -37,3 +37,6 @@ build/
 
 ### Local config (chứa password, không commit) ###
 **/application-local.properties
+
+### Build output logs ###
+compile_out*.txt

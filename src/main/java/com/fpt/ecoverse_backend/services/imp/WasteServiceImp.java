@@ -107,6 +107,13 @@ public class WasteServiceImp implements WasteService {
     }
 
     @Override
+    public List<WasteItemResponseDto> getAllWasteItems() {
+        return wasteItemRepository.findAll().stream()
+                .map(item -> wasteItemMapper.toWasteItemResponse(item, null))
+                .toList();
+    }
+
+    @Override
     public List<WasteItemResponseDto> getWasteItems(String userId, String gameRoundId) {
         CreatedBy userRole = getUserRole(userId);
         List<WasteItemWithOrderProjection> wasteItemWithOrder = wasteItemRepository.findByUserIdAndGameRoundId(userId, gameRoundId);
