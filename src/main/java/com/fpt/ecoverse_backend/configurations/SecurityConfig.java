@@ -129,6 +129,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/achievements/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/achievements/**").hasRole("ADMIN")
 
+                        // Redemption endpoints
+                        .requestMatchers(HttpMethod.POST, "/redemptions/students/{student_id}/reward-items/{rewardItem_id}").hasRole("STUDENT")
+                        .requestMatchers(HttpMethod.POST, "/redemptions/{redemption_id}/parents/{parent_id}/approve").hasRole("PARENT")
+                        .requestMatchers(HttpMethod.POST, "/redemptions/{redemption_id}/partners/{partner_id}/approve").hasRole("PARTNERSHIP")
+                        .requestMatchers(HttpMethod.POST, "/redemptions/{redemption_id}/partners/{partner_id}/fulfill").hasRole("PARTNERSHIP")
+                        .requestMatchers(HttpMethod.GET, "/redemptions/users/{user_id}").hasAnyRole("STUDENT", "PARENT", "PARTNERSHIP")
+
                         // All other requests need authentication
                         .anyRequest().authenticated()
                 )
