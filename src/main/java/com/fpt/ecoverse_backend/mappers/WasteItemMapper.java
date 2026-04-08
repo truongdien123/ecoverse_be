@@ -13,10 +13,9 @@ public interface WasteItemMapper {
     @Mappings({
             @Mapping(target = "name", source = "request.name"),
             @Mapping(target = "description", source = "request.description"),
-            @Mapping(target = "imageUrl", source = "request.image", qualifiedByName = "convertImg"),
             @Mapping(target = "id", source = "id")
     })
-    WasteItem toWasteItem(WasteItemRequestDto request, String id, @Context UploadFile uploadFile);
+    WasteItem toWasteItem(WasteItemRequestDto request, String id);
 
     @Mappings({
             @Mapping(target = "name", source = "item.name"),

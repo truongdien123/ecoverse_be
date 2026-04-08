@@ -15,10 +15,9 @@ public interface WasteBinMapper {
             @Mapping(target = "displayName", source = "request.displayName"),
             @Mapping(target = "colorHex", source = "request.colorHex"),
             @Mapping(target = "description", source = "request.description"),
-            @Mapping(target = "iconUrl", source = "request.icon", qualifiedByName = "convertImg"),
             @Mapping(target = "id", source = "id")
     })
-    WasteBin toWasteBin(WasteBinRequestDto request, String id, @Context UploadFile uploadFile);
+    WasteBin toWasteBin(WasteBinRequestDto request, String id);
 
     @Mappings({
             @Mapping(target = "id", source = "id"),

@@ -34,8 +34,9 @@ public class WasteServiceImp implements WasteService {
     private final GameAttemptRepository gameAttemptRepository;
     private final GameRoundRepository gameRoundRepository;
     private final StudentRepository studentRepository;
+    private final GameRoundItemRepository gameRoundItemRepository;
 
-    public WasteServiceImp(WasteItemRepository wasteItemRepository, WasteItemMapper wasteItemMapper, UserRepository userRepository, PartnerRepository partnerRepository, UploadFile uploadFile, WasteBinRepository wasteBinRepository, WasteBinMapper wasteBinMapper, GameAttemptRepository gameAttemptRepository, GameRoundRepository gameRoundRepository, StudentRepository studentRepository) {
+    public WasteServiceImp(WasteItemRepository wasteItemRepository, WasteItemMapper wasteItemMapper, UserRepository userRepository, PartnerRepository partnerRepository, UploadFile uploadFile, WasteBinRepository wasteBinRepository, WasteBinMapper wasteBinMapper, GameAttemptRepository gameAttemptRepository, GameRoundRepository gameRoundRepository, StudentRepository studentRepository, GameRoundItemRepository gameRoundItemRepository) {
         this.wasteItemRepository = wasteItemRepository;
         this.wasteItemMapper = wasteItemMapper;
         this.userRepository = userRepository;
@@ -46,13 +47,14 @@ public class WasteServiceImp implements WasteService {
         this.gameAttemptRepository = gameAttemptRepository;
         this.gameRoundRepository = gameRoundRepository;
         this.studentRepository = studentRepository;
+        this.gameRoundItemRepository = gameRoundItemRepository;
     }
 
     @Override
     public WasteItemResponseDto createWasteItem(String userId, WasteItemRequestDto request) {
         CreatedBy userRole = getUserRole(userId);
 
-        WasteItem wasteItem = wasteItemMapper.toWasteItem(request, null, uploadFile);
+        WasteItem wasteItem = wasteItemMapper.toWasteItem(request, null);
         wasteItem.setCreatedBy(userRole);
         Optional<WasteBin> wasteBin = wasteBinRepository.findByCode(request.getCorrectBinCode());
         if (wasteBin.isEmpty()) {
@@ -66,11 +68,15 @@ public class WasteServiceImp implements WasteService {
             }
             wasteItem.setPartner(partnerOpt.get());
         }
+        if (request.getImage() != null) {
+            String imageUrl = uploadFile.imageToUrl(request.getImage());
+            wasteItem.setImageUrl(imageUrl);
+        }
         wasteItemRepository.save(wasteItem);
         WasteItemResponseDto response = wasteItemMapper.toWasteItemResponse(wasteItem, null);
         response.setCorrectBinCode(wasteBin.get().getCode());
         response.setCreatedBy(userRole.toString());
-        return wasteItemMapper.toWasteItemResponse(wasteItem, null);
+        return response;
     }
 
     @Override
@@ -86,7 +92,11 @@ public class WasteServiceImp implements WasteService {
         if (wasteBinExisting.isPresent()) {
             throw new ForbiddenException("Waste bin code already exist");
         }
-        WasteBin wasteBin = wasteBinMapper.toWasteBin(request, null, uploadFile);
+        WasteBin wasteBin = wasteBinMapper.toWasteBin(request, null);
+        if (request.getIcon() != null) {
+            String iconUrl = uploadFile.imageToUrl(request.getIcon());
+            wasteBin.setIconUrl(iconUrl);
+        }
         wasteBinRepository.save(wasteBin);
         return wasteBinMapper.toWasteBinResponse(wasteBin);
     }
@@ -128,18 +138,19 @@ public class WasteServiceImp implements WasteService {
             if (wasteItemOptional.isEmpty()) {
                 throw new NotFoundException("Waste item not found");
             }
-            wasteItemMapper.toWasteItem(request, wasteItemOptional.get().getId(), uploadFile);
-            wasteItemRepository.save(wasteItemOptional.get());
-            return wasteItemMapper.toWasteItemResponse(wasteItemOptional.get(), null);
         } else {
             wasteItemOptional = wasteItemRepository.findById(wasteItemId);
             if (wasteItemOptional.isEmpty()) {
                 throw new NotFoundException("Waste item not found");
             }
-            wasteItemMapper.toWasteItem(request, wasteItemOptional.get().getId(), uploadFile);
-            wasteItemRepository.save(wasteItemOptional.get());
-            return wasteItemMapper.toWasteItemResponse(wasteItemOptional.get(), null);
         }
+        wasteItemMapper.toWasteItem(request, wasteItemOptional.get().getId());
+        if (request.getImage() != null) {
+            String imageUrl = uploadFile.imageToUrl(request.getImage());
+            wasteItemOptional.get().setImageUrl(imageUrl);
+        }
+        wasteItemRepository.save(wasteItemOptional.get());
+        return wasteItemMapper.toWasteItemResponse(wasteItemOptional.get(), null);
     }
 
     @Override
@@ -152,9 +163,13 @@ public class WasteServiceImp implements WasteService {
         if (wasteBinOptional.isEmpty()) {
             throw new NotFoundException("Waste bin not found");
         }
-        wasteBinMapper.toWasteBin(request, wasteBinOptional.get().getId(), uploadFile);
-        wasteBinRepository.save(wasteBinOptional.get());
-        return wasteBinMapper.toWasteBinResponse(wasteBinOptional.get());
+        WasteBin wasteBin = wasteBinMapper.toWasteBin(request, wasteBinOptional.get().getId());
+        if (request.getIcon() != null) {
+            String iconUrl = uploadFile.imageToUrl(request.getIcon());
+            wasteBin.setIconUrl(iconUrl);
+        }
+        wasteBinRepository.save(wasteBin);
+        return wasteBinMapper.toWasteBinResponse(wasteBin);
     }
 
     @Override
