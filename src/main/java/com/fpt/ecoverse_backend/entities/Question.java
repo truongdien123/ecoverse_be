@@ -16,13 +16,13 @@ import java.util.List;
 @AllArgsConstructor
 public class Question extends BaseEntity {
 
-    @Column(name = "text", nullable = false, columnDefinition = "text")
+    @Column(name = "text", nullable = true, columnDefinition = "text")
     private String text;
 
     @Column(name = "options_json", columnDefinition = "text")
     private String optionsJson;
 
-    @Column(name = "correct_answer", nullable = false, length = 255)
+    @Column(name = "correct_answer", nullable = true, length = 255)
     private String correctAnswer;
 
     @Column(name = "explanation", columnDefinition = "text")

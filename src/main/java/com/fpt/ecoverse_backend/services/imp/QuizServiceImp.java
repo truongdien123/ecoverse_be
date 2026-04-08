@@ -34,6 +34,7 @@ public class QuizServiceImp implements QuizService {
     private final QuizPlacementRepository quizPlacementRepository;
     private final PartnerRepository partnerRepository;
     private final StudentRepository studentRepository;
+    private final QuestionRepository questionRepository;
     private final ObjectMapper objectMapper;
 
     public QuizServiceImp(QuizTemplateRepository quizTemplateRepository,
@@ -41,12 +42,14 @@ public class QuizServiceImp implements QuizService {
                           QuizPlacementRepository quizPlacementRepository,
                           PartnerRepository partnerRepository,
                           StudentRepository studentRepository,
+                          QuestionRepository questionRepository,
                           ObjectMapper objectMapper) {
         this.quizTemplateRepository = quizTemplateRepository;
         this.quizAttemptRepository = quizAttemptRepository;
         this.quizPlacementRepository = quizPlacementRepository;
         this.partnerRepository = partnerRepository;
         this.studentRepository = studentRepository;
+        this.questionRepository = questionRepository;
         this.objectMapper = objectMapper;
     }
 
@@ -66,12 +69,20 @@ public class QuizServiceImp implements QuizService {
         template.setCreatedBy(CreatedBy.PARTNERSHIP);
         template.setPartner(partner);
         template.setActive(true);
-
-        // Tạo danh sách Questions
-        List<Question> questions = buildQuestions(request.getQuestions(), template);
-        template.setQuestions(questions);
+        template.setQuestions(new ArrayList<>());
 
         QuizTemplate saved = quizTemplateRepository.save(template);
+
+        // Nếu có questionIds, link các câu hỏi đã tạo vào bộ đề này
+        if (request.getQuestionIds() != null && !request.getQuestionIds().isEmpty()) {
+            List<Question> questions = questionRepository.findAllById(request.getQuestionIds());
+            for (Question q : questions) {
+                q.setQuizTemplate(saved);
+            }
+            questionRepository.saveAll(questions);
+            saved.getQuestions().addAll(questions);
+        }
+
         return toDetailResponse(saved, true);
     }
 
@@ -84,9 +95,14 @@ public class QuizServiceImp implements QuizService {
         template.setTitle(request.getTitle());
         template.setDescription(request.getDescription());
 
-        // Xoá câu hỏi cũ, thêm câu hỏi mới
-        template.getQuestions().clear();
-        template.getQuestions().addAll(buildQuestions(request.getQuestions(), template));
+        // Nếu có questionIds, link câu hỏi vào bộ đề
+        if (request.getQuestionIds() != null && !request.getQuestionIds().isEmpty()) {
+            List<Question> questions = questionRepository.findAllById(request.getQuestionIds());
+            for (Question q : questions) {
+                q.setQuizTemplate(template);
+            }
+            questionRepository.saveAll(questions);
+        }
 
         QuizTemplate saved = quizTemplateRepository.save(template);
         return toDetailResponse(saved, true);
@@ -218,24 +234,6 @@ public class QuizServiceImp implements QuizService {
     // ════════════════════════════════════════════════════════════════
     // PRIVATE HELPERS
     // ════════════════════════════════════════════════════════════════
-
-    private List<Question> buildQuestions(List<QuizTemplateRequestDto.QuestionRequestDto> dtos, QuizTemplate template) {
-        List<Question> questions = new ArrayList<>();
-        for (QuizTemplateRequestDto.QuestionRequestDto dto : dtos) {
-            Question q = new Question();
-            q.setText(dto.getText());
-            q.setCorrectAnswer(dto.getCorrectAnswer());
-            q.setExplanation(dto.getExplanation());
-            q.setQuizTemplate(template);
-            try {
-                q.setOptionsJson(objectMapper.writeValueAsString(dto.getOptions()));
-            } catch (JsonProcessingException e) {
-                throw new BadRequestException("Invalid options format for question: " + dto.getText());
-            }
-            questions.add(q);
-        }
-        return questions;
-    }
 
     /** Response dành cho PARTNER (kèm correct_answer) */
     private QuizTemplateResponseDto toDetailResponse(QuizTemplate t, boolean includeQuestions) {

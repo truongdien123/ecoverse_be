@@ -24,4 +24,6 @@ public class ParentRequestDto {
     @JsonProperty("phone_number")
     private String phoneNumber;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private org.springframework.web.multipart.MultipartFile avatar;
 }
