@@ -13,7 +13,9 @@ public interface GamePlacementMapper {
     @Mappings({
             @Mapping(target = "id", source = "id"),
             @Mapping(target = "isCorrect", source = "request.isCorrect"),
-            @Mapping(target = "placedBin.code", source = "request.code")
+            @Mapping(target = "placedBin", ignore = true),
+            @Mapping(target = "wasteItem", ignore = true),
+            @Mapping(target = "gameAttempt", ignore = true)
     })
     GamePlacement toGamePlacement(GamePlacementRequestDto request, String id);
 

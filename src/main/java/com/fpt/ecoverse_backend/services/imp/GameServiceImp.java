@@ -4,18 +4,17 @@ import com.fpt.ecoverse_backend.dtos.requests.GameAttemptRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.GamePlacementRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.GameRoundRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.PageFilterRequestDto;
-import com.fpt.ecoverse_backend.dtos.responses.GameAttemptResponseDto;
-import com.fpt.ecoverse_backend.dtos.responses.GamePlacementResponseDto;
-import com.fpt.ecoverse_backend.dtos.responses.GameRoundItemResponseDto;
-import com.fpt.ecoverse_backend.dtos.responses.GameRoundResponseDto;
+import com.fpt.ecoverse_backend.dtos.responses.*;
 import com.fpt.ecoverse_backend.entities.*;
 import com.fpt.ecoverse_backend.enums.CreatedBy;
 import com.fpt.ecoverse_backend.enums.UserType;
+import com.fpt.ecoverse_backend.enums.WasteBinCode;
 import com.fpt.ecoverse_backend.exceptions.BadRequestException;
 import com.fpt.ecoverse_backend.exceptions.NotFoundException;
 import com.fpt.ecoverse_backend.mappers.GameAttemptMapper;
 import com.fpt.ecoverse_backend.mappers.GamePlacementMapper;
 import com.fpt.ecoverse_backend.mappers.GameRoundMapper;
+import com.fpt.ecoverse_backend.mappers.WasteItemMapper;
 import com.fpt.ecoverse_backend.repositories.*;
 import com.fpt.ecoverse_backend.services.GameService;
 import org.springframework.data.domain.Page;
@@ -41,8 +40,11 @@ public class GameServiceImp implements GameService {
     private final GameAttemptMapper gameAttemptMapper;
     private final GamePlacementMapper gamePlacementMapper;
     private final GamePlacementRepository gamePlacementRepository;
+    private final WasteItemMapper wasteItemMapper;
+    private final GameRoundItemRepository gameRoundItemRepository;
+    private final WasteBinRepository wasteBinRepository;
 
-    public GameServiceImp(UserRepository userRepository, PartnerRepository partnerRepository, GameRoundRepository gameRoundRepository, GameRoundMapper gameRoundMapper, WasteItemRepository wasteItemRepository, StudentRepository studentRepository, GameAttemptRepository gameAttemptRepository, GameAttemptMapper gameAttemptMapper, GamePlacementMapper gamePlacementMapper, GamePlacementRepository gamePlacementRepository) {
+    public GameServiceImp(UserRepository userRepository, PartnerRepository partnerRepository, GameRoundRepository gameRoundRepository, GameRoundMapper gameRoundMapper, WasteItemRepository wasteItemRepository, StudentRepository studentRepository, GameAttemptRepository gameAttemptRepository, GameAttemptMapper gameAttemptMapper, GamePlacementMapper gamePlacementMapper, GamePlacementRepository gamePlacementRepository, WasteItemMapper wasteItemMapper, GameRoundItemRepository gameRoundItemRepository, WasteBinRepository wasteBinRepository) {
         this.userRepository = userRepository;
         this.partnerRepository = partnerRepository;
         this.gameRoundRepository = gameRoundRepository;
@@ -53,6 +55,9 @@ public class GameServiceImp implements GameService {
         this.gameAttemptMapper = gameAttemptMapper;
         this.gamePlacementMapper = gamePlacementMapper;
         this.gamePlacementRepository = gamePlacementRepository;
+        this.wasteItemMapper = wasteItemMapper;
+        this.gameRoundItemRepository = gameRoundItemRepository;
+        this.wasteBinRepository = wasteBinRepository;
     }
 
     @Override
@@ -94,7 +99,7 @@ public class GameServiceImp implements GameService {
                 pageFilterRequestDto.getPageNo()-1,
                 pageFilterRequestDto.getPageSize());
         Page<GameRound> gameRoundPage = gameRoundRepository.findGameRounds(
-                userId, pageFilterRequestDto.getSearching(), getUserRole(userId).name(), pageable);
+                userId, pageFilterRequestDto.getSearching(), getUserRole(userId), pageable);
         List<GameRoundResponseDto> response = new ArrayList<>();
         for (GameRound gameRound : gameRoundPage.getContent()) {
             GameRoundResponseDto gameRoundResponseDto = gameRoundMapper.toGameRoundResponse(gameRound);
@@ -201,25 +206,73 @@ public class GameServiceImp implements GameService {
         if (gameAttemptOpt.isEmpty()) {
             throw new NotFoundException("Game attempt not found");
         }
-        List<GamePlacement> gamePlacements = requests.stream().map(request -> {
+        List<GamePlacementResponseDto> response = new ArrayList<>();
+        List<GamePlacement> gamePlacements = new ArrayList<>();
+        requests.forEach(request -> {
             GamePlacement gamePlacement = gamePlacementMapper.toGamePlacement(request, null);
+
             gamePlacement.setGameAttempt(gameAttemptOpt.get());
+
             WasteItem wasteItem = wasteItemRepository.findById(request.getWasteItemId())
                     .orElseThrow(() -> new NotFoundException("Waste item not found"));
             gamePlacement.setWasteItem(wasteItem);
-            return gamePlacementRepository.save(gamePlacement);
-        }).toList();
-        return gamePlacements.stream().map(gamePlacementMapper::toGamePlacementResponse).toList();
+
+            gamePlacement.setPlacedBin(
+                    wasteBinRepository.findByCode(request.getCode())
+                            .orElseThrow(() -> new NotFoundException("Waste bin not found for code: " + request.getCode()))
+            );
+
+            GamePlacement saved = gamePlacementRepository.save(gamePlacement);
+            gamePlacements.add(saved);
+
+            // build response
+            GamePlacementResponseDto gamePlacementResponseDto = gamePlacementMapper.toGamePlacementResponse(saved);
+
+            GameRoundItem gameRoundItem = gameRoundItemRepository
+                    .findByGameRoundIdAndWasteItemId(gameRoundId, request.getWasteItemId())
+                    .orElseThrow(() -> new NotFoundException("Game round item not found for waste item id: " + request.getWasteItemId()));
+
+            WasteItemResponseDto wasteItemResponseDto =
+                    wasteItemMapper.toWasteItemResponse(wasteItem, gameRoundItem.getOrderIndex());
+
+            wasteItemResponseDto.setCorrectBinCode(wasteItem.getWasteBin().getCode());
+
+            gamePlacementResponseDto.setWasteItem(wasteItemResponseDto);
+            gamePlacementResponseDto.setCode(request.getCode());
+            gamePlacementResponseDto.setIsCorrect(request.getIsCorrect());
+
+            response.add(gamePlacementResponseDto);
+        });
+        return response;
     }
 
     @Override
     public List<GamePlacementResponseDto> getGamePlacements(String gameAttemptId) {
-        Optional<GameAttempt> gameAttemptOpt = gameAttemptRepository.findById(gameAttemptId);
-        if (gameAttemptOpt.isEmpty()) {
-            throw new NotFoundException("Game attempt not found");
-        }
+        GameAttempt gameAttempt = gameAttemptRepository.findById(gameAttemptId)
+                .orElseThrow(() -> new NotFoundException("Game attempt not found"));
         List<GamePlacement> gamePlacements = gamePlacementRepository.findByGameAttemptId(gameAttemptId);
-        return gamePlacements.stream().map(gamePlacementMapper::toGamePlacementResponse).toList();
+        List<GamePlacementResponseDto> response = new ArrayList<>();
+        gamePlacements.forEach(gamePlacement -> {
+            GamePlacementResponseDto dto = gamePlacementMapper.toGamePlacementResponse(gamePlacement);
+            WasteItem wasteItem = gamePlacement.getWasteItem();
+            String gameRoundId = gameAttempt.getGameRound().getId();
+            GameRoundItem gameRoundItem = gameRoundItemRepository
+                    .findByGameRoundIdAndWasteItemId(gameRoundId, wasteItem.getId())
+                    .orElseThrow(() -> new NotFoundException(
+                            "Game round item not found for waste item id: " + wasteItem.getId()
+                    ));
+            WasteItemResponseDto wasteItemDto =
+                    wasteItemMapper.toWasteItemResponse(wasteItem, gameRoundItem.getOrderIndex());
+            wasteItemDto.setCorrectBinCode(wasteItem.getWasteBin().getCode());
+            dto.setWasteItem(wasteItemDto);
+            dto.setCode(gamePlacement.getPlacedBin().getCode());
+            dto.setIsCorrect(
+                    gamePlacement.getIsCorrect()
+            );
+            response.add(dto);
+        });
+
+        return response;
     }
 
     private static GameRound getGameRound(String userId, Optional<GameRound> gameRoundOpt, Optional<User> userOpt) {

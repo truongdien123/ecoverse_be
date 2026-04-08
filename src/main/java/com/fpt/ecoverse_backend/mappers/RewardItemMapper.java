@@ -16,8 +16,22 @@ public interface RewardItemMapper {
         @Mapping(target = "pointsRequired", source = "request.pointRequired"),
         @Mapping(target = "id", source = "id"),
         @Mapping(target = "available", source = "request.available"),
+        @Mapping(target = "redemptionRequests", ignore = true),
+        @Mapping(target = "partner", ignore = true)
     })
     RewardItem toRewardItem(RewardItemRequestDto request, String id);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mappings({
+            @Mapping(target = "name", source = "request.name"),
+            @Mapping(target = "description", source = "request.description"),
+            @Mapping(target = "pointsRequired", source = "request.pointRequired"),
+            @Mapping(target = "available", source = "request.available"),
+            @Mapping(target = "redemptionRequests", ignore = true),
+            @Mapping(target = "partner", ignore = true),
+            @Mapping(target = "id", ignore = true)
+    })
+    void updateRewardItem(@MappingTarget RewardItem entity, RewardItemRequestDto request);
 
     @Mappings({
         @Mapping(target = "id", source = "rewardItem.id"),
