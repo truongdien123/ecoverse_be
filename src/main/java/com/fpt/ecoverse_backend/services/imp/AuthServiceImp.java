@@ -88,7 +88,7 @@ public class AuthServiceImp implements AuthService {
     @Override
     public LoginResponseDto<?> studentLogin(StudentLoginRequestDto request) {
         // Load student by student_code (không cần password)
-        UserDetails userDetails = customUserDetailsService.loadStudent(request.getStudentCode());
+        UserDetails userDetails = customUserDetailsService.loadStudentByCode(request.getStudentCode());
         CustomUserDetails customUser = (CustomUserDetails) userDetails;
 
         if (!customUser.isEnabled()) {
@@ -209,6 +209,10 @@ public class AuthServiceImp implements AuthService {
     }
 
     private StudentResponseDto buildStudentInfo(User user, Student student) {
+        String parentId = null;
+        if (student.getParent() != null) {
+            parentId = student.getParent().getId();
+        }
         return new StudentResponseDto(
                 student.getId(),
                 user.getFullName(),
@@ -216,7 +220,7 @@ public class AuthServiceImp implements AuthService {
                 student.getGrade(),
                 student.getPoints() != null ? student.getPoints() : 0,
                 user.getAvatarUrl(),
-                student.getParent().getId(),
+                parentId,
                 student.getPartner().getId(),
                 null,
                 user.getCreatedAt(),

@@ -90,5 +90,11 @@ public class ExceptionHandlerConfig {
         LOG.error(ex.getMessage(), ex);
         return ResponseUtil.error(HttpStatus.BAD_REQUEST, "Invalid parameter type: " + ex.getMessage());
     }
+
+    @ExceptionHandler(value = Exception.class)
+    public ResponseEntity<?> handleGenericException(Exception ex) {
+        LOG.error("Unexpected error: " + ex.getMessage(), ex);
+        return ResponseUtil.error(HttpStatus.INTERNAL_SERVER_ERROR, "Lỗi server: " + ex.getMessage());
+    }
 }
 

@@ -68,6 +68,12 @@ public class RewardServiceImp implements RewardService {
     }
 
     @Override
+    public List<RewardItemResponseDto> getAllRewardItems() {
+        List<RewardItem> rewardItems = rewardItemRepository.findAll();
+        return rewardItems.stream().map(rewardItemMapper::toRewardItemResponse).toList();
+    }
+
+    @Override
     public RewardItemResponseDto getRewardItemById(String partnerId, String rewardItemId) {
         Optional<Partner> partnerOpt = partnerRepository.findById(partnerId);
         if (partnerOpt.isEmpty()) {
