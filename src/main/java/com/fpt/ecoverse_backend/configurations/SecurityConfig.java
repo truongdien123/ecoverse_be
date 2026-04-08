@@ -107,7 +107,7 @@ public class SecurityConfig {
 
                         // Game endpoints
                         .requestMatchers(HttpMethod.POST, "/games/rounds/users/{user_id}").hasAnyRole("PARTNERSHIP", "ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/games/rounds/users/{user_id}").hasAnyRole("STUDENT", "PARTNERSHIP", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/games/rounds/users/{user_id}/get-list").hasAnyRole("STUDENT", "PARTNERSHIP", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/games/rounds/{game_round_id}/users/{user_id}").hasAnyRole("PARTNERSHIP", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/games/rounds/{game_round_id}/users/{user_id}").hasAnyRole("PARTNERSHIP", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/games/rounds/{game_round_id}/students/{student_id}/attempts").hasRole("STUDENT")
@@ -118,16 +118,24 @@ public class SecurityConfig {
 
                         // Reward endpoints
                         .requestMatchers(HttpMethod.POST, "/rewards/{partner_id}").hasRole("PARTNERSHIP")
-                        .requestMatchers(HttpMethod.GET, "/rewards/{partner_id}").hasAnyRole("STUDENT", "PARTNERSHIP")
+                        .requestMatchers(HttpMethod.POST, "/rewards/{partner_id}/get-list").hasAnyRole("STUDENT", "PARTNERSHIP")
                         .requestMatchers(HttpMethod.GET, "/rewards/items/{reward_item_id}/partners/{partner_id}").hasAnyRole("STUDENT", "PARTNERSHIP")
                         .requestMatchers(HttpMethod.PUT, "/rewards/items/{reward_item_id}/partners/{partner_id}").hasRole("PARTNERSHIP")
                         .requestMatchers(HttpMethod.DELETE, "/rewards/items/{reward_item_id}/partners/{partner_id}").hasRole("PARTNERSHIP")
 
+<<<<<<< HEAD
                         // Question endpoints
                         .requestMatchers(HttpMethod.GET, "/api/questions", "/api/questions/**").hasAnyRole("STUDENT", "PARTNERSHIP", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/questions").hasAnyRole("PARTNERSHIP", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/questions/**").hasAnyRole("PARTNERSHIP", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/questions/**").hasAnyRole("PARTNERSHIP", "ADMIN")
+=======
+                        // Achievement endpoints
+                        .requestMatchers(HttpMethod.GET, "/api/achievements", "/api/achievements/**").hasAnyRole("STUDENT", "PARTNERSHIP", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/achievements").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/achievements/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/achievements/**").hasRole("ADMIN")
+>>>>>>> origin/dev
 
                         // All other requests need authentication
                         .anyRequest().authenticated()

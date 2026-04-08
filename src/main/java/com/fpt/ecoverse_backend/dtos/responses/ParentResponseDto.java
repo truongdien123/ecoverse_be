@@ -6,8 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -35,7 +33,7 @@ public class ParentResponseDto {
     @JsonProperty("active")
     private Boolean active;
 
-    @JsonProperty("students")
-    private List<StudentResponseDto> students;
+    @JsonProperty("number_children")
+    private Integer numberChildren;
 }
 
