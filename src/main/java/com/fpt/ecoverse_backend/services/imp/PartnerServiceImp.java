@@ -283,7 +283,7 @@ public class PartnerServiceImp implements PartnerService {
         if (student.get().getParent() != null) {
             Optional<Parent> parent = parentRepository.findById(student.get().getParent().getId());
             Optional<User> parentUser = userRepository.findById(parent.get().getUser().getId());
-            studentResponseDto.setParent(parentMapper.toParentResponse(parent.get()));
+            studentResponseDto.setParentId(parent.get().getId());
         }
         studentResponseDto.setStatistics(statistic);
         return studentResponseDto;
