@@ -123,19 +123,17 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/rewards/items/{reward_item_id}/partners/{partner_id}").hasRole("PARTNERSHIP")
                         .requestMatchers(HttpMethod.DELETE, "/rewards/items/{reward_item_id}/partners/{partner_id}").hasRole("PARTNERSHIP")
 
-<<<<<<< HEAD
                         // Question endpoints
                         .requestMatchers(HttpMethod.GET, "/api/questions", "/api/questions/**").hasAnyRole("STUDENT", "PARTNERSHIP", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/questions").hasAnyRole("PARTNERSHIP", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/questions/**").hasAnyRole("PARTNERSHIP", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/questions/**").hasAnyRole("PARTNERSHIP", "ADMIN")
-=======
+
                         // Achievement endpoints
                         .requestMatchers(HttpMethod.GET, "/api/achievements", "/api/achievements/**").hasAnyRole("STUDENT", "PARTNERSHIP", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/achievements").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/achievements/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/achievements/**").hasRole("ADMIN")
->>>>>>> origin/dev
 
                         // Redemption endpoints
                         .requestMatchers(HttpMethod.POST, "/redemptions/students/{student_id}/reward-items/{rewardItem_id}").hasRole("STUDENT")

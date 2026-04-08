@@ -44,7 +44,6 @@ public class CustomUserDetailsServiceImp implements CustomUserDetailsService, Us
         };
     }
 
-    @Override
     public UserDetails loadStudent(String studentCode) {
         var student = studentRepository.findByStudentCode(studentCode)
                 .orElseThrow(() -> new NotFoundException("Student not found"));

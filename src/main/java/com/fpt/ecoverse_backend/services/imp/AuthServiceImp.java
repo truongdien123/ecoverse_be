@@ -92,7 +92,7 @@ public class AuthServiceImp implements AuthService {
         CustomUserDetails customUser = (CustomUserDetails) userDetails;
 
         if (!customUser.isEnabled()) {
-            throw new DisabledException("Student account is disabled");
+            throw new DisabledException("Student account is disabled.");
         }
 
         Student student = studentRepository.findByStudentCode(request.getStudentCode())
