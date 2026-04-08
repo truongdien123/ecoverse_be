@@ -29,6 +29,13 @@ public class RewardController {
         return ResponseUtil.success("Reward item created successfully", responseDto);
     }
 
+    @GetMapping
+    @PreAuthorize("hasAnyRole('PARTNERSHIP', 'STUDENT')")
+    public ResponseEntity<?> getAllRewards() {
+        List<RewardItemResponseDto> response = rewardService.getAllRewardItems();
+        return ResponseUtil.success("All reward items retrieved successfully", response);
+    }
+
     @GetMapping("/{partner_id}")
     @PreAuthorize("hasAnyRole('PARTNERSHIP', 'STUDENT')")
     public ResponseEntity<?> getRewards(@PathVariable("partner_id") String partnerId, PageFilterRequestDto pageFilterRequestDto) {
