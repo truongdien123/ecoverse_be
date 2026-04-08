@@ -14,7 +14,8 @@ public interface RewardItemMapper {
         @Mapping(target = "name", source = "request.name"),
         @Mapping(target = "description", source = "request.description"),
         @Mapping(target = "pointsRequired", source = "request.pointRequired"),
-        @Mapping(target = "id", source = "id")
+        @Mapping(target = "id", source = "id"),
+        @Mapping(target = "available", source = "request.available"),
     })
     RewardItem toRewardItem(RewardItemRequestDto request, String id);
 
