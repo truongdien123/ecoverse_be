@@ -16,9 +16,9 @@ public interface ParentMapper {
             @Mapping(target = "email", source = "user.email"),
             @Mapping(target = "avatarUrl", source = "user.avatarUrl"),
             @Mapping(target = "active", source = "user.active"),
-            @Mapping(target = "parentId", source = "parent.id")
+            @Mapping(target = "parentId", source = "id")
     })
-    ParentResponseDto toParentResponse(Parent parent, User user);
+    ParentResponseDto toParentResponse(Parent parent);
 
 
 }

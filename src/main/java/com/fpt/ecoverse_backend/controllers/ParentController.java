@@ -4,6 +4,7 @@ import com.fpt.ecoverse_backend.dtos.requests.ParentRequestDto;
 import com.fpt.ecoverse_backend.dtos.responses.ParentResponseDto;
 import com.fpt.ecoverse_backend.services.ParentService;
 import com.fpt.ecoverse_backend.utils.ResponseUtil;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -31,9 +32,9 @@ public class ParentController {
         return ResponseUtil.success("Get list student by parent id successfully", parentService.getListStudent(parentId));
     }
 
-    @PutMapping("{parent_id}")
+    @PutMapping(value = "{parent_id}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('PARENT')")
-    public ResponseEntity<?> updateParent(@PathVariable("parent_id") String parentId, ParentRequestDto request) {
+    public ResponseEntity<?> updateParent(@PathVariable("parent_id") String parentId, @ModelAttribute ParentRequestDto request) {
         return ResponseUtil.success("Update parent successfully", parentService.updateParent(parentId, request));
     }
 

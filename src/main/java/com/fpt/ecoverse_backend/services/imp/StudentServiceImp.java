@@ -38,7 +38,7 @@ public class StudentServiceImp implements StudentService {
         if (studentOpt.isEmpty()) {
             throw new NotFoundException("Student not found");
         }
-        return studentMapper.toStudentResponse(studentOpt.get(), studentOpt.get().getUser());
+        return studentMapper.toStudentResponse(studentOpt.get());
     }
 
     @Override
@@ -51,6 +51,6 @@ public class StudentServiceImp implements StudentService {
         User user = userMapper.toUser(request, studentOpt.get().getId());
         userRepository.save(user);
         studentRepository.save(student);
-        return studentMapper.toStudentResponse(student, user);
+        return studentMapper.toStudentResponse(student);
     }
 }

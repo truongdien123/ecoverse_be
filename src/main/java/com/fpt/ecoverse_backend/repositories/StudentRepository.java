@@ -28,5 +28,5 @@ public interface StudentRepository extends JpaRepository<Student, String> {
     Page<Object[]> searchStudents(@Param("partnerId") String partnerId, @Param("searching") String searching, @Param("grade") String grade, Pageable pageable);
 
     @Query("select s from Student s where s.parent.id = :parentId")
-    List<Student> findByParentId(String parentId);
+    List<Student> findByParentId(@Param("parentId") String parentId);
 }

@@ -52,7 +52,7 @@ public class GameController {
 
     @PostMapping("/rounds/{game_round_id}/students/{student_id}/attempts")
     @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<?> createGameAttempt(@PathVariable("game_round_id") String gameRoundId, @PathVariable("student_id") String studentId, GameAttemptRequestDto request) {
+    public ResponseEntity<?> createGameAttempt(@PathVariable("game_round_id") String gameRoundId, @PathVariable("student_id") String studentId, @RequestBody GameAttemptRequestDto request) {
         return ResponseUtil.success("Create game attempt successfully", gameService.createGameAttempt(gameRoundId, studentId, request));
     }
 

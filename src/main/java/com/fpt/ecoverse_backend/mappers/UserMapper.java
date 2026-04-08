@@ -44,7 +44,21 @@ public interface UserMapper {
             @Mapping(target = "id", source = "id"),
             @Mapping(target = "email", source = "request.email")
     })
-    User toUser(ParentRequestDto request, String id, @Context UploadFile uploadFile);
+    User toUser(ParentRequestDto request, String id);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mappings({
+            @Mapping(target = "fullName", source = "fullName"),
+            @Mapping(target = "address", source = "address"),
+            @Mapping(target = "phoneNumber", source = "phoneNumber"),
+            @Mapping(target = "email", source = "email"),
+            @Mapping(target = "notifications", ignore = true),
+            @Mapping(target = "password", ignore = true),
+            @Mapping(target = "role", ignore = true),
+            @Mapping(target = "active", ignore = true),
+            @Mapping(target = "avatarUrl", ignore = true)
+    })
+    void updateUserFromDto(ParentRequestDto dto, @MappingTarget User user);
 
     @Named("convertImg")
     static String convertImg(MultipartFile multipartFile, @Context UploadFile uploadFile) {
