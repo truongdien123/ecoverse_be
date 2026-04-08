@@ -20,8 +20,7 @@ public interface StudentMapper {
             @Mapping(target = "avatarUrl", source = "user.avatarUrl"),
             @Mapping(target = "createdDate", source = "user.createdAt"),
             @Mapping(target = "updatedDate", source = "user.updatedAt"),
-            @Mapping(target = "active", source = "user.active"),
-            @Mapping(target = "parent", ignore = true)
+            @Mapping(target = "active", source = "user.active")
     })
     StudentResponseDto toStudentResponse(Student student);
 
