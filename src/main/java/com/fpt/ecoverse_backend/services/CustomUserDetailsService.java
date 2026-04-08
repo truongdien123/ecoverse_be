@@ -5,7 +5,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 public interface CustomUserDetailsService {
     UserDetails loadUserByEmailAndType(String emailOrId, UserType userType);
-    UserDetails loadStudentByCode(String studentCode);
+    UserDetails loadStudent(String studentCode);
     UserDetails loadAdmin(String email);
     UserDetails loadParent(String email);
     UserDetails loadPartnership(String email);

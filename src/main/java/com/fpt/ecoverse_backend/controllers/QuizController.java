@@ -80,7 +80,7 @@ public class QuizController {
     public ResponseEntity<?> getMyQuizTemplates(
             @AuthenticationPrincipal CustomUserDetails currentUser,
             @RequestParam(required = false) String title,
-            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         Page<QuizTemplateResponseDto> result = quizService.getMyQuizTemplates(currentUser.getId(), title, page, size);
