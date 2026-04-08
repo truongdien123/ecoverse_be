@@ -65,6 +65,25 @@ public class CustomUserDetailsServiceImp implements CustomUserDetailsService, Us
                 .build();
     }
 
+    @Override
+    public UserDetails loadStudentByCode(String studentCode) {
+        var student = studentRepository.findByStudentCode(studentCode)
+                .orElseThrow(() -> new NotFoundException("Student not found"));
+        Optional<User> userOpt = userRepository.findById(student.getId());
+        if (userOpt.isEmpty()) {
+            throw new NotFoundException("User not found");
+        }
+        return CustomUserDetails.builder()
+                .id(student.getId())
+                .email(null)
+                .password(null)
+                .fullName(userOpt.get().getFullName())
+                .avatarUrl(userOpt.get().getAvatarUrl())
+                .userType(UserType.STUDENT)
+                .active(userOpt.get().getActive() != null ? userOpt.get().getActive() : true)
+                .build();
+    }
+
 
     @Override
     public UserDetails loadAdmin(String email) {
