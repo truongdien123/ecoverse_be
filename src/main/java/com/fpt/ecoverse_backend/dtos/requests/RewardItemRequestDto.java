@@ -16,4 +16,5 @@ public class RewardItemRequestDto {
     private String description;
     private Integer pointRequired;
     private MultipartFile image;
+    private Boolean available;
 }
