@@ -30,9 +30,9 @@ public class GameController {
         return ResponseUtil.success("Create game round successfully", response);
     }
 
-    @GetMapping("/rounds/users/{user_id}")
+    @PostMapping("/rounds/users/{user_id}/get-list")
     @PreAuthorize("hasAnyRole('ADMIN', 'PARTNERSHIP', 'STUDENT')")
-    public ResponseEntity<?> getGameRounds(@PathVariable("user_id") String userId, PageFilterRequestDto pageFilterRequestDto) {
+    public ResponseEntity<?> getGameRounds(@PathVariable("user_id") String userId, @RequestBody PageFilterRequestDto pageFilterRequestDto) {
         return ResponseUtil.success("Get game rounds successfully", gameService.getGameRounds(userId, pageFilterRequestDto));
     }
 
