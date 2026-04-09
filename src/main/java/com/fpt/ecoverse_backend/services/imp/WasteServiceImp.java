@@ -1,5 +1,6 @@
 package com.fpt.ecoverse_backend.services.imp;
 
+import com.fpt.ecoverse_backend.dtos.requests.PageFilterRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.WasteBinRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.WasteItemRequestDto;
 import com.fpt.ecoverse_backend.dtos.responses.WasteBinResponseDto;
@@ -16,6 +17,9 @@ import com.fpt.ecoverse_backend.projections.WasteItemWithOrderProjection;
 import com.fpt.ecoverse_backend.repositories.*;
 import com.fpt.ecoverse_backend.services.WasteService;
 import com.fpt.ecoverse_backend.utils.UploadFile;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -189,6 +193,29 @@ public class WasteServiceImp implements WasteService {
             wasteItemRepository.delete(wasteItemOptional.get());
             return wasteItemMapper.toWasteItemResponse(wasteItemOptional.get(), null);
         }
+    }
+
+    @Override
+    public List<WasteItemResponseDto> getWasteItemsByFilter(String userId, PageFilterRequestDto pageFilterRequestDto) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isEmpty()) {
+            throw new NotFoundException("User not found");
+        }
+        Pageable pageable = PageRequest.of(
+                pageFilterRequestDto.getPageNo()-1,
+                pageFilterRequestDto.getPageSize());
+        WasteBinCode type = null;
+        if (pageFilterRequestDto.getType() != null) {
+            type = WasteBinCode.valueOf(pageFilterRequestDto.getType().toUpperCase());
+        }
+        Page<WasteItem> wasteItems = wasteItemRepository.findWasteItemsByUserId(userId, type, pageFilterRequestDto.getSearching(), pageable);
+
+        return wasteItems.stream().map(wasteItem -> {
+            WasteItemResponseDto response = wasteItemMapper.toWasteItemResponse(wasteItem, null);
+            response.setCorrectBinCode(wasteItem.getWasteBin().getCode());
+            response.setCreatedBy(wasteItem.getCreatedBy().toString());
+            return response;
+        }).toList();
     }
 
     private CreatedBy getUserRole(String userId) {
