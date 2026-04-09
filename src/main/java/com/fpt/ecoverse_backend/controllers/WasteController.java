@@ -1,5 +1,6 @@
 package com.fpt.ecoverse_backend.controllers;
 
+import com.fpt.ecoverse_backend.dtos.requests.PageFilterRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.WasteBinRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.WasteItemRequestDto;
 import com.fpt.ecoverse_backend.dtos.responses.WasteBinResponseDto;
@@ -10,6 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/wastes")
@@ -66,5 +69,12 @@ public class WasteController {
     public ResponseEntity<?> deleteWasteItem(@PathVariable("user_id") String userId, @PathVariable("waste_item_id") String wasteItemId) {
         WasteItemResponseDto response = wasteService.deleteWasteItem(userId, wasteItemId);
         return ResponseUtil.success("Delete waste item successfully", response);
+    }
+
+    @PostMapping("/items/{user_id}/get-list")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PARTNERSHIP')")
+    public ResponseEntity<?> getWasteItems(@PathVariable("user_id") String userId, @RequestBody PageFilterRequestDto pageFilterRequestDto) {
+        List<WasteItemResponseDto> response = wasteService.getWasteItemsByFilter(userId, pageFilterRequestDto);
+        return ResponseUtil.success("Get waste items by filter successfully", response);
     }
 }

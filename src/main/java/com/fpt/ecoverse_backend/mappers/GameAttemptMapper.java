@@ -16,7 +16,8 @@ public interface GameAttemptMapper {
             @Mapping(target = "totalItems", source = "request.totalItems"),
             @Mapping(target = "correctCount", source = "request.correctCount"),
             @Mapping(target = "completed", source = "request.completed"),
-            @Mapping(target = "id", source = "id")
+            @Mapping(target = "id", source = "id"),
+            @Mapping(target = "gamePlacements", ignore = true)
     })
     GameAttempt toGameAttempt(GameAttemptRequestDto request, String id);
 

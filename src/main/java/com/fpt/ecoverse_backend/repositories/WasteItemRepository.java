@@ -2,7 +2,10 @@ package com.fpt.ecoverse_backend.repositories;
 
 import com.fpt.ecoverse_backend.entities.WasteItem;
 import com.fpt.ecoverse_backend.enums.CreatedBy;
+import com.fpt.ecoverse_backend.enums.WasteBinCode;
 import com.fpt.ecoverse_backend.projections.WasteItemWithOrderProjection;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -34,5 +37,15 @@ public interface WasteItemRepository extends JpaRepository<WasteItem, String> {
     )
     List<WasteItemWithOrderProjection> findByUserIdAndGameRoundId(@Param("userId") String userId, @Param("gameRoundId") String gameRoundId);
 
+    @Query("""
+    SELECT w 
+    FROM WasteItem w 
+    WHERE 
+        (w.partner.id = :userId 
+            OR w.createdBy = 'ADMIN')
+        AND (:type IS NULL OR w.wasteBin.code = :type)
+        AND (:searching IS NULL OR w.name ILIKE '%' || CAST(:searching AS STRING ) || '%' OR w.description ILIKE '%' || CAST(:searching AS STRING ) || '%')
+""")
+    Page<WasteItem> findWasteItemsByUserId(@Param("userId") String userId, WasteBinCode type, String searching, Pageable pageable);
 
 }
