@@ -23,7 +23,8 @@ public interface WasteItemMapper {
             @Mapping(target = "id", source = "item.id"),
             @Mapping(target = "imageUrl", source = "item.imageUrl"),
             @Mapping(target = "createdBy", source = "item.createdBy"),
-            @Mapping(target = "orderIndex", source = "orderIndex")
+            @Mapping(target = "orderIndex", source = "orderIndex"),
+            @Mapping(target = "correctBinCode", source = "item.wasteBin.code")
     })
     WasteItemResponseDto toWasteItemResponse(WasteItem item, Integer orderIndex);
 

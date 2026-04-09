@@ -23,9 +23,15 @@ public interface WasteItemRepository extends JpaRepository<WasteItem, String> {
     @Query("select w from WasteItem w where w.id in :ids")
     List<WasteItem> findWasteItemByIds(List<String> ids);
 
-    @Query("select w as wasteItem, gri.orderIndex as orderIndex " +
-            "from GameRoundItem gri join gri.wasteItem w " +
-            "where gri.gameRound.id = :gameRoundId and gri.gameRound.partner.id = :userId")
+    @Query("""
+    select w as wasteItem, gri.orderIndex as orderIndex
+    from GameRoundItem gri 
+    join gri.wasteItem w
+    where gri.gameRound.id = :gameRoundId
+      and (gri.gameRound.partner.id = :userId 
+           or gri.gameRound.createdBy = 'ADMIN')
+"""
+    )
     List<WasteItemWithOrderProjection> findByUserIdAndGameRoundId(@Param("userId") String userId, @Param("gameRoundId") String gameRoundId);
 
 

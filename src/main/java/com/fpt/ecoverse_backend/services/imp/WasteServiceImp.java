@@ -119,11 +119,9 @@ public class WasteServiceImp implements WasteService {
             throw new NotFoundException("Game round not found");
         }
         gameAttempt.setGameRound(gameRoundOptional.get());
-        Optional<Student> student = studentRepository.findById(userId);
-        if (student.isEmpty()) {
-            throw new NotFoundException("Student not found");
-        }
-        gameAttempt.setStudent(student.get());
+        gameAttempt.setStudent(gameAttempt.getStudent());
+        gameAttempt.setTotalItems(wasteItemWithOrder.size());
+        gameAttempt.setAttemptNumber(1);
         gameAttemptRepository.save(gameAttempt);
         return wasteItemWithOrder.stream().map(projection ->
                 wasteItemMapper.toWasteItemResponse(projection.getWasteItem(), projection.getOrderIndex())).toList();
@@ -203,7 +201,7 @@ public class WasteServiceImp implements WasteService {
         } else if (userOpt.get().getRole() == UserType.PARTNERSHIP) {
             return CreatedBy.PARTNERSHIP;
         }
-        throw new ForbiddenException("Only partnership and admin can create waste item");
+        return CreatedBy.ADMIN;
     }
 }
 
