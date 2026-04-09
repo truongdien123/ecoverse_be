@@ -94,7 +94,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/parents/{parent_id}").hasAnyRole("PARENT", "PARTNERSHIP")
 
                         // Student endpoints
-                        .requestMatchers("/students/**").hasAnyRole("STUDENT", "PARENT", "ADMIN", "PARTNERSHIP")
+                        .requestMatchers(HttpMethod.GET, "/students/{student_id}").hasRole("STUDENT")
+                        .requestMatchers(HttpMethod.PUT, "/students/{student_id}").hasRole("STUDENT")
+                        .requestMatchers(HttpMethod.DELETE, "/students/{student_id}").hasAnyRole("STUDENT", "PARTNERSHIP")
 
                         // Waste endpoints
                         .requestMatchers(HttpMethod.GET, "/wastes/bins").hasAnyRole("STUDENT", "PARTNERSHIP", "ADMIN")
