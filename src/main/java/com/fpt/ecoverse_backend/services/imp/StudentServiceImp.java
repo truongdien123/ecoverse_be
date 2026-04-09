@@ -53,4 +53,16 @@ public class StudentServiceImp implements StudentService {
         studentRepository.save(student);
         return studentMapper.toStudentResponse(student);
     }
+
+    @Override
+    public StudentResponseDto deleteStudent(String studentId) {
+        Optional<Student> studentOpt = studentRepository.findById(studentId);
+        if (studentOpt.isEmpty()) {
+            throw new NotFoundException("Student not found");
+        }
+        Student student = studentOpt.get();
+        studentRepository.delete(student);
+        userRepository.deleteById(studentId);
+        return studentMapper.toStudentResponse(student);
+    }
 }
