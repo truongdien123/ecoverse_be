@@ -27,19 +27,19 @@ public class ParentController {
     }
 
     @GetMapping("{parent_id}/students")
-    @PreAuthorize("hasRole('PARENT')")
+    @PreAuthorize("hasAnyRole('PARENT', 'PARTNERSHIP')")
     public ResponseEntity<?> getListStudent(@PathVariable("parent_id") String parentId) {
         return ResponseUtil.success("Get list student by parent id successfully", parentService.getListStudent(parentId));
     }
 
     @PutMapping(value = "{parent_id}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('PARENT')")
+    @PreAuthorize("hasAnyRole('PARENT', 'PARTNERSHIP')")
     public ResponseEntity<?> updateParent(@PathVariable("parent_id") String parentId, @ModelAttribute ParentRequestDto request) {
         return ResponseUtil.success("Update parent successfully", parentService.updateParent(parentId, request));
     }
 
     @GetMapping("{parent_id}")
-    @PreAuthorize("hasRole('PARENT')")
+    @PreAuthorize("hasAnyRole('PARENT', 'PARTNERSHIP')")
     public ResponseEntity<?> getParentDetail(@PathVariable("parent_id") String parentId) {
         return ResponseUtil.success("Get parent by id successfully", parentService.getParentDetail(parentId));
     }

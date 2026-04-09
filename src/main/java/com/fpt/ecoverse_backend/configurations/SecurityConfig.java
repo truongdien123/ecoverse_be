@@ -88,14 +88,14 @@ public class SecurityConfig {
 
                         // Parent endpoints
                         .requestMatchers(HttpMethod.POST, "/parents/{parent_id}/students/{student_id}/link-student").hasRole("PARENT")
-                        .requestMatchers(HttpMethod.GET, "/parents/{parent_id}/students").hasRole("PARENT")
-                        .requestMatchers(HttpMethod.PUT, "/parents/{parent_id}").hasRole("PARENT")
-                        .requestMatchers(HttpMethod.GET, "/parents/{parent_id}").hasRole("PARENT")
+                        .requestMatchers(HttpMethod.GET, "/parents/{parent_id}/students").hasAnyRole("PARENT", "PARTNERSHIP")
+                        .requestMatchers(HttpMethod.PUT, "/parents/{parent_id}").hasAnyRole("PARENT", "PARTNERSHIP")
+                        .requestMatchers(HttpMethod.GET, "/parents/{parent_id}").hasAnyRole("PARENT", "PARTNERSHIP")
                         .requestMatchers(HttpMethod.DELETE, "/parents/{parent_id}").hasAnyRole("PARENT", "PARTNERSHIP")
 
                         // Student endpoints
-                        .requestMatchers(HttpMethod.GET, "/students/{student_id}").hasRole("STUDENT")
-                        .requestMatchers(HttpMethod.PUT, "/students/{student_id}").hasRole("STUDENT")
+                        .requestMatchers(HttpMethod.GET, "/students/{student_id}").hasAnyRole("STUDENT", "PARTNERSHIP")
+                        .requestMatchers(HttpMethod.PUT, "/students/{student_id}").hasAnyRole("STUDENT", "PARTNERSHIP")
                         .requestMatchers(HttpMethod.DELETE, "/students/{student_id}").hasAnyRole("STUDENT", "PARTNERSHIP")
 
                         // Waste endpoints
@@ -106,6 +106,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/wastes/items/{waste_item_id}/users/{user_id}").hasAnyRole("PARTNERSHIP", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/wastes/bins/{waste_bin_id}/admins/{admin_id}").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/wastes/items/{waste_item_id}/users/{user_id}").hasAnyRole("PARTNERSHIP", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "wastes/items/{user_id}/get-list").hasAnyRole("PARTNERSHIP", "ADMIN")
 
                         // Game endpoints
                         .requestMatchers(HttpMethod.POST, "/games/rounds/users/{user_id}").hasAnyRole("PARTNERSHIP", "ADMIN")
