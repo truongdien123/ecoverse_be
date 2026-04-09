@@ -29,4 +29,10 @@ public class StudentController {
     public ResponseEntity<?> updateStudent(@PathVariable("student_id") String studentId, @ModelAttribute StudentRequestDto request) {
         return ResponseUtil.success("Update student details successfully", studentService.updateStudentDetails(studentId, request));
     }
+
+    @DeleteMapping("/{student_id}")
+    @PreAuthorize("hasAnyRole('PARTNERSHIP', 'STUDENT')")
+    public ResponseEntity<?> deleteStudent(@PathVariable("student_id") String studentId) {
+        return ResponseUtil.success("Delete student successfully", studentService.deleteStudent(studentId));
+    }
 }
