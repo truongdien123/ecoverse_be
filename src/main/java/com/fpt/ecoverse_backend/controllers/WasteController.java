@@ -57,9 +57,9 @@ public class WasteController {
         return ResponseUtil.success("Update waste item successfully", response);
     }
 
-    @PutMapping("/bins/{waste_bin_id}/admins/{admin_id}")
+    @PutMapping(value = "/bins/{waste_bin_id}/admins/{admin_id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> updateWasteBin(@PathVariable("admin_id") String adminId, @PathVariable("waste_bin_id") String wasteBinId, WasteBinRequestDto request) {
+    public ResponseEntity<?> updateWasteBin(@PathVariable("admin_id") String adminId, @PathVariable("waste_bin_id") String wasteBinId, @ModelAttribute WasteBinRequestDto request) {
         WasteBinResponseDto response = wasteService.updateWasteBin(adminId, wasteBinId, request);
         return ResponseUtil.success("Update waste bin successfully", response);
     }
