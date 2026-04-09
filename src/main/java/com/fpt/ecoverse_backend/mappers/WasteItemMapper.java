@@ -13,9 +13,19 @@ public interface WasteItemMapper {
     @Mappings({
             @Mapping(target = "name", source = "request.name"),
             @Mapping(target = "description", source = "request.description"),
-            @Mapping(target = "id", source = "id")
+            @Mapping(target = "id", source = "id"),
+            @Mapping(target = "gameRoundItems", ignore = true),
+            @Mapping(target = "gamePlacements", ignore = true)
     })
     WasteItem toWasteItem(WasteItemRequestDto request, String id);
+
+    @Mappings({
+            @Mapping(target = "name", source = "request.name"),
+            @Mapping(target = "description", source = "request.description"),
+            @Mapping(target = "gameRoundItems", ignore = true),
+            @Mapping(target = "gamePlacements", ignore = true)
+    })
+    void updateWasteItem(@MappingTarget WasteItem entity, WasteItemRequestDto request);
 
     @Mappings({
             @Mapping(target = "name", source = "item.name"),
