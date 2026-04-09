@@ -18,6 +18,7 @@ import com.fpt.ecoverse_backend.services.ParentService;
 import com.fpt.ecoverse_backend.utils.UploadFile;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -74,7 +75,15 @@ public class ParentServiceImp implements ParentService {
             throw new NotFoundException("Parent not found");
         }
         List<Student> students = studentRepository.findByParentId(parentId);
-        return students.stream().map(studentMapper::toStudentResponse).toList();
+        List<StudentResponseDto> response = new ArrayList<>();
+        for (Student student : students) {
+            StudentResponseDto studentResponseDto = studentMapper.toStudentResponse(student);
+            studentResponseDto.setParentId(parentId);
+            studentResponseDto.setParentName(parent.get().getUser().getFullName());
+            studentResponseDto.setPartnerId(student.getPartner().getId());
+            response.add(studentResponseDto);
+        }
+        return response;
     }
 
     @Override
