@@ -134,25 +134,23 @@ public class WasteServiceImp implements WasteService {
     @Override
     public WasteItemResponseDto updateWasteItem(String userId, String wasteItemId, WasteItemRequestDto request) {
         CreatedBy userRole = getUserRole(userId);
-        Optional<WasteItem> wasteItemOptional;
-        if (userRole == CreatedBy.PARTNERSHIP) {
-            wasteItemOptional = wasteItemRepository.findWasteItemByPartnerId(userId);
-            if (wasteItemOptional.isEmpty()) {
-                throw new NotFoundException("Waste item not found");
-            }
-        } else {
-            wasteItemOptional = wasteItemRepository.findById(wasteItemId);
-            if (wasteItemOptional.isEmpty()) {
-                throw new NotFoundException("Waste item not found");
-            }
+        Optional<WasteItem> wasteItemOptional = wasteItemRepository.findById(wasteItemId);
+        if (wasteItemOptional.isEmpty()) {
+            throw new NotFoundException("Waste item not found");
         }
-        wasteItemMapper.toWasteItem(request, wasteItemOptional.get().getId());
+        WasteItem wasteItem = wasteItemOptional.get();
+        wasteItemMapper.updateWasteItem(wasteItem, request);
+        Optional<WasteBin> wasteBin = wasteBinRepository.findByCode(request.getCorrectBinCode());
+        if (wasteBin.isEmpty()) {
+            throw new NotFoundException("Not found waste bin or waste bin is not active");
+        }
+        wasteItem.setWasteBin(wasteBin.get());
         if (request.getImage() != null) {
             String imageUrl = uploadFile.imageToUrl(request.getImage());
-            wasteItemOptional.get().setImageUrl(imageUrl);
+            wasteItem.setImageUrl(imageUrl);
         }
-        wasteItemRepository.save(wasteItemOptional.get());
-        return wasteItemMapper.toWasteItemResponse(wasteItemOptional.get(), null);
+        wasteItemRepository.save(wasteItem);
+        return wasteItemMapper.toWasteItemResponse(wasteItem, null);
     }
 
     @Override
@@ -177,22 +175,12 @@ public class WasteServiceImp implements WasteService {
     @Override
     public WasteItemResponseDto deleteWasteItem(String userId, String wasteItemId) {
         CreatedBy userRole = getUserRole(userId);
-        Optional<WasteItem> wasteItemOptional;
-        if (userRole == CreatedBy.PARTNERSHIP) {
-            wasteItemOptional = wasteItemRepository.findWasteItemByPartnerId(userId);
-            if (wasteItemOptional.isEmpty()) {
-                throw new NotFoundException("Waste item not found");
-            }
-            wasteItemRepository.delete(wasteItemOptional.get());
-            return wasteItemMapper.toWasteItemResponse(wasteItemOptional.get(), null);
-        } else {
-            wasteItemOptional = wasteItemRepository.findById(wasteItemId);
-            if (wasteItemOptional.isEmpty()) {
-                throw new NotFoundException("Waste item not found");
-            }
-            wasteItemRepository.delete(wasteItemOptional.get());
-            return wasteItemMapper.toWasteItemResponse(wasteItemOptional.get(), null);
+        Optional<WasteItem> wasteItemOptional = wasteItemRepository.findById(wasteItemId);
+        if (wasteItemOptional.isEmpty()) {
+            throw new NotFoundException("Waste item not found");
         }
+        wasteItemRepository.delete(wasteItemOptional.get());
+        return wasteItemMapper.toWasteItemResponse(wasteItemOptional.get(), null);
     }
 
     @Override
