@@ -3,12 +3,14 @@ package com.fpt.ecoverse_backend.services.imp;
 import com.fpt.ecoverse_backend.dtos.requests.LoginRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.StudentLoginRequestDto;
 import com.fpt.ecoverse_backend.dtos.responses.*;
+import com.fpt.ecoverse_backend.entities.Parent;
 import com.fpt.ecoverse_backend.entities.Partner;
 import com.fpt.ecoverse_backend.entities.Student;
 import com.fpt.ecoverse_backend.entities.User;
 import com.fpt.ecoverse_backend.enums.UserType;
 import com.fpt.ecoverse_backend.exceptions.NotFoundException;
 import com.fpt.ecoverse_backend.filter.CustomUserDetails;
+import com.fpt.ecoverse_backend.repositories.ParentRepository;
 import com.fpt.ecoverse_backend.repositories.PartnerRepository;
 import com.fpt.ecoverse_backend.repositories.StudentRepository;
 import com.fpt.ecoverse_backend.repositories.UserRepository;
@@ -30,19 +32,21 @@ public class AuthServiceImp implements AuthService {
     private final StudentRepository studentRepository;
     private final PartnerRepository partnerRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ParentRepository parentRepository;
 
     public AuthServiceImp(JwtUtils jwtUtils,
                           CustomUserDetailsService customUserDetailsService,
                           UserRepository userRepository,
                           StudentRepository studentRepository,
                           PartnerRepository partnerRepository,
-                          PasswordEncoder passwordEncoder) {
+                          PasswordEncoder passwordEncoder, ParentRepository parentRepository) {
         this.jwtUtils = jwtUtils;
         this.customUserDetailsService = customUserDetailsService;
         this.userRepository = userRepository;
         this.studentRepository = studentRepository;
         this.partnerRepository = partnerRepository;
         this.passwordEncoder = passwordEncoder;
+        this.parentRepository = parentRepository;
     }
 
     @Override
@@ -174,6 +178,8 @@ public class AuthServiceImp implements AuthService {
             case PARENT -> {
                 User user = userRepository.findById(customUser.getId())
                         .orElseThrow(() -> new NotFoundException("Parent not found"));
+                Parent parent = parentRepository.findById(customUser.getId())
+                        .orElseThrow(() -> new NotFoundException("Parent profile not found"));
                 yield new ParentResponseDto(
                         user.getId(),
                         user.getFullName(),
@@ -182,7 +188,7 @@ public class AuthServiceImp implements AuthService {
                         user.getEmail(),
                         user.getAvatarUrl(),
                         user.getActive(),
-                        null
+                        parent.getStudents().size()
                 );
             }
             case PARTNERSHIP -> {
@@ -210,8 +216,10 @@ public class AuthServiceImp implements AuthService {
 
     private StudentResponseDto buildStudentInfo(User user, Student student) {
         String parentId = null;
+        String parentName = null;
         if (student.getParent() != null) {
             parentId = student.getParent().getId();
+            parentName = student.getParent().getUser().getFullName();
         }
         return new StudentResponseDto(
                 student.getId(),
@@ -221,6 +229,7 @@ public class AuthServiceImp implements AuthService {
                 student.getPoints() != null ? student.getPoints() : 0,
                 user.getAvatarUrl(),
                 parentId,
+                parentName,
                 student.getPartner().getId(),
                 null,
                 user.getCreatedAt(),

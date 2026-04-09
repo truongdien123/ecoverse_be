@@ -36,6 +36,9 @@ public class StudentResponseDto {
     @JsonProperty("parent_id")
     private String parentId;
 
+    @JsonProperty("parent_name")
+    private String parentName;
+
     @JsonProperty("partner_id")
     private String partnerId;
 

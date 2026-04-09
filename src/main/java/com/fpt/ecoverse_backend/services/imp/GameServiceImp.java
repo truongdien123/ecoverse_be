@@ -170,7 +170,14 @@ public class GameServiceImp implements GameService {
             throw new NotFoundException("Game attempt not found");
         }
         GameAttempt gameAttempt = gameAttemptMapper.toGameAttempt(request, gameAttemptOpt.get().getId());
-        return gameAttemptMapper.toGameAttemptResponse(gameAttemptRepository.save(gameAttempt));
+        gameAttemptRepository.save(gameAttempt);
+        Optional<Student> student = studentRepository.findById(gameAttempt.getStudent().getId());
+        if (student.isEmpty()) {
+            throw new NotFoundException("Student not found");
+        }
+        student.get().setPoints(student.get().getPoints() + request.getPointsEarned());
+        studentRepository.save(student.get());
+        return gameAttemptMapper.toGameAttemptResponse(gameAttempt);
     }
 
     @Override
