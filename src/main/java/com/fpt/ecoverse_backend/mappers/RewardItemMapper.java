@@ -39,8 +39,7 @@ public interface RewardItemMapper {
         @Mapping(target = "description", source = "rewardItem.description"),
         @Mapping(target = "pointRequired", source = "rewardItem.pointsRequired"),
         @Mapping(target = "imageUrl", source = "rewardItem.imageUrl"),
-        @Mapping(target = "available", source = "rewardItem.available"),
-        @Mapping(target = "partnerId", source = "rewardItem.partner.id")
+        @Mapping(target = "available", source = "rewardItem.available")
     })
     RewardItemResponseDto toRewardItemResponse(RewardItem rewardItem);
 
