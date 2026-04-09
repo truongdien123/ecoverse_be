@@ -38,7 +38,7 @@ public class GameController {
 
     @PutMapping("/rounds/{game_round_id}/users/{user_id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'PARTNERSHIP')")
-    public ResponseEntity<?> updateGameRound(@PathVariable("user_id") String userId, @PathVariable("game_round_id") String gameRoundId, GameRoundRequestDto request) {
+    public ResponseEntity<?> updateGameRound(@PathVariable("user_id") String userId, @PathVariable("game_round_id") String gameRoundId, @RequestBody GameRoundRequestDto request) {
         GameRoundResponseDto response = gameService.updateGameRound(userId, gameRoundId, request);
         return ResponseUtil.success("Update game round successfully", response);
     }
