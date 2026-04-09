@@ -321,7 +321,14 @@ public class PartnerServiceImp implements PartnerService {
             List<StudentResponseDto> list = students.getContent().stream().map(row -> {
                 Student student = (Student) row[0];
                 User user = (User) row[1];
-                return studentMapper.toStudentResponse(student);
+                StudentResponseDto response = studentMapper.toStudentResponse(student);
+                 if (student.getParent() != null) {
+                    Optional<User> parentUser = userRepository.findById(student.getParent().getUser().getId());
+                    response.setParentId(parentUser.get().getId());
+                    response.setParentName(parentUser.get().getFullName());
+                    response.setPartnerId(student.getPartner().getId());
+                }
+                return response;
             }).toList();
             return new UserListResponseDto<>(
                     list,
