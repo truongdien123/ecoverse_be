@@ -149,7 +149,7 @@ public class GameServiceImp implements GameService {
         if (student.isEmpty()) {
             throw new NotFoundException("Student not found");
         }
-        GameAttempt gameAttempt = new GameAttempt();
+        GameAttempt gameAttempt;
         Optional<GameAttempt> gameAttemptOptional = gameAttemptRepository.findByGameGroundAndStudent(gameRoundId, studentId);
         if (gameAttemptOptional.isEmpty()) {
             gameAttempt = gameAttemptMapper.toGameAttempt(request, null);
@@ -158,12 +158,17 @@ public class GameServiceImp implements GameService {
             gameAttempt.setAttemptNumber(1);
             gameAttempt.setPointsEarned(request.getPointsEarned());
         } else {
-            gameAttempt = gameAttemptMapper.toGameAttempt(request, gameAttemptOptional.get().getId());
+            gameAttempt = gameAttemptOptional.get();
+            gameAttemptMapper.updateGameAttempt(gameAttempt, request);
             gameAttempt.setAttemptNumber(gameAttemptOptional.get().getAttemptNumber()+1);
             gameAttempt.setPointsEarned(gameAttempt.getPointsEarned()+request.getPointsEarned() - gameAttemptOptional.get().getPointsEarned());
         }
         gameAttemptRepository.save(gameAttempt);
-        return gameAttemptMapper.toGameAttemptResponse(gameAttempt);
+        GameAttemptResponseDto response = gameAttemptMapper.toGameAttemptResponse(gameAttempt);
+        response.setGameRoundId(gameRound.get().getId());
+        response.setTitleGameRound(gameRound.get().getTitle());
+        response.setStudentId(student.get().getId());
+        return response;
     }
 
     @Override
@@ -172,17 +177,23 @@ public class GameServiceImp implements GameService {
         if (gameAttemptOpt.isEmpty()) {
             throw new NotFoundException("Game attempt not found");
         }
-        GameAttempt gameAttempt = gameAttemptMapper.toGameAttempt(request, gameAttemptOpt.get().getId());
-        gameAttempt.setAttemptNumber(gameAttemptOpt.get().getAttemptNumber()+1);
-        gameAttempt.setPointsEarned(gameAttempt.getPointsEarned()+request.getPointsEarned() - gameAttemptOpt.get().getPointsEarned());
-        gameAttemptRepository.save(gameAttempt);
-        Optional<Student> student = studentRepository.findById(gameAttempt.getStudent().getId());
+        Optional<Student> student = studentRepository.findById(gameAttemptOpt.get().getStudent().getId());
         if (student.isEmpty()) {
             throw new NotFoundException("Student not found");
         }
+        GameAttempt gameAttempt = gameAttemptOpt.get();
+        gameAttemptMapper.updateGameAttempt(gameAttempt, request);
+        gameAttempt.setAttemptNumber(gameAttemptOpt.get().getAttemptNumber()+1);
+        gameAttempt.setPointsEarned(gameAttempt.getPointsEarned()+request.getPointsEarned() - gameAttemptOpt.get().getPointsEarned());
+        gameAttemptRepository.save(gameAttempt);
+
         student.get().setPoints(student.get().getPoints() + request.getPointsEarned());
         studentRepository.save(student.get());
-        return gameAttemptMapper.toGameAttemptResponse(gameAttempt);
+        GameAttemptResponseDto response = gameAttemptMapper.toGameAttemptResponse(gameAttempt);
+        response.setGameRoundId(gameAttempt.getGameRound().getId());
+        response.setTitleGameRound(gameAttempt.getGameRound().getTitle());
+        response.setStudentId(student.get().getId());
+        return response;
     }
 
     @Override
