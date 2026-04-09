@@ -149,16 +149,19 @@ public class GameServiceImp implements GameService {
         if (student.isEmpty()) {
             throw new NotFoundException("Student not found");
         }
-        GameAttempt gameAttempt = gameAttemptMapper.toGameAttempt(request, null);
-        gameAttempt.setGameRound(gameRound.get());
-        gameAttempt.setStudent(student.get());
+        GameAttempt gameAttempt = new GameAttempt();
         Optional<GameAttempt> gameAttemptOptional = gameAttemptRepository.findByGameGroundAndStudent(gameRoundId, studentId);
         if (gameAttemptOptional.isEmpty()) {
+            gameAttempt = gameAttemptMapper.toGameAttempt(request, null);
+            gameAttempt.setGameRound(gameRound.get());
+            gameAttempt.setStudent(student.get());
             gameAttempt.setAttemptNumber(1);
+            gameAttempt.setPointsEarned(request.getPointsEarned());
         } else {
-            gameAttempt.setAttemptNumber(gameAttempt.getAttemptNumber()+1);
+            gameAttempt = gameAttemptMapper.toGameAttempt(request, gameAttemptOptional.get().getId());
+            gameAttempt.setAttemptNumber(gameAttemptOptional.get().getAttemptNumber()+1);
+            gameAttempt.setPointsEarned(gameAttempt.getPointsEarned()+request.getPointsEarned() - gameAttemptOptional.get().getPointsEarned());
         }
-        gameAttempt.setPointsEarned(gameAttempt.getPointsEarned()+request.getPointsEarned());
         gameAttemptRepository.save(gameAttempt);
         return gameAttemptMapper.toGameAttemptResponse(gameAttempt);
     }
@@ -170,6 +173,8 @@ public class GameServiceImp implements GameService {
             throw new NotFoundException("Game attempt not found");
         }
         GameAttempt gameAttempt = gameAttemptMapper.toGameAttempt(request, gameAttemptOpt.get().getId());
+        gameAttempt.setAttemptNumber(gameAttemptOpt.get().getAttemptNumber()+1);
+        gameAttempt.setPointsEarned(gameAttempt.getPointsEarned()+request.getPointsEarned() - gameAttemptOpt.get().getPointsEarned());
         gameAttemptRepository.save(gameAttempt);
         Optional<Student> student = studentRepository.findById(gameAttempt.getStudent().getId());
         if (student.isEmpty()) {
