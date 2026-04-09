@@ -114,7 +114,7 @@ public class QuizController {
     public ResponseEntity<?> getAvailableQuizzes(
             @RequestParam(required = false) String partnerId,
             @RequestParam(required = false) String title,
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         Page<QuizTemplateResponseDto> result = quizService.getAvailableQuizzes(partnerId, title, page, size);

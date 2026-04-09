@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface QuizTemplateRepository extends JpaRepository<QuizTemplate, String> {
 
     @Query("SELECT qt FROM QuizTemplate qt WHERE qt.partner.id = :partnerId AND qt.active = true " +
-           "AND (:title IS NULL OR lower(qt.title) LIKE lower(concat('%', :title, '%')))")
+           "AND (:title IS NULL OR qt.title ILIKE '%' || cast(:title as string ) || '%')")
     Page<QuizTemplate> findByPartnerIdAndActiveTrue(
             @Param("partnerId") String partnerId,
             @Param("title") String title,
@@ -24,6 +24,6 @@ public interface QuizTemplateRepository extends JpaRepository<QuizTemplate, Stri
     Optional<QuizTemplate> findByIdAndPartnerId(@Param("id") String id, @Param("partnerId") String partnerId);
 
     @Query("SELECT qt FROM QuizTemplate qt WHERE qt.active = true " +
-           "AND (:title IS NULL OR lower(qt.title) LIKE lower(concat('%', :title, '%')))")
+           "AND (:title IS NULL OR qt.title ILIKE '%' || cast(:title as string ) || '%')")
     Page<QuizTemplate> findAllActive(@Param("title") String title, Pageable pageable);
 }
