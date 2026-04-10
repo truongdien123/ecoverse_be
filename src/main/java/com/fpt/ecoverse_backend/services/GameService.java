@@ -17,7 +17,7 @@ public interface GameService {
     GameRoundResponseDto deleteGameRound(String userId, String gameRoundId);
     GameAttemptResponseDto createGameAttempt(String gameRoundId, String studentId, GameAttemptRequestDto request);
     GameAttemptResponseDto updateGameAttempt(String gameAttemptId, GameAttemptRequestDto request);
-    List<GameAttemptResponseDto> getGameAttempts(String gameRoundId, String studentId, PageFilterRequestDto pageFilterRequestDto);
+    List<GameAttemptResponseDto> getGameAttempts(String studentId, PageFilterRequestDto pageFilterRequestDto);
     List<GamePlacementResponseDto> createGamePlacements(String gameRoundId, String gameAttemptId, List<GamePlacementRequestDto> requests);
     List<GamePlacementResponseDto> getGamePlacements(String gameAttemptId);
 }
