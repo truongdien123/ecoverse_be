@@ -5,6 +5,7 @@ import com.fpt.ecoverse_backend.dtos.requests.GamePlacementRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.GameRoundRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.PageFilterRequestDto;
 import com.fpt.ecoverse_backend.dtos.responses.GameRoundResponseDto;
+import com.fpt.ecoverse_backend.enums.WasteBinCode;
 import com.fpt.ecoverse_backend.services.GameService;
 import com.fpt.ecoverse_backend.utils.ResponseUtil;
 import org.springframework.http.ResponseEntity;
@@ -78,5 +79,17 @@ public class GameController {
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> getGamePlacements(@PathVariable("game_attempt_id") String gameAttemptId) {
         return ResponseUtil.success("Get game placements successfully", gameService.getGamePlacements(gameAttemptId));
+    }
+
+    @PutMapping("/attempts/{game_attempt_id}/replay-game-round")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<?> replayGameRoundThroughGameAttempt(@PathVariable("game_attempt_id") String gameAttemptId, @RequestBody GameAttemptRequestDto request) {
+        return ResponseUtil.success("Update game attempt through game attempt successfully", gameService.replayGameRoundThroughGameAttempt(gameAttemptId, request));
+    }
+
+    @PutMapping("/placements/{game_placement_id}")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<?> updateGamePlacement(@PathVariable("game_placement_id") String gamePlacementId, Boolean correct, WasteBinCode code) {
+        return ResponseUtil.success("Update game placement successfully", gameService.updateGamePlacement(gamePlacementId, correct, code));
     }
 }
