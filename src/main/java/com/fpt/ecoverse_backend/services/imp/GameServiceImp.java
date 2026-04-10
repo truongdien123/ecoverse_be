@@ -174,7 +174,6 @@ public class GameServiceImp implements GameService {
         }
         GameAttempt gameAttempt = gameAttemptOpt.get();
         gameAttemptMapper.updateGameAttempt(gameAttempt, request);
-        gameAttempt.setPointsEarned(gameAttempt.getPointsEarned()+request.getPointsEarned() - gameAttemptOpt.get().getPointsEarned());
         gameAttemptRepository.save(gameAttempt);
 
         student.get().setPoints(student.get().getPoints() + request.getPointsEarned());
@@ -284,6 +283,58 @@ public class GameServiceImp implements GameService {
         });
 
         return response;
+    }
+
+    @Override
+    public GameAttemptResponseDto replayGameRoundThroughGameAttempt(String gameAttemptId, GameAttemptRequestDto request) {
+        Optional<GameAttempt> gameAttemptOptional = gameAttemptRepository.findById(gameAttemptId);
+        if (gameAttemptOptional.isEmpty()) {
+            throw new NotFoundException("Not found game attempt");
+        }
+        GameAttempt gameAttempt = gameAttemptOptional.get();
+        gameAttemptMapper.updateGameAttempt(gameAttempt, request);
+        gameAttempt.setAttemptNumber(gameAttempt.getAttemptNumber()+1);
+        gameAttemptRepository.save(gameAttempt);
+        GameAttemptResponseDto response = gameAttemptMapper.toGameAttemptResponse(gameAttempt);
+        response.setGameRoundId(gameAttempt.getGameRound().getId());
+        response.setTitleGameRound(gameAttempt.getGameRound().getTitle());
+        response.setStudentId(gameAttempt.getStudent().getId());
+        return response;
+    }
+
+    @Override
+    public GamePlacementResponseDto updateGamePlacement(String gamePlacementId, Boolean correct, WasteBinCode code) {
+        Optional<GamePlacement> gamePlacement = gamePlacementRepository.findById(gamePlacementId);
+        if (gamePlacement.isEmpty()) {
+            throw new NotFoundException("Game placement not found");
+        }
+        gamePlacement.get().setIsCorrect(correct);
+        WasteBin wasteBin = wasteBinRepository.findByCode(code).orElseThrow(() -> new NotFoundException("Waste bin not found"));
+        gamePlacement.get().setPlacedBin(wasteBin);
+        gamePlacementRepository.save(gamePlacement.get());
+        GamePlacementResponseDto dto = gamePlacementMapper.toGamePlacementResponse(gamePlacement.get());
+        WasteItem wasteItem = gamePlacement.get().getWasteItem();
+        Optional<GameAttempt> gameAttempt = gameAttemptRepository.findById(gamePlacement.get().getGameAttempt().getId());
+        if (gameAttempt.isEmpty()) {
+            throw new NotFoundException("Not found game attempt");
+        }
+        gameAttempt.get().setAttemptNumber(gameAttempt.get().getAttemptNumber()+1);
+        gameAttemptRepository.save(gameAttempt.get());
+        String gameRoundId = gameAttempt.get().getGameRound().getId();
+        GameRoundItem gameRoundItem = gameRoundItemRepository
+                .findByGameRoundIdAndWasteItemId(gameRoundId, wasteItem.getId())
+                .orElseThrow(() -> new NotFoundException(
+                        "Game round item not found for waste item id: " + wasteItem.getId()
+                ));
+        WasteItemResponseDto wasteItemDto =
+                wasteItemMapper.toWasteItemResponse(wasteItem, gameRoundItem.getOrderIndex());
+        wasteItemDto.setCorrectBinCode(wasteItem.getWasteBin().getCode());
+        dto.setWasteItem(wasteItemDto);
+        dto.setCode(gamePlacement.get().getPlacedBin().getCode());
+        dto.setIsCorrect(
+                gamePlacement.get().getIsCorrect()
+        );
+        return dto;
     }
 
     private static GameRound getGameRound(String userId, Optional<GameRound> gameRoundOpt, Optional<User> userOpt) {
