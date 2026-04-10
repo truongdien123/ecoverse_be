@@ -7,6 +7,7 @@ import com.fpt.ecoverse_backend.dtos.requests.PageFilterRequestDto;
 import com.fpt.ecoverse_backend.dtos.responses.GameAttemptResponseDto;
 import com.fpt.ecoverse_backend.dtos.responses.GamePlacementResponseDto;
 import com.fpt.ecoverse_backend.dtos.responses.GameRoundResponseDto;
+import com.fpt.ecoverse_backend.enums.WasteBinCode;
 
 import java.util.List;
 
@@ -20,4 +21,6 @@ public interface GameService {
     List<GameAttemptResponseDto> getGameAttempts(String studentId, PageFilterRequestDto pageFilterRequestDto);
     List<GamePlacementResponseDto> createGamePlacements(String gameRoundId, String gameAttemptId, List<GamePlacementRequestDto> requests);
     List<GamePlacementResponseDto> getGamePlacements(String gameAttemptId);
+    GameAttemptResponseDto replayGameRoundThroughGameAttempt(String gameAttemptId, GameAttemptRequestDto request);
+    GamePlacementResponseDto updateGamePlacement(String gamePlacementId, Boolean correct, WasteBinCode code);
 }
