@@ -183,7 +183,6 @@ public class GameServiceImp implements GameService {
         }
         GameAttempt gameAttempt = gameAttemptOpt.get();
         gameAttemptMapper.updateGameAttempt(gameAttempt, request);
-        gameAttempt.setAttemptNumber(gameAttemptOpt.get().getAttemptNumber()+1);
         gameAttempt.setPointsEarned(gameAttempt.getPointsEarned()+request.getPointsEarned() - gameAttemptOpt.get().getPointsEarned());
         gameAttemptRepository.save(gameAttempt);
 
