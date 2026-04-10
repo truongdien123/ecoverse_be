@@ -149,20 +149,11 @@ public class GameServiceImp implements GameService {
         if (student.isEmpty()) {
             throw new NotFoundException("Student not found");
         }
-        GameAttempt gameAttempt;
-        Optional<GameAttempt> gameAttemptOptional = gameAttemptRepository.findByGameGroundAndStudent(gameRoundId, studentId);
-        if (gameAttemptOptional.isEmpty()) {
-            gameAttempt = gameAttemptMapper.toGameAttempt(request, null);
-            gameAttempt.setGameRound(gameRound.get());
-            gameAttempt.setStudent(student.get());
-            gameAttempt.setAttemptNumber(1);
-            gameAttempt.setPointsEarned(request.getPointsEarned());
-        } else {
-            gameAttempt = gameAttemptOptional.get();
-            gameAttemptMapper.updateGameAttempt(gameAttempt, request);
-            gameAttempt.setAttemptNumber(gameAttemptOptional.get().getAttemptNumber()+1);
-            gameAttempt.setPointsEarned(gameAttempt.getPointsEarned()+request.getPointsEarned() - gameAttemptOptional.get().getPointsEarned());
-        }
+        GameAttempt gameAttempt = gameAttemptMapper.toGameAttempt(request, null);
+        gameAttempt.setGameRound(gameRound.get());
+        gameAttempt.setStudent(student.get());
+        gameAttempt.setAttemptNumber(1);
+        gameAttempt.setPointsEarned(request.getPointsEarned());
         gameAttemptRepository.save(gameAttempt);
         GameAttemptResponseDto response = gameAttemptMapper.toGameAttemptResponse(gameAttempt);
         response.setGameRoundId(gameRound.get().getId());
@@ -196,11 +187,7 @@ public class GameServiceImp implements GameService {
     }
 
     @Override
-    public List<GameAttemptResponseDto> getGameAttempts(String gameRoundId, String studentId, PageFilterRequestDto pageFilterRequestDto) {
-        Optional<GameRound> gameRound = gameRoundRepository.findById(gameRoundId);
-        if (gameRound.isEmpty()) {
-            throw new NotFoundException("Game round not found");
-        }
+    public List<GameAttemptResponseDto> getGameAttempts(String studentId, PageFilterRequestDto pageFilterRequestDto) {
         Optional<Student> student = studentRepository.findById(studentId);
         if (student.isEmpty()) {
             throw new NotFoundException("Student not found");
@@ -208,11 +195,13 @@ public class GameServiceImp implements GameService {
         Pageable pageable = PageRequest.of(
                 pageFilterRequestDto.getPageNo()-1,
                 pageFilterRequestDto.getPageSize());
-        Page<GameAttempt> gameAttemptPage = gameAttemptRepository.findGameAttempts(gameRoundId, studentId, pageable);
+        Page<GameAttempt> gameAttemptPage = gameAttemptRepository.findGameAttempts(studentId, pageable);
         List<GameAttemptResponseDto> response = new ArrayList<>();
         for (GameAttempt gameAttempt : gameAttemptPage.getContent()) {
             GameAttemptResponseDto gameAttemptResponse = gameAttemptMapper.toGameAttemptResponse(gameAttempt);
-            gameAttemptResponse.setTitleGameRound(gameRound.get().getTitle());
+            gameAttemptResponse.setGameRoundId(gameAttempt.getGameRound().getId());
+            gameAttemptResponse.setTitleGameRound(gameAttempt.getGameRound().getTitle());
+            gameAttemptResponse.setStudentId(gameAttempt.getStudent().getId());
             response.add(gameAttemptResponse);
         }
         return response;
