@@ -14,8 +14,8 @@ public interface RedemptionRequestRepository extends JpaRepository<RedemptionReq
     @Query("SELECT r FROM RedemptionRequest r WHERE r.student.id = :studentId")
     List<RedemptionRequest> findByStudentId(@Param("studentId") String studentId);
 
-    @Query("SELECT r FROM RedemptionRequest r WHERE r.partner.id = :partnerId")
-    List<RedemptionRequest> findByParentId(@Param("partnerId") String parentId);
+    @Query("SELECT r FROM RedemptionRequest r WHERE r.parent.id = :parentId")
+    List<RedemptionRequest> findByParentId(@Param("parentId") String parentId);
 
     @Query("SELECT r FROM RedemptionRequest r WHERE r.partner.id = :partnerId")
     List<RedemptionRequest> findByPartnerId(@Param("partnerId") String partnerId);
