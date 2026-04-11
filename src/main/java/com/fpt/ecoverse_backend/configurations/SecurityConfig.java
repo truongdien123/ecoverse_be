@@ -147,6 +147,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/redemptions/{redemption_id}/partners/{partner_id}/fulfill").hasRole("PARTNERSHIP")
                         .requestMatchers(HttpMethod.GET, "/redemptions/users/{user_id}").hasAnyRole("STUDENT", "PARENT", "PARTNERSHIP")
 
+                        // Leaderboard endpoints
+                        .requestMatchers(HttpMethod.GET, "/leaderboards/{partner_id}").hasRole("STUDENT")
+                        .requestMatchers(HttpMethod.GET, "/leaderboards/partners/{partner_id}/students/{student_id}").hasAnyRole("STUDENT", "PARTNERSHIP", "PARENT")
+
                         // All other requests need authentication
                         .anyRequest().authenticated()
                 )
