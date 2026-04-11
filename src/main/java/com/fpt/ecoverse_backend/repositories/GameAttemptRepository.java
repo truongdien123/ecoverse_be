@@ -18,4 +18,12 @@ public interface GameAttemptRepository extends JpaRepository<GameAttempt, String
 
     @Query("select ga from GameAttempt ga where ga.student.id = :studentId")
     Page<GameAttempt> findGameAttempts(@Param("studentId") String studentId, Pageable pageable);
+
+    @Query("""
+    SELECT COALESCE(SUM(ga.duration), 0)
+    FROM GameAttempt ga
+    WHERE ga.student.id = :studentId
+        AND ga.completed = true
+""")
+    Long getTotalDurationByStudent(@Param("studentId") String studentId);
 }
