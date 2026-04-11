@@ -92,4 +92,10 @@ public class GameController {
     public ResponseEntity<?> updateGamePlacement(@PathVariable("game_placement_id") String gamePlacementId, Boolean correct, WasteBinCode code) {
         return ResponseUtil.success("Update game placement successfully", gameService.updateGamePlacement(gamePlacementId, correct, code));
     }
+
+    @PutMapping("/attempts/{game_attempt_id}/placements")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<?> updateGamePlacements(@PathVariable("game_attempt_id") String gameAttemptId, @RequestBody List<GamePlacementRequestDto> requests) {
+        return ResponseUtil.success("Update list game placement in game attempt successfully", gameService.updateGamePlacements(gameAttemptId, requests));
+    }
 }
