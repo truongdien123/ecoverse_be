@@ -7,6 +7,7 @@ import com.fpt.ecoverse_backend.dtos.requests.PageFilterRequestDto;
 import com.fpt.ecoverse_backend.dtos.responses.*;
 import com.fpt.ecoverse_backend.entities.*;
 import com.fpt.ecoverse_backend.enums.CreatedBy;
+import com.fpt.ecoverse_backend.enums.LeaderboardScope;
 import com.fpt.ecoverse_backend.enums.UserType;
 import com.fpt.ecoverse_backend.enums.WasteBinCode;
 import com.fpt.ecoverse_backend.exceptions.BadRequestException;
@@ -17,6 +18,7 @@ import com.fpt.ecoverse_backend.mappers.GameRoundMapper;
 import com.fpt.ecoverse_backend.mappers.WasteItemMapper;
 import com.fpt.ecoverse_backend.repositories.*;
 import com.fpt.ecoverse_backend.services.GameService;
+import com.fpt.ecoverse_backend.services.LeaderboardService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -43,8 +45,9 @@ public class GameServiceImp implements GameService {
     private final WasteItemMapper wasteItemMapper;
     private final GameRoundItemRepository gameRoundItemRepository;
     private final WasteBinRepository wasteBinRepository;
+    private final LeaderboardService leaderboardService;
 
-    public GameServiceImp(UserRepository userRepository, PartnerRepository partnerRepository, GameRoundRepository gameRoundRepository, GameRoundMapper gameRoundMapper, WasteItemRepository wasteItemRepository, StudentRepository studentRepository, GameAttemptRepository gameAttemptRepository, GameAttemptMapper gameAttemptMapper, GamePlacementMapper gamePlacementMapper, GamePlacementRepository gamePlacementRepository, WasteItemMapper wasteItemMapper, GameRoundItemRepository gameRoundItemRepository, WasteBinRepository wasteBinRepository) {
+    public GameServiceImp(UserRepository userRepository, PartnerRepository partnerRepository, GameRoundRepository gameRoundRepository, GameRoundMapper gameRoundMapper, WasteItemRepository wasteItemRepository, StudentRepository studentRepository, GameAttemptRepository gameAttemptRepository, GameAttemptMapper gameAttemptMapper, GamePlacementMapper gamePlacementMapper, GamePlacementRepository gamePlacementRepository, WasteItemMapper wasteItemMapper, GameRoundItemRepository gameRoundItemRepository, WasteBinRepository wasteBinRepository, LeaderboardService leaderboardService) {
         this.userRepository = userRepository;
         this.partnerRepository = partnerRepository;
         this.gameRoundRepository = gameRoundRepository;
@@ -58,6 +61,7 @@ public class GameServiceImp implements GameService {
         this.wasteItemMapper = wasteItemMapper;
         this.gameRoundItemRepository = gameRoundItemRepository;
         this.wasteBinRepository = wasteBinRepository;
+        this.leaderboardService = leaderboardService;
     }
 
     @Override
@@ -173,10 +177,14 @@ public class GameServiceImp implements GameService {
             throw new NotFoundException("Student not found");
         }
         GameAttempt gameAttempt = gameAttemptOpt.get();
+        Integer points = 0;
+        if (gameAttempt.getPointsEarned() < request.getPointsEarned()) {
+            points = request.getPointsEarned() - gameAttempt.getPointsEarned();
+        }
         gameAttemptMapper.updateGameAttempt(gameAttempt, request);
         gameAttemptRepository.save(gameAttempt);
-
-        student.get().setPoints(student.get().getPoints() + request.getPointsEarned());
+        student.get().setPoints(student.get().getPoints() + points);
+        handleGameResult(gameAttempt, points);
         studentRepository.save(student.get());
         GameAttemptResponseDto response = gameAttemptMapper.toGameAttemptResponse(gameAttempt);
         response.setGameRoundId(gameAttempt.getGameRound().getId());
@@ -349,6 +357,29 @@ public class GameServiceImp implements GameService {
             throw new NotFoundException("Game round not found");
         }
         return gameRound;
+    }
+
+    public void handleGameResult(GameAttempt attempt, int point) {
+        if (point == 0) return;
+        Student student = attempt.getStudent();
+
+        // SCHOOL
+        leaderboardService.upsertLeaderboardEntry(
+                student.getId(),
+                student.getPartner().getId(),
+                LeaderboardScope.valueOf("SCHOOL"),
+                student.getGrade(),
+                point
+        );
+
+        // CLASS
+        leaderboardService.upsertLeaderboardEntry(
+                student.getId(),
+                student.getPartner().getId(),
+                LeaderboardScope.valueOf("CLASS"),
+                student.getGrade(),
+                point
+        );
     }
 
 
