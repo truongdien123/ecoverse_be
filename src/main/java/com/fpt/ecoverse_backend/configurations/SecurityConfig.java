@@ -120,6 +120,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/games/attempts/{game_attempt_id}/placements").hasRole("STUDENT")
                         .requestMatchers(HttpMethod.PUT, "/games/attempts/{game_attempt_id}/replay-game-round").hasRole("STUDENT")
                         .requestMatchers(HttpMethod.PUT, "/games/placements/{game_placement_id}").hasRole("STUDENT")
+                        .requestMatchers(HttpMethod.PUT, "/games/attempts/{game_attempt_id}/placements").hasRole("STUDENT")
 
                         // Reward endpoints
                         .requestMatchers(HttpMethod.POST, "/rewards/{partner_id}").hasRole("PARTNERSHIP")

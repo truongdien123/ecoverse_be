@@ -345,6 +345,56 @@ public class GameServiceImp implements GameService {
         return dto;
     }
 
+    @Override
+    public List<GamePlacementResponseDto> updateGamePlacements(String gameAttemptId, List<GamePlacementRequestDto> requests) {
+        GameAttempt gameAttempt = gameAttemptRepository.findById(gameAttemptId)
+                .orElseThrow(() -> new NotFoundException("Game attempt not found"));
+
+        List<GamePlacementResponseDto> response = new ArrayList<>();
+
+        for (GamePlacementRequestDto request : requests) {
+
+            GamePlacement gamePlacement = gamePlacementRepository
+                    .findByGameAttemptIdAndWasteItemId(gameAttemptId, request.getWasteItemId())
+                    .orElseThrow(() -> new NotFoundException(
+                            "Game placement not found for waste item id: " + request.getWasteItemId()
+                    ));
+
+            WasteBin wasteBin = wasteBinRepository.findByCode(request.getCode())
+                    .orElseThrow(() -> new NotFoundException("Waste bin not found"));
+            gamePlacement.setPlacedBin(wasteBin);
+
+            gamePlacement.setIsCorrect(request.getIsCorrect());
+
+            gamePlacementRepository.save(gamePlacement);
+
+            GamePlacementResponseDto dto = gamePlacementMapper.toGamePlacementResponse(gamePlacement);
+
+            WasteItem wasteItem = gamePlacement.getWasteItem();
+
+            String gameRoundId = gameAttempt.getGameRound().getId();
+
+            GameRoundItem gameRoundItem = gameRoundItemRepository
+                    .findByGameRoundIdAndWasteItemId(gameRoundId, wasteItem.getId())
+                    .orElseThrow(() -> new NotFoundException(
+                            "Game round item not found for waste item id: " + wasteItem.getId()
+                    ));
+
+            WasteItemResponseDto wasteItemDto =
+                    wasteItemMapper.toWasteItemResponse(wasteItem, gameRoundItem.getOrderIndex());
+
+            wasteItemDto.setCorrectBinCode(wasteItem.getWasteBin().getCode());
+
+            dto.setWasteItem(wasteItemDto);
+            dto.setCode(gamePlacement.getPlacedBin().getCode());
+            dto.setIsCorrect(gamePlacement.getIsCorrect());
+
+            response.add(dto);
+        }
+
+        return response;
+    }
+
     private static GameRound getGameRound(String userId, Optional<GameRound> gameRoundOpt, Optional<User> userOpt) {
         GameRound gameRound = gameRoundOpt.get();
         if (gameRound.getCreatedBy() == CreatedBy.ADMIN &&
