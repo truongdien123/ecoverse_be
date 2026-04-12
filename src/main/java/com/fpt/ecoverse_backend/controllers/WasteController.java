@@ -77,4 +77,10 @@ public class WasteController {
         List<WasteItemResponseDto> response = wasteService.getWasteItemsByFilter(userId, pageFilterRequestDto);
         return ResponseUtil.success("Get waste items by filter successfully", response);
     }
+
+    @GetMapping("/items/{game_placement_id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PARTNERSHIP', 'STUDENT')")
+    public ResponseEntity<?> getDetailWasteItem(@PathVariable("game_placement_id") String gamePlacementId) {
+        return ResponseUtil.success("Get waste item detail successfully", wasteService.getDetailWasteItem(gamePlacementId));
+    }
 }

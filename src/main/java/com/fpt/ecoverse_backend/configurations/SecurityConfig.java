@@ -87,7 +87,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/partnerships/{partnership_id}/parents").hasRole("PARTNERSHIP")
 
                         // Parent endpoints
-                        .requestMatchers(HttpMethod.POST, "/parents/{parent_id}/students/{student_id}/link-student").hasRole("PARENT")
+                        .requestMatchers(HttpMethod.POST, "/parents/{parent_id}/link-student").hasRole("PARENT")
                         .requestMatchers(HttpMethod.GET, "/parents/{parent_id}/students").hasAnyRole("PARENT", "PARTNERSHIP")
                         .requestMatchers(HttpMethod.PUT, "/parents/{parent_id}").hasAnyRole("PARENT", "PARTNERSHIP")
                         .requestMatchers(HttpMethod.GET, "/parents/{parent_id}").hasAnyRole("PARENT", "PARTNERSHIP")
@@ -107,6 +107,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/wastes/bins/{waste_bin_id}/admins/{admin_id}").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/wastes/items/{waste_item_id}/users/{user_id}").hasAnyRole("PARTNERSHIP", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "wastes/items/{user_id}/get-list").hasAnyRole("PARTNERSHIP", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "wastes/items/{game_placement_id}").hasAnyRole("STUDENT", "PARTNERSHIP", "ADMIN")
 
                         // Game endpoints
                         .requestMatchers(HttpMethod.POST, "/games/rounds/users/{user_id}").hasAnyRole("PARTNERSHIP", "ADMIN")

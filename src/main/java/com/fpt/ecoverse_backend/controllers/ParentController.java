@@ -19,32 +19,32 @@ public class ParentController {
         this.parentService = parentService;
     }
 
-    @PostMapping("{parent_id}/students/{student_id}/link-student")
+    @PostMapping("/{parent_id}/link-student")
     @PreAuthorize("hasRole('PARENT')")
-    public ResponseEntity<?> linkParentToStudent(@PathVariable("parent_id") String parentId, @PathVariable("student_id") String studentId) {
-        ParentResponseDto response = parentService.linkParentToStudent(parentId, studentId);
+    public ResponseEntity<?> linkParentToStudent(@PathVariable("parent_id") String parentId, @RequestParam("studentCode") String studentCode) {
+        ParentResponseDto response = parentService.linkParentToStudent(parentId, studentCode);
         return ResponseUtil.success("Link parent to student successfully", response);
     }
 
-    @GetMapping("{parent_id}/students")
+    @GetMapping("/{parent_id}/students")
     @PreAuthorize("hasAnyRole('PARENT', 'PARTNERSHIP')")
     public ResponseEntity<?> getListStudent(@PathVariable("parent_id") String parentId) {
         return ResponseUtil.success("Get list student by parent id successfully", parentService.getListStudent(parentId));
     }
 
-    @PutMapping(value = "{parent_id}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/{parent_id}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAnyRole('PARENT', 'PARTNERSHIP')")
     public ResponseEntity<?> updateParent(@PathVariable("parent_id") String parentId, @ModelAttribute ParentRequestDto request) {
         return ResponseUtil.success("Update parent successfully", parentService.updateParent(parentId, request));
     }
 
-    @GetMapping("{parent_id}")
+    @GetMapping("/{parent_id}")
     @PreAuthorize("hasAnyRole('PARENT', 'PARTNERSHIP')")
     public ResponseEntity<?> getParentDetail(@PathVariable("parent_id") String parentId) {
         return ResponseUtil.success("Get parent by id successfully", parentService.getParentDetail(parentId));
     }
 
-    @DeleteMapping("{parent_id}")
+    @DeleteMapping("/{parent_id}")
     @PreAuthorize("hasAnyRole('PARENT', 'PARTNERSHIP')")
     public ResponseEntity<?> deleteParent(@PathVariable("parent_id") String parentId) {
         return ResponseUtil.success("Delete parent successfully", parentService.deleteParent(parentId));
