@@ -39,8 +39,9 @@ public class WasteServiceImp implements WasteService {
     private final GameRoundRepository gameRoundRepository;
     private final StudentRepository studentRepository;
     private final GameRoundItemRepository gameRoundItemRepository;
+    private final GamePlacementRepository gamePlacementRepository;
 
-    public WasteServiceImp(WasteItemRepository wasteItemRepository, WasteItemMapper wasteItemMapper, UserRepository userRepository, PartnerRepository partnerRepository, UploadFile uploadFile, WasteBinRepository wasteBinRepository, WasteBinMapper wasteBinMapper, GameAttemptRepository gameAttemptRepository, GameRoundRepository gameRoundRepository, StudentRepository studentRepository, GameRoundItemRepository gameRoundItemRepository) {
+    public WasteServiceImp(WasteItemRepository wasteItemRepository, WasteItemMapper wasteItemMapper, UserRepository userRepository, PartnerRepository partnerRepository, UploadFile uploadFile, WasteBinRepository wasteBinRepository, WasteBinMapper wasteBinMapper, GameAttemptRepository gameAttemptRepository, GameRoundRepository gameRoundRepository, StudentRepository studentRepository, GameRoundItemRepository gameRoundItemRepository, GamePlacementRepository gamePlacementRepository) {
         this.wasteItemRepository = wasteItemRepository;
         this.wasteItemMapper = wasteItemMapper;
         this.userRepository = userRepository;
@@ -52,6 +53,7 @@ public class WasteServiceImp implements WasteService {
         this.gameRoundRepository = gameRoundRepository;
         this.studentRepository = studentRepository;
         this.gameRoundItemRepository = gameRoundItemRepository;
+        this.gamePlacementRepository = gamePlacementRepository;
     }
 
     @Override
@@ -204,6 +206,19 @@ public class WasteServiceImp implements WasteService {
             response.setCreatedBy(wasteItem.getCreatedBy().toString());
             return response;
         }).toList();
+    }
+
+    @Override
+    public WasteItemResponseDto getDetailWasteItem(String gamePlacementId) {
+        Optional<GamePlacement> gamePlacement = gamePlacementRepository.findById(gamePlacementId);
+        if (gamePlacement.isEmpty()) {
+            throw new NotFoundException("Not found game placement");
+        }
+        WasteItem wasteItem = gamePlacement.get().getWasteItem();
+        GameAttempt gameAttempt = gamePlacement.get().getGameAttempt();
+        gameAttempt.setAttemptNumber(gameAttempt.getAttemptNumber()+1);
+        gameAttemptRepository.save(gameAttempt);
+        return wasteItemMapper.toWasteItemResponse(wasteItem, null);
     }
 
     private CreatedBy getUserRole(String userId) {

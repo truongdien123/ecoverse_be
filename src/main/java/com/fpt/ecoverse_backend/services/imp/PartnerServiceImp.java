@@ -376,6 +376,10 @@ public class PartnerServiceImp implements PartnerService {
                     dto.getGrade(),
                     dto.getClassNumber()
             );
+            Optional<Student> studentOptional = studentRepository.findByStudentCode(studentCode);
+            if (studentOptional.isPresent()) {
+                throw new BadRequestException("Student have class number in class already exist");
+            }
             student.setStudentCode(studentCode);
             return studentRepository.save(student);
 

@@ -7,7 +7,7 @@ import com.fpt.ecoverse_backend.dtos.responses.StudentResponseDto;
 import java.util.List;
 
 public interface ParentService {
-    ParentResponseDto linkParentToStudent(String parentId, String studentId);
+    ParentResponseDto linkParentToStudent(String parentId, String studentCode);
     List<StudentResponseDto> getListStudent(String parentId);
     ParentResponseDto getParentDetail(String parentId);
     ParentResponseDto updateParent(String parentId, ParentRequestDto request);

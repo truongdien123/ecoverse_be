@@ -44,12 +44,12 @@ public class ParentServiceImp implements ParentService {
     }
 
     @Override
-    public ParentResponseDto linkParentToStudent(String parentId, String studentId) {
+    public ParentResponseDto linkParentToStudent(String parentId, String studentCode) {
         Optional<Parent> parentOpt = parentRepository.findById(parentId);
         if (parentOpt.isEmpty()) {
             throw new NotFoundException("Parent not found");
         }
-        Optional<Student> studentOpt = studentRepository.findById(studentId);
+        Optional<Student> studentOpt = studentRepository.findByStudentCode(studentCode);
         if (studentOpt.isEmpty()) {
             throw new NotFoundException("Student not found");
         }
