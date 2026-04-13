@@ -34,6 +34,9 @@ public class GameRound extends BaseEntity {
     @Column(name = "item_count", nullable = false)
     private Integer itemCount;
 
+    @Column(name = "is_competition")
+    private Boolean isCompetition;
+
     @Column(name = "active", nullable = false, columnDefinition = "boolean default true")
     private Boolean active = true;
 

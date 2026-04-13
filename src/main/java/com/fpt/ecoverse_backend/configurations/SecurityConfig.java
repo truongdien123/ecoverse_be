@@ -153,6 +153,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/leaderboards/{partner_id}").hasRole("STUDENT")
                         .requestMatchers(HttpMethod.GET, "/leaderboards/partners/{partner_id}/students/{student_id}").hasAnyRole("STUDENT", "PARTNERSHIP", "PARENT")
 
+                        // Competition endpoints
+                        .requestMatchers(HttpMethod.POST, "/competitions/{partner_id}").hasRole("PARTNERSHIP")
+                        .requestMatchers(HttpMethod.POST, "/competitions/{competition_id}/link").hasRole("PARTNERSHIP")
+                        .requestMatchers(HttpMethod.POST, "/competitions/{competition_id}/students/{student_id}/participant").hasRole("STUDENT")
+                        .requestMatchers(HttpMethod.GET, "/competitions/{partner_id}").hasAnyRole("STUDENT", "PARENT", "PARTNERSHIP")
+                        .requestMatchers(HttpMethod.GET, "/competitions/{competition_id}/participants").hasAnyRole("STUDENT", "PARENT", "PARTNERSHIP")
+
                         // All other requests need authentication
                         .anyRequest().authenticated()
                 )
