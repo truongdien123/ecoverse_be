@@ -17,7 +17,8 @@ public interface StudentRepository extends JpaRepository<Student, String> {
     @Query("select count(st.id) from Student st where st.partner.id = :partnerId")
     long countStudentByPartnerId(@Param("partnerId") String partnerId);
 
-    Optional<Student> findByStudentCode(String studentCode);
+    @Query("select s from Student s where s.studentCode = :studentCode")
+    Optional<Student> findByStudentCode(@Param("studentCode") String studentCode);
 
     @Query(
             "select s, u from Student s join s.user u " +

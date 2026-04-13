@@ -27,4 +27,16 @@ public interface GameAttemptRepository extends JpaRepository<GameAttempt, String
         AND ga.completed = true
 """)
     Long getTotalDurationByStudent(@Param("studentId") String studentId);
+
+    @Query("""
+    SELECT ga
+    FROM GameAttempt ga
+    WHERE ga.id IN (
+        SELECT MIN(sub.id)
+        FROM GameAttempt sub
+        WHERE sub.student.id = :studentId
+        GROUP BY sub.gameRound.id
+    )
+""")
+    List<GameAttempt> findDistinctByGameRound(@Param("studentId") String studentId);
 }
