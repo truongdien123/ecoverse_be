@@ -28,6 +28,9 @@ public class QuizTemplate extends BaseEntity {
     @Column(name = "created_by", length = 50)
     private CreatedBy createdBy;
 
+    @Column(name = "is_competition")
+    private Boolean isCompetition;
+
     @Column(name = "active", nullable = false, columnDefinition = "boolean default true")
     private Boolean active = true;
 

@@ -26,4 +26,7 @@ public interface QuizTemplateRepository extends JpaRepository<QuizTemplate, Stri
     @Query("SELECT qt FROM QuizTemplate qt WHERE qt.active = true " +
            "AND (:title IS NULL OR qt.title ILIKE '%' || cast(:title as string ) || '%')")
     Page<QuizTemplate> findAllActive(@Param("title") String title, Pageable pageable);
+
+    @Query("SELECT qt FROM QuizTemplate qt WHERE qt.id = :quizTemplateId and qt.isCompetition = true")
+    Optional<QuizTemplate> findByIdForCompetition(@Param("quizTemplateId") String quizTemplateId);
 }
