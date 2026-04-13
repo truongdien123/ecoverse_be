@@ -21,4 +21,16 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, String
 
     @Query("SELECT qa FROM QuizAttempt qa WHERE qa.quizTemplate.id = :templateId ORDER BY qa.createdAt DESC")
     List<QuizAttempt> findByTemplateId(@Param("templateId") String templateId);
+
+    @Query("""
+    SELECT qa
+    FROM QuizAttempt qa
+    WHERE qa.id IN (
+        SELECT MIN(sub.id)
+        FROM QuizAttempt sub
+        WHERE sub.student.id = :studentId
+        GROUP BY sub.quizTemplate.id
+    )
+""")
+    List<QuizAttempt> findDistinctByQuizTemplate(@Param("studentId") String studentId);
 }
