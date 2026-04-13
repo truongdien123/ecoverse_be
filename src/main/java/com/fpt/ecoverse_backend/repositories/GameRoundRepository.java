@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface GameRoundRepository extends JpaRepository<GameRound, String> {
 
@@ -20,4 +22,7 @@ public interface GameRoundRepository extends JpaRepository<GameRound, String> {
                     "or gr.description ilike '%' || cast(:searching as string ) || '%')"
     )
     Page<GameRound> findGameRounds(@Param("userId") String userId, @Param("searching") String searching, @Param("createdBy") CreatedBy createdBy, Pageable pageable);
+
+    @Query("select gr from GameRound gr where gr.id = :gameRoundId and gr.isCompetition = true")
+    Optional<GameRound> findByIdForCompetition(@Param("gameRoundId") String gameRoundId);
 }

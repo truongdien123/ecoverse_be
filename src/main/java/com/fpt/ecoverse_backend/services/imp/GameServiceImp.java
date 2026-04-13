@@ -172,6 +172,7 @@ public class GameServiceImp implements GameService {
         if (gameAttemptOpt.isEmpty()) {
             throw new NotFoundException("Game attempt not found");
         }
+        List<GameAttempt> gameAttempts = gameAttemptRepository.findByGameGroundAndStudent(gameAttemptOpt.get().getGameRound().getId(), gameAttemptOpt.get().getStudent().getId());
         Optional<Student> student = studentRepository.findById(gameAttemptOpt.get().getStudent().getId());
         if (student.isEmpty()) {
             throw new NotFoundException("Student not found");
@@ -179,7 +180,13 @@ public class GameServiceImp implements GameService {
         GameAttempt gameAttempt = gameAttemptOpt.get();
         Integer points = 0;
         if (gameAttempt.getPointsEarned() < request.getPointsEarned()) {
-            points = request.getPointsEarned() - gameAttempt.getPointsEarned();
+            if (gameAttempts.size() == 1) {
+                points = request.getPointsEarned() - gameAttempt.getPointsEarned();
+            } else if (gameAttempts.size() == 2) {
+                points = (int) (request.getPointsEarned() * 0.7);
+            } else if (gameAttempts.size() == 3) {
+                points = (int) (request.getPointsEarned() * 0.3);
+            }
         }
         gameAttemptMapper.updateGameAttempt(gameAttempt, request);
         gameAttemptRepository.save(gameAttempt);
@@ -190,6 +197,7 @@ public class GameServiceImp implements GameService {
         response.setGameRoundId(gameAttempt.getGameRound().getId());
         response.setTitleGameRound(gameAttempt.getGameRound().getTitle());
         response.setStudentId(student.get().getId());
+        response.setPointsEarned(points);
         return response;
     }
 
@@ -349,9 +357,7 @@ public class GameServiceImp implements GameService {
     public List<GamePlacementResponseDto> updateGamePlacements(String gameAttemptId, List<GamePlacementRequestDto> requests) {
         GameAttempt gameAttempt = gameAttemptRepository.findById(gameAttemptId)
                 .orElseThrow(() -> new NotFoundException("Game attempt not found"));
-
         List<GamePlacementResponseDto> response = new ArrayList<>();
-
         for (GamePlacementRequestDto request : requests) {
 
             GamePlacement gamePlacement = gamePlacementRepository
@@ -363,35 +369,24 @@ public class GameServiceImp implements GameService {
             WasteBin wasteBin = wasteBinRepository.findByCode(request.getCode())
                     .orElseThrow(() -> new NotFoundException("Waste bin not found"));
             gamePlacement.setPlacedBin(wasteBin);
-
             gamePlacement.setIsCorrect(request.getIsCorrect());
-
             gamePlacementRepository.save(gamePlacement);
-
             GamePlacementResponseDto dto = gamePlacementMapper.toGamePlacementResponse(gamePlacement);
-
             WasteItem wasteItem = gamePlacement.getWasteItem();
-
             String gameRoundId = gameAttempt.getGameRound().getId();
-
             GameRoundItem gameRoundItem = gameRoundItemRepository
                     .findByGameRoundIdAndWasteItemId(gameRoundId, wasteItem.getId())
                     .orElseThrow(() -> new NotFoundException(
                             "Game round item not found for waste item id: " + wasteItem.getId()
                     ));
-
             WasteItemResponseDto wasteItemDto =
                     wasteItemMapper.toWasteItemResponse(wasteItem, gameRoundItem.getOrderIndex());
-
             wasteItemDto.setCorrectBinCode(wasteItem.getWasteBin().getCode());
-
             dto.setWasteItem(wasteItemDto);
             dto.setCode(gamePlacement.getPlacedBin().getCode());
             dto.setIsCorrect(gamePlacement.getIsCorrect());
-
             response.add(dto);
         }
-
         return response;
     }
 
