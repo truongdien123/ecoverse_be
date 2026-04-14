@@ -105,6 +105,9 @@ public class CompetitionServiceImp implements CompetitionService {
         if (competition.isEmpty()) {
             throw new NotFoundException("Not found competition");
         }
+        if (competition.get().getStartTime() != null && LocalDateTime.now().isBefore(competition.get().getStartTime())) {
+            throw new BadRequestException("Competition has not started yet");
+        }
         if (competition.get().getEndTime() != null && LocalDateTime.now().isAfter(competition.get().getEndTime())) {
             throw new BadRequestException("Competition has ended");
         }
@@ -160,6 +163,26 @@ public class CompetitionServiceImp implements CompetitionService {
             responses.add(competitionParticipantResponseDto);
         });
         return responses;
+    }
+
+    @Override
+    public CompetitionResponseDto updateCompetition(String competitionId, CompetitionRequestDto request) {
+        Optional<Competition> competition = competitionRepository.findById(competitionId);
+        if (competition.isEmpty()) {
+            throw new NotFoundException("Not found competition");
+        }
+        Competition updatedCompetition = competition.get();
+        competitionMapper.updateCompetition(updatedCompetition, request);
+        competitionRepository.save(updatedCompetition);
+        Optional<CompetitionLink> competitionLink = competitionLinkRepository.findByCompetitionId(updatedCompetition.getId());
+        if (competitionLink.isEmpty()) {
+            throw new NotFoundException("Not found competition link");
+        }
+        GameRound gameRound = competitionLink.get().getGameRound();
+        GameRoundResponseDto gameRoundResponseDto = gameRoundMapper.toGameRoundResponse(gameRound);
+        CompetitionResponseDto response = competitionMapper.toCompetitionResponse(updatedCompetition);
+        response.setGameRound(gameRoundResponseDto);
+        return response;
     }
 
 }

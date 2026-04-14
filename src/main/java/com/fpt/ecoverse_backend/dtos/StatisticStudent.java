@@ -15,7 +15,7 @@ public class StatisticStudent {
     private int totalGamesPlayed;
 
     @JsonProperty("total_average_accuracy")
-    private int totalAverageAccuracy;
+    private double totalAverageAccuracy;
 
     @JsonProperty("total_quizzes_completed")
     private int totalQuizzesCompleted;

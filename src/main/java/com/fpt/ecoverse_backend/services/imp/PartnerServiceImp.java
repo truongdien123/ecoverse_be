@@ -17,6 +17,7 @@ import com.fpt.ecoverse_backend.mappers.StudentMapper;
 import com.fpt.ecoverse_backend.mappers.UserMapper;
 import com.fpt.ecoverse_backend.repositories.*;
 import com.fpt.ecoverse_backend.services.PartnerService;
+import com.fpt.ecoverse_backend.services.StatisticService;
 import com.fpt.ecoverse_backend.utils.UploadFile;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -58,8 +59,9 @@ public class PartnerServiceImp implements PartnerService {
     private final ParentMapper parentMapper;
     private final StudentMapper studentMapper;
     private final UserMapper userMapper;
+    private final StatisticService statisticService;
 
-    public PartnerServiceImp(PartnerRepository partnerRepository, PartnerMapper partnerMapper, PasswordEncoder passwordEncoder, UploadFile uploadFile, ParentRepository parentRepository, StudentRepository studentRepository, UserRepository userRepository, ApplicationEventPublisher eventPublisher, ParentMapper parentMapper, StudentMapper studentMapper, UserMapper userMapper) {
+    public PartnerServiceImp(PartnerRepository partnerRepository, PartnerMapper partnerMapper, PasswordEncoder passwordEncoder, UploadFile uploadFile, ParentRepository parentRepository, StudentRepository studentRepository, UserRepository userRepository, ApplicationEventPublisher eventPublisher, ParentMapper parentMapper, StudentMapper studentMapper, UserMapper userMapper, StatisticService statisticService) {
         this.partnerRepository = partnerRepository;
         this.partnerMapper = partnerMapper;
         this.passwordEncoder = passwordEncoder;
@@ -71,6 +73,7 @@ public class PartnerServiceImp implements PartnerService {
         this.parentMapper = parentMapper;
         this.studentMapper = studentMapper;
         this.userMapper = userMapper;
+        this.statisticService = statisticService;
     }
 
     @Override
@@ -105,13 +108,7 @@ public class PartnerServiceImp implements PartnerService {
             throw new NotFoundException("Not found user for partner");
         }
         PartnerResponseDto partnerResponseDto = partnerMapper.toPartnerResponse(partner.get(), user.get());
-        StatisticPartner statisticPartner = new StatisticPartner();
-        statisticPartner.setTotalParents(parentRepository.countParentsByPartnerId(partnerId));
-        statisticPartner.setTotalStudents(studentRepository.countStudentByPartnerId(partnerId));
-        statisticPartner.setTotalActiveGames(0);
-        statisticPartner.setTotalActiveQuizzes(0);
-        statisticPartner.setTotalPointDistributed(0);
-        statisticPartner.setTotalRedemptions(0);
+        StatisticPartner statisticPartner = statisticService.getPartnerStatistic(partnerId);
         partnerResponseDto.setStatistics(statisticPartner);
         return partnerResponseDto;
     }
@@ -133,13 +130,7 @@ public class PartnerServiceImp implements PartnerService {
         }
         partnerRepository.save(partner.get());
         PartnerResponseDto partnerResponseDto = partnerMapper.toPartnerResponse(partner.get(), user.get());
-        StatisticPartner statisticPartner = new StatisticPartner();
-        statisticPartner.setTotalParents(parentRepository.countParentsByPartnerId(partnerId));
-        statisticPartner.setTotalStudents(studentRepository.countStudentByPartnerId(partnerId));
-        statisticPartner.setTotalActiveGames(0);
-        statisticPartner.setTotalActiveQuizzes(0);
-        statisticPartner.setTotalPointDistributed(0);
-        statisticPartner.setTotalRedemptions(0);
+        StatisticPartner statisticPartner = statisticService.getPartnerStatistic(partnerId);
         partnerResponseDto.setStatistics(statisticPartner);
         return partnerResponseDto;
     }

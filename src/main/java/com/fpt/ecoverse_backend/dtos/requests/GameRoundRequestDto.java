@@ -23,6 +23,9 @@ public class GameRoundRequestDto {
     @JsonProperty("shared")
     private Boolean shared;
 
+    @JsonProperty("is_competition")
+    private Boolean isCompetition;
+
     @JsonProperty("waste_item_ids")
     private List<String> wasteItemIds;
 }
