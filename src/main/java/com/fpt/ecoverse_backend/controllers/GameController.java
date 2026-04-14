@@ -57,10 +57,10 @@ public class GameController {
         return ResponseUtil.success("Create game attempt successfully", gameService.createGameAttempt(gameRoundId, studentId, request));
     }
 
-    @PostMapping("/students/{student_id}/attempts/get-list")
+    @PostMapping("/rounds/{game_round_id}/students/{student_id}/attempts/get-list")
     @PreAuthorize("hasAnyRole('ADMIN', 'PARTNERSHIP', 'STUDENT')")
-    public ResponseEntity<?> getGameAttempts(@PathVariable("student_id") String studentId, @RequestBody PageFilterRequestDto pageFilterRequestDto) {
-        return ResponseUtil.success("Get game attempts successfully", gameService.getGameAttempts(studentId, pageFilterRequestDto));
+    public ResponseEntity<?> getGameAttempts(@PathVariable("student_id") String studentId, @PathVariable("game_round_id") String gameRoundId, @RequestBody PageFilterRequestDto pageFilterRequestDto) {
+        return ResponseUtil.success("Get game attempts successfully", gameService.getGameAttempts(studentId, gameRoundId, pageFilterRequestDto));
     }
 
     @PutMapping("/attempts/{game_attempt_id}")
