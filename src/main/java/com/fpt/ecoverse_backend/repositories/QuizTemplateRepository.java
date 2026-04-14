@@ -29,4 +29,9 @@ public interface QuizTemplateRepository extends JpaRepository<QuizTemplate, Stri
 
     @Query("SELECT qt FROM QuizTemplate qt WHERE qt.id = :quizTemplateId and qt.isCompetition = true")
     Optional<QuizTemplate> findByIdForCompetition(@Param("quizTemplateId") String quizTemplateId);
+
+    @Query("select count(q.id) from QuizTemplate q where q.partner.id = :partnerId and q.active = true")
+    long countByPartnerId(@Param("partnerId") String partnerId);
+
+
 }

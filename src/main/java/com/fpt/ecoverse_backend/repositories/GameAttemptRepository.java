@@ -39,4 +39,11 @@ public interface GameAttemptRepository extends JpaRepository<GameAttempt, String
     )
 """)
     List<GameAttempt> findDistinctByGameRound(@Param("studentId") String studentId);
+
+    @Query("""
+    SELECT COALESCE(SUM(ga.pointsEarned), 0)
+    FROM GameAttempt ga
+    WHERE ga.student.partner.id = :partnerId and ga.completed = true
+""")
+    Long sumGamePoints(@Param("partnerId") String partnerId);
 }

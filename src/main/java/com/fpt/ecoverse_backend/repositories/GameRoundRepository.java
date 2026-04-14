@@ -25,4 +25,7 @@ public interface GameRoundRepository extends JpaRepository<GameRound, String> {
 
     @Query("select gr from GameRound gr where gr.id = :gameRoundId and gr.isCompetition = true")
     Optional<GameRound> findByIdForCompetition(@Param("gameRoundId") String gameRoundId);
+
+    @Query("select count(gr.id) from GameRound gr where gr.partner.id = :partnerId and gr.active = true")
+    long countByPartnerId(@Param("partnerId") String partnerId);
 }

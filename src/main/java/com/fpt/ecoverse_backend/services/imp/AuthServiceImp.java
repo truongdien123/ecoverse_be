@@ -1,5 +1,7 @@
 package com.fpt.ecoverse_backend.services.imp;
 
+import com.fpt.ecoverse_backend.dtos.StatisticPartner;
+import com.fpt.ecoverse_backend.dtos.StatisticStudent;
 import com.fpt.ecoverse_backend.dtos.requests.LoginRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.StudentLoginRequestDto;
 import com.fpt.ecoverse_backend.dtos.responses.*;
@@ -16,6 +18,7 @@ import com.fpt.ecoverse_backend.repositories.StudentRepository;
 import com.fpt.ecoverse_backend.repositories.UserRepository;
 import com.fpt.ecoverse_backend.services.AuthService;
 import com.fpt.ecoverse_backend.services.CustomUserDetailsService;
+import com.fpt.ecoverse_backend.services.StatisticService;
 import com.fpt.ecoverse_backend.utils.JwtUtils;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -33,13 +36,14 @@ public class AuthServiceImp implements AuthService {
     private final PartnerRepository partnerRepository;
     private final PasswordEncoder passwordEncoder;
     private final ParentRepository parentRepository;
+    private final StatisticService statisticService;
 
     public AuthServiceImp(JwtUtils jwtUtils,
                           CustomUserDetailsService customUserDetailsService,
                           UserRepository userRepository,
                           StudentRepository studentRepository,
                           PartnerRepository partnerRepository,
-                          PasswordEncoder passwordEncoder, ParentRepository parentRepository) {
+                          PasswordEncoder passwordEncoder, ParentRepository parentRepository, StatisticService statisticService) {
         this.jwtUtils = jwtUtils;
         this.customUserDetailsService = customUserDetailsService;
         this.userRepository = userRepository;
@@ -47,6 +51,7 @@ public class AuthServiceImp implements AuthService {
         this.partnerRepository = partnerRepository;
         this.passwordEncoder = passwordEncoder;
         this.parentRepository = parentRepository;
+        this.statisticService = statisticService;
     }
 
     @Override
@@ -196,6 +201,7 @@ public class AuthServiceImp implements AuthService {
                         .orElseThrow(() -> new NotFoundException("Partner not found"));
                 Partner partner = partnerRepository.findById(customUser.getId())
                         .orElseThrow(() -> new NotFoundException("Partner profile not found"));
+                StatisticPartner statisticPartner = statisticService.getPartnerStatistic(partner.getId());
                 yield new PartnerResponseDto(
                         partner.getId(),
                         partner.getOrganizationName(),
@@ -207,7 +213,7 @@ public class AuthServiceImp implements AuthService {
                         user.getAvatarUrl(),
                         user.getCreatedAt(),
                         user.getUpdatedAt(),
-                        null
+                        statisticPartner
                 );
             }
             default -> throw new BadCredentialsException("Unsupported user type");
@@ -221,6 +227,7 @@ public class AuthServiceImp implements AuthService {
             parentId = student.getParent().getId();
             parentName = student.getParent().getUser().getFullName();
         }
+        StatisticStudent statisticStudent = statisticService.getStudentStatistic(student.getId());
         return new StudentResponseDto(
                 student.getId(),
                 user.getFullName(),
@@ -231,7 +238,7 @@ public class AuthServiceImp implements AuthService {
                 parentId,
                 parentName,
                 student.getPartner().getId(),
-                null,
+                statisticStudent,
                 user.getCreatedAt(),
                 user.getUpdatedAt(),
                 user.getActive() != null && user.getActive()

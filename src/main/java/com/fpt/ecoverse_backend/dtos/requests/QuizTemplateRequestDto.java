@@ -21,6 +21,9 @@ public class QuizTemplateRequestDto {
     @JsonProperty("description")
     private String description;
 
+    @JsonProperty("is_competition")
+    private Boolean isCompetition;
+
     @NotEmpty(message = "Questions list must not be empty")
     @JsonProperty("questions")
     private List<QuestionRequestDto> questions;

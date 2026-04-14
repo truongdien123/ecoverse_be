@@ -11,6 +11,6 @@ import java.util.Optional;
 @Repository
 public interface CompetitionLinkRepository extends JpaRepository<CompetitionLink, String> {
 
-    @Query("select cl from CompetitionLink cl where cl.competition.id = :competitionId")
+    @Query("select cl from CompetitionLink cl where cl.competition.id = :competitionId and cl.competition.status = 'ACTIVE'")
     Optional<CompetitionLink> findByCompetitionId(@Param("competitionId") String competitionId);
 }

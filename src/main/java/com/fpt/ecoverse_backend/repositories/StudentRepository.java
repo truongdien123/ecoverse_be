@@ -1,6 +1,7 @@
 package com.fpt.ecoverse_backend.repositories;
 
 import com.fpt.ecoverse_backend.entities.Student;
+import com.fpt.ecoverse_backend.projections.AccuracyStatsProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -30,4 +31,23 @@ public interface StudentRepository extends JpaRepository<Student, String> {
 
     @Query("select s from Student s where s.parent.id = :parentId")
     List<Student> findByParentId(@Param("parentId") String parentId);
+
+    @Query("""
+    SELECT
+        COALESCE(SUM(qa.correctAmount), 0) as correctSum,
+        COALESCE(SUM(qa.correctAmount + qa.wrongAmount), 0) as totalSum
+    FROM QuizAttempt qa
+    WHERE qa.student.id = :studentId
+      AND qa.completed = true
+""")
+    AccuracyStatsProjection getAverageAccuracyStats(@Param("studentId") String studentId);
+
+    @Query("""
+    SELECT COUNT(sa)
+    FROM StudentAchievement sa
+    WHERE sa.student.id = :studentId
+""")
+    int countAchievementsUnlocked(@Param("studentId") String studentId);
+
+
 }
