@@ -20,6 +20,6 @@ public interface RedemptionRequestRepository extends JpaRepository<RedemptionReq
     @Query("SELECT r FROM RedemptionRequest r WHERE r.partner.id = :partnerId")
     List<RedemptionRequest> findByPartnerId(@Param("partnerId") String partnerId);
 
-    @Query("select r from RedemptionRequest r where r.partner.id = :partnerId")
+    @Query("select count(r.id) from RedemptionRequest r where r.partner.id = :partnerId")
     long countByPartnerId(@Param("partnerId") String partnerId);
 }
