@@ -42,7 +42,7 @@ SELECT
 
 FROM leaderboard_entries le
 JOIN students s ON le.student_id = s.id
-JOIN users u ON s.user_id = u.id
+JOIN users u ON s.id = u.id
 
 LEFT JOIN (
     SELECT student_id, SUM(duration) as total_game_duration
