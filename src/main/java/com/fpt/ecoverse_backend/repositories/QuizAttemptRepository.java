@@ -33,4 +33,12 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, String
     )
 """)
     List<QuizAttempt> findDistinctByQuizTemplate(@Param("studentId") String studentId);
+
+    @Query("""
+    SELECT COALESCE(SUM(qa.score), 0)
+    FROM QuizAttempt qa
+    WHERE qa.quizTemplate.partner.id = :partnerId
+      AND qa.completed = true
+""")
+    Long sumQuizPoints(@Param("partnerId") String partnerId);
 }

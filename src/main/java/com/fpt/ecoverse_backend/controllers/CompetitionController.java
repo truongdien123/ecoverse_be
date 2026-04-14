@@ -21,7 +21,7 @@ public class CompetitionController {
 
     @PostMapping("/{partner_id}")
     @PreAuthorize("hasRole('PARTNERSHIP')")
-    public ResponseEntity<?> createCompetition(@PathVariable("partner_id") String partnerId, @ModelAttribute CompetitionRequestDto request) {
+    public ResponseEntity<?> createCompetition(@PathVariable("partner_id") String partnerId, @RequestBody CompetitionRequestDto request) {
         return ResponseUtil.success("Create competition successfully", competitionService.createCompetition(partnerId, request));
     }
 
@@ -33,7 +33,7 @@ public class CompetitionController {
 
     @PostMapping("/{competition_id}/students/{student_id}/participant")
     @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<?> createParticipant(@PathVariable("competition_id") String competitionId, @PathVariable("student_id") String studentId, @ModelAttribute CompetitionParticipantRequestDto request) {
+    public ResponseEntity<?> createParticipant(@PathVariable("competition_id") String competitionId, @PathVariable("student_id") String studentId, @RequestBody CompetitionParticipantRequestDto request) {
         return ResponseUtil.success("Create competition participant successfully", competitionService.createCompetitionParticipant(competitionId, studentId, request));
     }
 
@@ -47,5 +47,11 @@ public class CompetitionController {
     @PreAuthorize("hasAnyRole('STUDENT', 'PARTNERSHIP', 'PARENT')")
     public ResponseEntity<?> getListParticipant(@PathVariable("competition_id") String competitionId) {
         return ResponseUtil.success("Get list participant successfully", competitionService.getListParticipant(competitionId));
+    }
+
+    @PutMapping("/{competition_id}")
+    @PreAuthorize("hasRole('PARTNERSHIP')")
+    public ResponseEntity<?> updateCompetition(@PathVariable("competition_id") String competitionId, @RequestBody CompetitionRequestDto request) {
+        return ResponseUtil.success("Update competition successfully", competitionService.updateCompetition(competitionId, request));
     }
 }

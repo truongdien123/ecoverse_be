@@ -90,6 +90,7 @@ public class GameServiceImp implements GameService {
         }
         gameRound.setGameRoundItems(gameRoundItems);
         gameRound.setItemCount(wasteItems.size());
+        gameRound.setIsCompetition(request.getIsCompetition());
         gameRoundRepository.save(gameRound);
         GameRoundResponseDto response = gameRoundMapper.toGameRoundResponse(gameRound);
         response.setGameRoundItems(gameRoundItemResponseDtos);

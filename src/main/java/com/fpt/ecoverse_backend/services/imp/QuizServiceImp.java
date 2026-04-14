@@ -66,6 +66,7 @@ public class QuizServiceImp implements QuizService {
         template.setCreatedBy(CreatedBy.PARTNERSHIP);
         template.setPartner(partner);
         template.setActive(true);
+        template.setIsCompetition(request.getIsCompetition());
 
         // Tạo danh sách Questions
         List<Question> questions = buildQuestions(request.getQuestions(), template);
