@@ -24,30 +24,4 @@ public class QuizTemplateRequestDto {
     @JsonProperty("is_competition")
     private Boolean isCompetition;
 
-    @NotEmpty(message = "Questions list must not be empty")
-    @JsonProperty("questions")
-    private List<QuestionRequestDto> questions;
-
-    // ── Inner DTO ──────────────────────────────────
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class QuestionRequestDto {
-
-        @NotBlank(message = "Question text is required")
-        @JsonProperty("text")
-        private String text;
-
-        @NotNull(message = "Options are required")
-        @JsonProperty("options")
-        private List<String> options;          // ["A. Nhựa", "B. Giấy", "C. Hữu cơ", "D. Khác"]
-
-        @NotBlank(message = "Correct answer is required")
-        @JsonProperty("correct_answer")
-        private String correctAnswer;          // "A" hoặc "Nhựa" tùy thiết kế
-
-        @JsonProperty("explanation")
-        private String explanation;
-    }
 }
