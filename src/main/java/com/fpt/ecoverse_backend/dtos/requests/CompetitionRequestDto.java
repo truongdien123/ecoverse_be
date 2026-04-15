@@ -21,4 +21,5 @@ public class CompetitionRequestDto {
     private CompetitionStatus status;
     private TargetScope scope;
     private String targetClass;
+    private CompetitionLinkRequestDto link;
 }

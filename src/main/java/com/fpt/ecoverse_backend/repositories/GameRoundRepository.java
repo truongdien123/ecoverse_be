@@ -16,8 +16,14 @@ public interface GameRoundRepository extends JpaRepository<GameRound, String> {
 
     @Query(
             "select gr from GameRound gr " +
-                    "where (:createdBy is null or gr.createdBy = :createdBy) " +
-                    "or (gr.createdBy = :createdBy and gr.partner.id = :userId) " +
+                    "where (" +
+                    "            gr.createdBy = 'ADMIN'" +
+                    "            or" +
+                    "            (" +
+                    "                gr.createdBy = :createdBy" +
+                    "                and gr.partner.id = :userId" +
+                    "            )" +
+                    "        ) " +
                     "and (:searching is null or gr.title ilike '%' || cast(:searching as string ) || '%' " +
                     "or gr.description ilike '%' || cast(:searching as string ) || '%')"
     )
