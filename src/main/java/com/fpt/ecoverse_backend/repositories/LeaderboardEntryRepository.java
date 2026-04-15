@@ -60,7 +60,7 @@ LEFT JOIN (
 
 WHERE le.partner_id = :partnerId
     AND le.scope = :scope
-    AND (:grade IS NULL OR s.grade = CAST(:grade AS varchar))
+    AND (:grade IS NULL OR s.grade = :grade)
 
 ORDER BY le.points DESC, totalDuration ASC
 """,
@@ -70,7 +70,7 @@ FROM leaderboard_entries le
 JOIN students s ON le.student_id = s.id
 WHERE le.partner_id = :partnerId
     AND le.scope = :scope
-    AND (:grade IS NULL OR s.grade = CAST(:grade AS varchar))
+    AND (:grade IS NULL OR s.grade = :grade)
 """,
             nativeQuery = true)
     Page<LeaderboardProjection> getLeaderboard(

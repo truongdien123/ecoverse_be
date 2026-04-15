@@ -11,6 +11,7 @@ import com.fpt.ecoverse_backend.exceptions.NotFoundException;
 import com.fpt.ecoverse_backend.mappers.*;
 import com.fpt.ecoverse_backend.repositories.*;
 import com.fpt.ecoverse_backend.services.CompetitionService;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -50,14 +51,53 @@ public class CompetitionServiceImp implements CompetitionService {
     }
 
     @Override
+    @Transactional
     public CompetitionResponseDto createCompetition(String partnerId, CompetitionRequestDto request) {
-        Optional<Partner> partner = partnerRepository.findById(partnerId);
-        if (partner.isEmpty()) {
-            throw new NotFoundException("Not found partner");
-        }
+
+        Partner partner = partnerRepository.findById(partnerId)
+                .orElseThrow(() -> new NotFoundException("Not found partner"));
+
         Competition competition = competitionMapper.toCompetition(request, null);
-        competition.setPartner(partner.get());
+        competition.setPartner(partner);
         competitionRepository.save(competition);
+
+        CompetitionLinkRequestDto linkRequest = request.getLink();
+
+        if (linkRequest != null) {
+
+            if (linkRequest.getQuizTemplateId() == null && linkRequest.getGameRoundId() == null) {
+                throw new BadRequestException("Must provide quizTemplateId or gameRoundId");
+            }
+
+            if (linkRequest.getQuizTemplateId() != null && linkRequest.getGameRoundId() != null) {
+                throw new BadRequestException("Only one is allowed");
+            }
+
+            CompetitionLink competitionLink = new CompetitionLink();
+            competitionLink.setCompetition(competition);
+            competitionLink.setIsCustom(linkRequest.getIsCustom());
+            competitionLink.setScore(linkRequest.getScore());
+
+            if (linkRequest.getQuizTemplateId() != null) {
+                QuizTemplate quizTemplate = quizTemplateRepository
+                        .findByIdForCompetition(linkRequest.getQuizTemplateId())
+                        .orElseThrow(() -> new NotFoundException("Not found quiz template"));
+
+                competitionLink.setQuizTemplate(quizTemplate);
+                competitionLink.setCompetitionType(CompetitionType.QUIZ);
+
+            } else {
+                GameRound gameRound = gameRoundRepository
+                        .findByIdForCompetition(linkRequest.getGameRoundId())
+                        .orElseThrow(() -> new NotFoundException("Not found game round"));
+
+                competitionLink.setGameRound(gameRound);
+                competitionLink.setCompetitionType(CompetitionType.GAME);
+            }
+
+            competitionLinkRepository.save(competitionLink);
+        }
+
         return competitionMapper.toCompetitionResponse(competition);
     }
 
@@ -116,6 +156,8 @@ public class CompetitionServiceImp implements CompetitionService {
         if (student.isEmpty()) {
             throw new NotFoundException("Not found student");
         }
+        student.get().setPoints(student.get().getPoints()+ request.getTotalScore());
+        studentRepository.save(student.get());
         CompetitionParticipant competitionParticipant = competitionParticipantMapper.toCompetitionParticipant(request, null);
         competitionParticipant.setStudent(student.get());
         competitionParticipant.setCompetition(competition.get());
