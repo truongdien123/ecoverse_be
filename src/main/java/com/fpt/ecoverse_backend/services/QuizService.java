@@ -6,6 +6,8 @@ import com.fpt.ecoverse_backend.dtos.responses.QuizAttemptResponseDto;
 import com.fpt.ecoverse_backend.dtos.responses.QuizTemplateResponseDto;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
+
 public interface QuizService {
 
     // ─── PARTNER: Quản lý quiz template ───────────────────────────────
@@ -38,4 +40,6 @@ public interface QuizService {
 
     /** Xem lịch sử làm bài của student */
     Page<QuizAttemptResponseDto> getMyAttempts(String studentId, int page, int size);
+
+    List<QuizTemplateResponseDto> getQuizTemplateCompetition(String partnerId);
 }

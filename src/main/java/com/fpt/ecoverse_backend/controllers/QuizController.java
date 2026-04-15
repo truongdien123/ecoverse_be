@@ -160,4 +160,10 @@ public class QuizController {
         Page<QuizAttemptResponseDto> result = quizService.getMyAttempts(currentUser.getId(), page, size);
         return ResponseUtil.success("My quiz history", result);
     }
+
+    @GetMapping("/partners/{partner_id}/competitions")
+    @PreAuthorize("hasAnyRole('PARTNERSHIP', 'STUDENT')")
+    public ResponseEntity<?> getQuizTemplateCompetition(@PathVariable("partner_id") String partnerId) {
+        return ResponseUtil.success("Get list quiz template successfully", quizService.getQuizTemplateCompetition(partnerId));
+    }
 }

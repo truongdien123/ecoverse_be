@@ -395,6 +395,16 @@ public class GameServiceImp implements GameService {
         return response;
     }
 
+    @Override
+    public List<GameRoundResponseDto> getGameRoundCompetition(String partnerId) {
+        Optional<Partner> partner = partnerRepository.findById(partnerId);
+        if (partner.isEmpty()) {
+            throw new NotFoundException("Not found partner");
+        }
+        List<GameRound> gameRounds = gameRoundRepository.findGameRoundCompetition(partnerId);
+        return gameRounds.stream().map(gameRoundMapper::toGameRoundResponse).toList();
+    }
+
     private static GameRound getGameRound(String userId, Optional<GameRound> gameRoundOpt, Optional<User> userOpt) {
         GameRound gameRound = gameRoundOpt.get();
         if (gameRound.getCreatedBy() == CreatedBy.ADMIN &&
