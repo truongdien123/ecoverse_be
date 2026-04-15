@@ -19,7 +19,7 @@ public class StudentController {
     }
 
     @GetMapping("/{student_id}")
-    @PreAuthorize("hasAnyRole('PARTNERSHIP', 'STUDENT')")
+    @PreAuthorize("hasAnyRole('PARTNERSHIP', 'STUDENT', 'PARENT')")
     public ResponseEntity<?> getStudentDetail(@PathVariable("student_id") String studentId) {
         return ResponseUtil.success("Get student details successfully", studentService.getStudentDetails(studentId));
     }

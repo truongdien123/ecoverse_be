@@ -60,17 +60,25 @@ LEFT JOIN (
 
 WHERE le.partner_id = :partnerId
     AND le.scope = :scope
-    AND (:grade IS NULL OR s.grade = :grade)
+    AND (:grade IS NULL OR s.grade = CAST(:grade AS varchar))
 
 ORDER BY le.points DESC, totalDuration ASC
-""", nativeQuery = true)
+""",
+            countQuery = """
+SELECT COUNT(*)
+FROM leaderboard_entries le
+JOIN students s ON le.student_id = s.id
+WHERE le.partner_id = :partnerId
+    AND le.scope = :scope
+    AND (:grade IS NULL OR s.grade = CAST(:grade AS varchar))
+""",
+            nativeQuery = true)
     Page<LeaderboardProjection> getLeaderboard(
             @Param("partnerId") String partnerId,
-            @Param("scope") LeaderboardScope scope,
+            @Param("scope") String scope,
             @Param("grade") String grade,
             Pageable pageable
     );
-
 
     @Query("""
     SELECT le.points

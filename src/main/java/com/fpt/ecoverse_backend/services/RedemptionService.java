@@ -10,4 +10,5 @@ public interface RedemptionService {
     RedemptionResponseDto approveRedemptionByPartner(String partnerId, String redemptionId, boolean approved, String partnerReason);
     RedemptionResponseDto fulfillRedemption(String redemptionId, String partnerId);
     List<RedemptionResponseDto> getRedemptionRequests(String userId);
+    RedemptionResponseDto createRedemptionByParent(String parentId, String studentId, String rewardItemId);
 }

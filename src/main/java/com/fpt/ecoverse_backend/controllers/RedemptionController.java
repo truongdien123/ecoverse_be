@@ -77,4 +77,10 @@ public class RedemptionController {
         return ResponseUtil.success("Get redemption requests successfully", responses);
     }
 
+    @PostMapping("/parents/{parent_id}/students/{student_id}/reward-items/{rewardItem_id}")
+    @PreAuthorize("hasRole('PARENT')")
+    public ResponseEntity<?> createRedemptionByParent(@PathVariable("parent_id") String parentId, @PathVariable("student_id") String studentId, @PathVariable("rewardItem_id") String rewardItemId) {
+        return ResponseUtil.success("Create redemption request successfully", redemptionService.createRedemptionByParent(parentId, studentId, rewardItemId));
+    }
+
 }
