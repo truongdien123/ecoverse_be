@@ -67,9 +67,12 @@ public class QuizServiceImp implements QuizService {
         List<Question> questions = new ArrayList<>();
         List<String> questionStrings = request.getListIdQuestion();
         for (String questionString : questionStrings) {
-            Question question = questionRepository.findById(questionString).orElseThrow(() -> new NotFoundException("Question not found: " + questionString)) ;
+            Question question = questionRepository.findById(questionString)
+                    .orElseThrow(() -> new NotFoundException("Question not found: " + questionString)) ;
+            question.setQuizTemplate(template);
             questions.add(question);
         }
+
         template.setQuestions(questions);
         template.setDescription(request.getDescription());
         template.setCreatedBy(CreatedBy.PARTNERSHIP);
