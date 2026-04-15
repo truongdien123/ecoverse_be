@@ -53,6 +53,24 @@ public class QuestionController {
         return ResponseUtil.success("Multiple AI questions created successfully", result);
     }
 
+    @GetMapping("/bank")
+    public ResponseEntity<?> getQuestionBank(
+            @AuthenticationPrincipal CustomUserDetails currentUser
+    ) {
+        List<QuizTemplateResponseDto.QuestionResponseDto> result = questionService.getQuestionBank(currentUser.getId());
+        return ResponseUtil.success("Question bank retrieved successfully", result);
+    }
+
+    @PostMapping("/quiz/{quizId}/import-bank")
+    public ResponseEntity<?> importQuestionsFromBank(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @PathVariable String quizId,
+            @RequestBody List<String> questionIds
+    ) {
+        List<QuizTemplateResponseDto.QuestionResponseDto> result = questionService.importQuestionsFromBank(currentUser.getId(), quizId, questionIds);
+        return ResponseUtil.success("Questions imported from bank successfully", result);
+    }
+
     @PutMapping("/{questionId}")
     public ResponseEntity<?> updateQuestion(
             @AuthenticationPrincipal CustomUserDetails currentUser,

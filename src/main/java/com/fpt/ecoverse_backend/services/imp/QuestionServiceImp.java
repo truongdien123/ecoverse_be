@@ -88,6 +88,44 @@ public class QuestionServiceImp implements QuestionService {
     }
 
     @Override
+    public List<QuizTemplateResponseDto.QuestionResponseDto> getQuestionBank(String partnerId) {
+        List<Question> questions = questionRepository.findAllByPartnerId(partnerId);
+        return questions.stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public List<QuizTemplateResponseDto.QuestionResponseDto> importQuestionsFromBank(String partnerId, String quizId, List<String> questionIds) {
+        QuizTemplate template = quizTemplateRepository.findByIdAndPartnerId(quizId, partnerId)
+                .orElseThrow(() -> new NotFoundException("Quiz template not found or access denied"));
+
+        List<Question> sourceQuestions = questionRepository.findAllById(questionIds);
+        
+        // Ensure all source questions belong to the same partner
+        for (Question sq : sourceQuestions) {
+            if (!sq.getQuizTemplate().getPartner().getId().equals(partnerId)) {
+                throw new BadRequestException("One or more questions do not belong to you");
+            }
+        }
+
+        // Clone the questions
+        List<Question> clonedQuestions = sourceQuestions.stream().map(sq -> {
+            Question newQ = new Question();
+            newQ.setText(sq.getText());
+            newQ.setOptionsJson(sq.getOptionsJson());
+            newQ.setCorrectAnswer(sq.getCorrectAnswer());
+            newQ.setExplanation(sq.getExplanation());
+            newQ.setQuizTemplate(template);
+            return newQ;
+        }).collect(Collectors.toList());
+
+        List<Question> savedQuestions = questionRepository.saveAll(clonedQuestions);
+        return savedQuestions.stream().map(this::toResponse).collect(Collectors.toList());
+    }
+
+    @Override
     @Transactional
     public QuizTemplateResponseDto.QuestionResponseDto updateQuestion(String partnerId, String questionId, QuestionRequestDto request) {
         Question question = questionRepository.findById(questionId)
