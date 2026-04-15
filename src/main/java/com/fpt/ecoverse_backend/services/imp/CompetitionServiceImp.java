@@ -57,6 +57,7 @@ public class CompetitionServiceImp implements CompetitionService {
         }
         Competition competition = competitionMapper.toCompetition(request, null);
         competition.setPartner(partner.get());
+        competitionRepository.save(competition);
         return competitionMapper.toCompetitionResponse(competition);
     }
 
