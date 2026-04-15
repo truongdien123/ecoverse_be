@@ -18,6 +18,9 @@ public class QuizTemplateRequestDto {
     @JsonProperty("title")
     private String title;
 
+    @JsonProperty("listId_question")
+    private List<String> listIdQuestion;
+
     @JsonProperty("description")
     private String description;
 

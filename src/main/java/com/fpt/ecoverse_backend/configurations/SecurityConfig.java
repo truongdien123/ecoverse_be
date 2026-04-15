@@ -130,6 +130,14 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/rewards/items/{reward_item_id}/partners/{partner_id}").hasRole("PARTNERSHIP")
                         .requestMatchers(HttpMethod.DELETE, "/rewards/items/{reward_item_id}/partners/{partner_id}").hasRole("PARTNERSHIP")
 
+                        // Quiz endpoints
+                        .requestMatchers(HttpMethod.GET, "/api/quiz/templates", "/api/quiz/templates/**").hasAnyRole("PARTNERSHIP", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/quiz/templates").hasAnyRole("PARTNERSHIP", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/quiz/templates/**").hasAnyRole("PARTNERSHIP", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/quiz/templates/**").hasAnyRole("PARTNERSHIP", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/quiz/available", "/api/quiz/*/start", "/api/quiz/my-attempts").hasAnyRole("STUDENT", "PARENT")
+                        .requestMatchers(HttpMethod.POST, "/api/quiz/submit").hasRole("STUDENT")
+
                         // Question endpoints
                         .requestMatchers(HttpMethod.GET, "/api/questions", "/api/questions/**").hasAnyRole("STUDENT", "PARTNERSHIP", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/questions").hasAnyRole("PARTNERSHIP", "ADMIN")

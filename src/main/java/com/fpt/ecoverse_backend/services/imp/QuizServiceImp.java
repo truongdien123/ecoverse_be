@@ -35,19 +35,21 @@ public class QuizServiceImp implements QuizService {
     private final PartnerRepository partnerRepository;
     private final StudentRepository studentRepository;
     private final ObjectMapper objectMapper;
+    private final QuestionRepository questionRepository;
 
     public QuizServiceImp(QuizTemplateRepository quizTemplateRepository,
                           QuizAttemptRepository quizAttemptRepository,
                           QuizPlacementRepository quizPlacementRepository,
                           PartnerRepository partnerRepository,
                           StudentRepository studentRepository,
-                          ObjectMapper objectMapper) {
+                          ObjectMapper objectMapper, QuestionRepository questionRepository) {
         this.quizTemplateRepository = quizTemplateRepository;
         this.quizAttemptRepository = quizAttemptRepository;
         this.quizPlacementRepository = quizPlacementRepository;
         this.partnerRepository = partnerRepository;
         this.studentRepository = studentRepository;
         this.objectMapper = objectMapper;
+        this.questionRepository = questionRepository;
     }
 
     // ════════════════════════════════════════════════════════════════
@@ -62,6 +64,13 @@ public class QuizServiceImp implements QuizService {
 
         QuizTemplate template = new QuizTemplate();
         template.setTitle(request.getTitle());
+        List<Question> questions = new ArrayList<>();
+        List<String> questionStrings = request.getListIdQuestion();
+        for (String questionString : questionStrings) {
+            Question question = questionRepository.findById(questionString).orElseThrow(() -> new NotFoundException("Question not found: " + questionString)) ;
+            questions.add(question);
+        }
+        template.setQuestions(questions);
         template.setDescription(request.getDescription());
         template.setCreatedBy(CreatedBy.PARTNERSHIP);
         template.setPartner(partner);
