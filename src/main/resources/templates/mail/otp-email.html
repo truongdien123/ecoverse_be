@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>EcoVerse - Mã OTP</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f7f6; font-family: Arial, sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f7f6; padding: 40px 0;">
+    <tr>
+        <td align="center">
+            <table width="600" cellpadding="0" cellspacing="0"
+                   style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+
+                <!-- Header -->
+                <tr>
+                    <td style="background-color: #2e7d32; padding: 32px 40px; text-align: center;">
+                        <h1 style="margin: 0; color: #ffffff; font-size: 26px; font-weight: bold;">🌿 EcoVerse</h1>
+                    </td>
+                </tr>
+
+                <!-- Body -->
+                <tr>
+                    <td style="padding: 40px;">
+                        <p style="margin: 0 0 16px; font-size: 16px; color: #333333;">
+                            Xin chào <strong th:text="${fullName}">Người dùng</strong>,
+                        </p>
+                        <p style="margin: 0 0 24px; font-size: 15px; color: #555555;" th:text="${purposeMessage}">
+                            Bạn vừa thực hiện yêu cầu trên tài khoản EcoVerse.
+                        </p>
+
+                        <!-- OTP Box -->
+                        <table width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td align="center">
+                                    <div style="background-color: #f0faf0; border: 2px dashed #2e7d32;
+                                                border-radius: 10px; padding: 24px 40px; display: inline-block; margin: 0 auto;">
+                                        <p style="margin: 0 0 8px; font-size: 13px; color: #777; text-align: center; text-transform: uppercase; letter-spacing: 1px;">
+                                            Mã OTP của bạn
+                                        </p>
+                                        <p style="margin: 0; font-size: 40px; font-weight: bold;
+                                                   color: #2e7d32; letter-spacing: 12px; text-align: center;"
+                                           th:text="${otpCode}">123456</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p style="margin: 24px 0 8px; font-size: 14px; color: #e53935; text-align: center;">
+                            ⏳ Mã OTP có hiệu lực trong <strong>5 phút</strong>.
+                        </p>
+                        <p style="margin: 0 0 24px; font-size: 14px; color: #888888; text-align: center;">
+                            Vui lòng không chia sẻ mã này với bất kỳ ai.
+                        </p>
+
+                        <hr style="border: none; border-top: 1px solid #eeeeee; margin: 24px 0;"/>
+
+                        <p style="margin: 0; font-size: 13px; color: #aaaaaa;">
+                            Nếu bạn không thực hiện yêu cầu này, hãy bỏ qua email này.
+                            Tài khoản của bạn vẫn an toàn.
+                        </p>
+                    </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                    <td style="background-color: #f9f9f9; padding: 20px 40px; text-align: center;
+                               border-top: 1px solid #eeeeee;">
+                        <p style="margin: 0; font-size: 12px; color: #aaaaaa;">
+                            © 2025 EcoVerse. All rights reserved.
+                        </p>
+                    </td>
+                </tr>
+
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

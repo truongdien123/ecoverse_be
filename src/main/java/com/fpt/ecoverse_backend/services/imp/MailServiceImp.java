@@ -78,5 +78,34 @@ public class MailServiceImp implements MailService {
     public void recover(Exception ex, ParentCredentialMail mail) {
 
     }
+
+    // ===================== OTP MAIL =====================
+
+    @Override
+    @Async("mailExecutor")
+    public void sendOtpMail(String email, String fullName, String otpCode, String purposeMessage) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(
+                    message,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                    StandardCharsets.UTF_8.name()
+            );
+            helper.setFrom("EcoVerse <" + from + ">");
+            helper.setTo(email);
+            helper.setSubject("[EcoVerse] Mã OTP xác thực");
+
+            Context context = new Context();
+            context.setVariable("fullName", fullName != null ? fullName : email);
+            context.setVariable("otpCode", otpCode);
+            context.setVariable("purposeMessage", purposeMessage);
+
+            String html = templateEngine.process("mail/otp-email", context);
+            helper.setText(html, true);
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send OTP email to: " + email, e);
+        }
+    }
 }
 
