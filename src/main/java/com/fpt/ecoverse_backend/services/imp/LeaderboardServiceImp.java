@@ -73,7 +73,7 @@ public class LeaderboardServiceImp implements LeaderboardService {
             throw new NotFoundException("Not found partner");
         }
         Pageable pageable = PageRequest.of(page-1, size);
-        Page<LeaderboardProjection> leaderboardEntries = leaderboardEntryRepository.getLeaderboard(partnerId, scope, grade, pageable);
+        Page<LeaderboardProjection> leaderboardEntries = leaderboardEntryRepository.getLeaderboard(partnerId, scope.name(), grade, pageable);
         return leaderboardEntries.getContent().stream().map(item -> {
             LeaderboardResponseDto dto = new LeaderboardResponseDto();
             dto.setStudentId(item.getStudentId());

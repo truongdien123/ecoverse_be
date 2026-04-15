@@ -185,4 +185,14 @@ public class CompetitionServiceImp implements CompetitionService {
         return response;
     }
 
+    @Override
+    public CompetitionResponseDto deleteCompetition(String competitionId) {
+        Optional<Competition> competition = competitionRepository.findById(competitionId);
+        if (competition.isEmpty()) {
+            throw new NotFoundException("Not found competition");
+        }
+        competitionRepository.delete(competition.get());
+        return competitionMapper.toCompetitionResponse(competition.get());
+    }
+
 }
