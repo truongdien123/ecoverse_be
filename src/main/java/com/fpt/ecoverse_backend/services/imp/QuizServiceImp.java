@@ -9,10 +9,12 @@ import com.fpt.ecoverse_backend.dtos.responses.QuizAttemptResponseDto;
 import com.fpt.ecoverse_backend.dtos.responses.QuizTemplateResponseDto;
 import com.fpt.ecoverse_backend.entities.*;
 import com.fpt.ecoverse_backend.enums.CreatedBy;
+import com.fpt.ecoverse_backend.enums.LeaderboardScope;
 import com.fpt.ecoverse_backend.exceptions.BadRequestException;
 import com.fpt.ecoverse_backend.exceptions.ForbiddenException;
 import com.fpt.ecoverse_backend.exceptions.NotFoundException;
 import com.fpt.ecoverse_backend.repositories.*;
+import com.fpt.ecoverse_backend.services.LeaderboardService;
 import com.fpt.ecoverse_backend.services.QuizService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -35,19 +38,21 @@ public class QuizServiceImp implements QuizService {
     private final PartnerRepository partnerRepository;
     private final StudentRepository studentRepository;
     private final ObjectMapper objectMapper;
+    private final LeaderboardService leaderboardService;
 
     public QuizServiceImp(QuizTemplateRepository quizTemplateRepository,
                           QuizAttemptRepository quizAttemptRepository,
                           QuizPlacementRepository quizPlacementRepository,
                           PartnerRepository partnerRepository,
                           StudentRepository studentRepository,
-                          ObjectMapper objectMapper) {
+                          ObjectMapper objectMapper, LeaderboardService leaderboardService) {
         this.quizTemplateRepository = quizTemplateRepository;
         this.quizAttemptRepository = quizAttemptRepository;
         this.quizPlacementRepository = quizPlacementRepository;
         this.partnerRepository = partnerRepository;
         this.studentRepository = studentRepository;
         this.objectMapper = objectMapper;
+        this.leaderboardService = leaderboardService;
     }
 
     // ════════════════════════════════════════════════════════════════
@@ -203,6 +208,7 @@ public class QuizServiceImp implements QuizService {
         // Cộng điểm cho student (10 điểm * số câu đúng)
         int pointsEarned = correct * 10;
         student.setPoints((student.getPoints() != null ? student.getPoints() : 0) + pointsEarned);
+        handleQuizResult(attempt, pointsEarned);
         studentRepository.save(student);
 
         QuizAttempt saved = quizAttemptRepository.save(attempt);
@@ -214,6 +220,16 @@ public class QuizServiceImp implements QuizService {
         PageRequest pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         return quizAttemptRepository.findByStudentId(studentId, pageable)
                 .map(this::toAttemptResponse);
+    }
+
+    @Override
+    public List<QuizTemplateResponseDto> getQuizTemplateCompetition(String partnerId) {
+        Optional<Partner> partner = partnerRepository.findById(partnerId);
+        if (partner.isEmpty()) {
+            throw new NotFoundException("Not found partner");
+        }
+        List<QuizTemplate> quizTemplates = quizTemplateRepository.findQuizTemplateCompetition(partnerId);
+        return quizTemplates.stream().map(quizTemplate -> toDetailResponse(quizTemplate, true)).toList();
     }
 
     // ════════════════════════════════════════════════════════════════
@@ -248,6 +264,7 @@ public class QuizServiceImp implements QuizService {
                 .active(t.getActive())
                 .partnerId(t.getPartner() != null ? t.getPartner().getId() : null)
                 .partnerName(t.getPartner() != null ? t.getPartner().getOrganizationName() : null)
+                .isCompetition(t.getIsCompetition())
                 .questions(includeQuestions && t.getQuestions() != null ? t.getQuestions().stream()
                         .map(q -> QuizTemplateResponseDto.QuestionResponseDto.builder()
                                 .id(q.getId())
@@ -314,6 +331,29 @@ public class QuizServiceImp implements QuizService {
                 .placements(placements)
                 .createdAt(a.getCreatedAt())
                 .build();
+    }
+
+    public void handleQuizResult(QuizAttempt attempt, int point) {
+        if (point == 0) return;
+        Student student = attempt.getStudent();
+
+        // SCHOOL
+        leaderboardService.upsertLeaderboardEntry(
+                student.getId(),
+                student.getPartner().getId(),
+                LeaderboardScope.valueOf("SCHOOL"),
+                student.getGrade(),
+                point
+        );
+
+        // CLASS
+        leaderboardService.upsertLeaderboardEntry(
+                student.getId(),
+                student.getPartner().getId(),
+                LeaderboardScope.valueOf("CLASS"),
+                student.getGrade(),
+                point
+        );
     }
 
     private List<String> parseOptions(String json) {

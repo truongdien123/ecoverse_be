@@ -33,6 +33,9 @@ public class GameRoundResponseDto {
     @JsonProperty("item_count")
     private Integer itemCount;
 
+    @JsonProperty("is_competition")
+    private Boolean isCompetition;
+
     @JsonProperty("active")
     private Boolean active;
 

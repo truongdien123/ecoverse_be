@@ -98,4 +98,10 @@ public class GameController {
     public ResponseEntity<?> updateGamePlacements(@PathVariable("game_attempt_id") String gameAttemptId, @RequestBody List<GamePlacementRequestDto> requests) {
         return ResponseUtil.success("Update list game placement in game attempt successfully", gameService.updateGamePlacements(gameAttemptId, requests));
     }
+
+    @GetMapping("/rounds/partners/{partner_id}/competitions")
+    @PreAuthorize("hasAnyRole('STUDENT', 'PARTNERSHIP')")
+    public ResponseEntity<?> getGameRoundCompetition(@PathVariable("partner_id") String partnerId) {
+        return ResponseUtil.success("Get list game round competition successfully", gameService.getGameRoundCompetition(partnerId));
+    }
 }

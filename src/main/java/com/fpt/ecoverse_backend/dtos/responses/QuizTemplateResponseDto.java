@@ -35,6 +35,9 @@ public class QuizTemplateResponseDto {
     @JsonProperty("partner_name")
     private String partnerName;
 
+    @JsonProperty("is_competition")
+    private Boolean isCompetition;
+
     @JsonProperty("questions")
     private List<QuestionResponseDto> questions;
 
