@@ -94,7 +94,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/parents/{parent_id}").hasAnyRole("PARENT", "PARTNERSHIP")
 
                         // Student endpoints
-                        .requestMatchers(HttpMethod.GET, "/students/{student_id}").hasAnyRole("STUDENT", "PARTNERSHIP")
+                        .requestMatchers(HttpMethod.GET, "/students/{student_id}").hasAnyRole("STUDENT", "PARTNERSHIP", "PARENT")
                         .requestMatchers(HttpMethod.PUT, "/students/{student_id}").hasAnyRole("STUDENT", "PARTNERSHIP")
                         .requestMatchers(HttpMethod.DELETE, "/students/{student_id}").hasAnyRole("STUDENT", "PARTNERSHIP")
 
@@ -148,6 +148,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/redemptions/{redemption_id}/partners/{partner_id}/approve").hasRole("PARTNERSHIP")
                         .requestMatchers(HttpMethod.POST, "/redemptions/{redemption_id}/partners/{partner_id}/fulfill").hasRole("PARTNERSHIP")
                         .requestMatchers(HttpMethod.GET, "/redemptions/users/{user_id}").hasAnyRole("STUDENT", "PARENT", "PARTNERSHIP")
+                        .requestMatchers(HttpMethod.POST, "/redemptions/parents/{parent_id}/students/{student_id}/reward-items/{rewardItem_id}").hasRole("PARENT")
 
                         // Leaderboard endpoints
                         .requestMatchers(HttpMethod.GET, "/leaderboards/{partner_id}").hasRole("STUDENT")

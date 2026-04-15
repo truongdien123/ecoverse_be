@@ -184,9 +184,9 @@ public class GameServiceImp implements GameService {
             if (gameAttempts.size() == 1) {
                 points = request.getPointsEarned() - gameAttempt.getPointsEarned();
             } else if (gameAttempts.size() == 2) {
-                points = (int) (request.getPointsEarned() * 0.7);
+                points = (int) ((request.getPointsEarned()) * 0.7);
             } else if (gameAttempts.size() == 3) {
-                points = (int) (request.getPointsEarned() * 0.3);
+                points = (int) ((request.getPointsEarned()) * 0.3);
             }
         }
         gameAttemptMapper.updateGameAttempt(gameAttempt, request);

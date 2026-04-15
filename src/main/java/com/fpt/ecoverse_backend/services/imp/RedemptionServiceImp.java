@@ -232,4 +232,40 @@ public class RedemptionServiceImp implements RedemptionService {
             return response;
         }).toList();
     }
+
+    @Override
+    public RedemptionResponseDto createRedemptionByParent(String parentId, String studentId, String rewardItemId) {
+        Optional<Parent> parent = parentRepository.findById(parentId);
+        if (parent.isEmpty()) {
+            throw new NotFoundException("Not found parent");
+        }
+        Optional<Student> student = studentRepository.findById(studentId);
+        if (student.isEmpty()) {
+            throw new NotFoundException("Not found student");
+        }
+        Optional<RewardItem> rewardItem = rewardItemRepository.findById(rewardItemId);
+        if (rewardItem.isEmpty()) {
+            throw new NotFoundException("Not found reward item");
+        }
+        if (!student.get().getParent().equals(parent.get())) {
+            throw new BadRequestException("Student is not children of parent");
+        }
+        RedemptionRequest redemptionRequest = new RedemptionRequest();
+        redemptionRequest.setStudent(student.get());
+        redemptionRequest.setRewardItem(rewardItem.get());
+        redemptionRequest.setParent(student.get().getParent());
+        redemptionRequest.setPartner(rewardItem.get().getPartner());
+        redemptionRequest.setParentApproval(ApprovalStatus.APPROVED);
+        redemptionRequest.setPartnerApproval(ApprovalStatus.PENDING);
+        redemptionRequest.setFulfilled(false);
+        redemptionRequestRepository.save(redemptionRequest);
+        student.get().setPoints(student.get().getPoints() - rewardItem.get().getPointsRequired());
+        studentRepository.save(student.get());
+        RedemptionResponseDto response = redemptionRequestMapper.toRedemptionResponse(redemptionRequest, redemptionRequest.getId());
+        response.setStudentName(student.get().getUser().getFullName());
+        response.setRewardItemName(rewardItem.get().getName());
+        response.setImageRewardItem(rewardItem.get().getImageUrl());
+        response.setAvatarUrl(student.get().getUser().getAvatarUrl());
+        return response;
+    }
 }
