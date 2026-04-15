@@ -24,4 +24,5 @@ public interface GameService {
     GameAttemptResponseDto replayGameRoundThroughGameAttempt(String gameAttemptId, GameAttemptRequestDto request);
     GamePlacementResponseDto updateGamePlacement(String gamePlacementId, Boolean correct, WasteBinCode code);
     List<GamePlacementResponseDto> updateGamePlacements(String gameAttemptId, List<GamePlacementRequestDto> requests);
+    List<GameRoundResponseDto> getGameRoundCompetition(String partnerId);
 }
