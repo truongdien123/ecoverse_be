@@ -33,8 +33,14 @@ public class StudentResponseDto {
     @JsonProperty("avatar_url")
     private String avatarUrl;
 
-    @JsonProperty("parent")
-    private ParentResponseDto parent;
+    @JsonProperty("parent_id")
+    private String parentId;
+
+    @JsonProperty("parent_name")
+    private String parentName;
+
+    @JsonProperty("partner_id")
+    private String partnerId;
 
     @JsonProperty("statistics")
     private StatisticStudent statistics;

@@ -1,5 +1,6 @@
 package com.fpt.ecoverse_backend.controllers;
 
+import com.fpt.ecoverse_backend.dtos.requests.PageFilterRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.WasteBinRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.WasteItemRequestDto;
 import com.fpt.ecoverse_backend.dtos.responses.WasteBinResponseDto;
@@ -10,6 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/wastes")
@@ -54,9 +57,9 @@ public class WasteController {
         return ResponseUtil.success("Update waste item successfully", response);
     }
 
-    @PutMapping("/bins/{waste_bin_id}/admins/{admin_id}")
+    @PutMapping(value = "/bins/{waste_bin_id}/admins/{admin_id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> updateWasteBin(@PathVariable("admin_id") String adminId, @PathVariable("waste_bin_id") String wasteBinId, WasteBinRequestDto request) {
+    public ResponseEntity<?> updateWasteBin(@PathVariable("admin_id") String adminId, @PathVariable("waste_bin_id") String wasteBinId, @ModelAttribute WasteBinRequestDto request) {
         WasteBinResponseDto response = wasteService.updateWasteBin(adminId, wasteBinId, request);
         return ResponseUtil.success("Update waste bin successfully", response);
     }
@@ -66,5 +69,18 @@ public class WasteController {
     public ResponseEntity<?> deleteWasteItem(@PathVariable("user_id") String userId, @PathVariable("waste_item_id") String wasteItemId) {
         WasteItemResponseDto response = wasteService.deleteWasteItem(userId, wasteItemId);
         return ResponseUtil.success("Delete waste item successfully", response);
+    }
+
+    @PostMapping("/items/{user_id}/get-list")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PARTNERSHIP')")
+    public ResponseEntity<?> getWasteItems(@PathVariable("user_id") String userId, @RequestBody PageFilterRequestDto pageFilterRequestDto) {
+        List<WasteItemResponseDto> response = wasteService.getWasteItemsByFilter(userId, pageFilterRequestDto);
+        return ResponseUtil.success("Get waste items by filter successfully", response);
+    }
+
+    @GetMapping("/items/{game_placement_id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PARTNERSHIP', 'STUDENT')")
+    public ResponseEntity<?> getDetailWasteItem(@PathVariable("game_placement_id") String gamePlacementId) {
+        return ResponseUtil.success("Get waste item detail successfully", wasteService.getDetailWasteItem(gamePlacementId));
     }
 }

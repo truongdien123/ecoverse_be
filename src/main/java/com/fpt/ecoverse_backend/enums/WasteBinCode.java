@@ -1,8 +1,8 @@
 package com.fpt.ecoverse_backend.enums;
 
 public enum WasteBinCode {
-    PLASTIC("Thùng nhựa & kim loại"),
-    PAPER("Thùng giấy"),
+    PLASTIC("Thùng Tái chế"),
+    PAPER("Thùng Vô cơ"),
     ORGANIC("Thùng hữu cơ"),
     OTHERS("Thùng khác");
 

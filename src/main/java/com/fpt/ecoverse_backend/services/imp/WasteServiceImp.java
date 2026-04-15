@@ -1,12 +1,11 @@
 package com.fpt.ecoverse_backend.services.imp;
 
+import com.fpt.ecoverse_backend.dtos.requests.PageFilterRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.WasteBinRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.WasteItemRequestDto;
 import com.fpt.ecoverse_backend.dtos.responses.WasteBinResponseDto;
 import com.fpt.ecoverse_backend.dtos.responses.WasteItemResponseDto;
-import com.fpt.ecoverse_backend.entities.User;
-import com.fpt.ecoverse_backend.entities.WasteBin;
-import com.fpt.ecoverse_backend.entities.WasteItem;
+import com.fpt.ecoverse_backend.entities.*;
 import com.fpt.ecoverse_backend.enums.CreatedBy;
 import com.fpt.ecoverse_backend.enums.UserType;
 import com.fpt.ecoverse_backend.enums.WasteBinCode;
@@ -15,12 +14,12 @@ import com.fpt.ecoverse_backend.exceptions.NotFoundException;
 import com.fpt.ecoverse_backend.mappers.WasteBinMapper;
 import com.fpt.ecoverse_backend.mappers.WasteItemMapper;
 import com.fpt.ecoverse_backend.projections.WasteItemWithOrderProjection;
-import com.fpt.ecoverse_backend.repositories.PartnerRepository;
-import com.fpt.ecoverse_backend.repositories.UserRepository;
-import com.fpt.ecoverse_backend.repositories.WasteBinRepository;
-import com.fpt.ecoverse_backend.repositories.WasteItemRepository;
+import com.fpt.ecoverse_backend.repositories.*;
 import com.fpt.ecoverse_backend.services.WasteService;
 import com.fpt.ecoverse_backend.utils.UploadFile;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -36,8 +35,13 @@ public class WasteServiceImp implements WasteService {
     private final UploadFile uploadFile;
     private final WasteBinRepository wasteBinRepository;
     private final WasteBinMapper wasteBinMapper;
+    private final GameAttemptRepository gameAttemptRepository;
+    private final GameRoundRepository gameRoundRepository;
+    private final StudentRepository studentRepository;
+    private final GameRoundItemRepository gameRoundItemRepository;
+    private final GamePlacementRepository gamePlacementRepository;
 
-    public WasteServiceImp(WasteItemRepository wasteItemRepository, WasteItemMapper wasteItemMapper, UserRepository userRepository, PartnerRepository partnerRepository, UploadFile uploadFile, WasteBinRepository wasteBinRepository, WasteBinMapper wasteBinMapper) {
+    public WasteServiceImp(WasteItemRepository wasteItemRepository, WasteItemMapper wasteItemMapper, UserRepository userRepository, PartnerRepository partnerRepository, UploadFile uploadFile, WasteBinRepository wasteBinRepository, WasteBinMapper wasteBinMapper, GameAttemptRepository gameAttemptRepository, GameRoundRepository gameRoundRepository, StudentRepository studentRepository, GameRoundItemRepository gameRoundItemRepository, GamePlacementRepository gamePlacementRepository) {
         this.wasteItemRepository = wasteItemRepository;
         this.wasteItemMapper = wasteItemMapper;
         this.userRepository = userRepository;
@@ -45,23 +49,40 @@ public class WasteServiceImp implements WasteService {
         this.uploadFile = uploadFile;
         this.wasteBinRepository = wasteBinRepository;
         this.wasteBinMapper = wasteBinMapper;
+        this.gameAttemptRepository = gameAttemptRepository;
+        this.gameRoundRepository = gameRoundRepository;
+        this.studentRepository = studentRepository;
+        this.gameRoundItemRepository = gameRoundItemRepository;
+        this.gamePlacementRepository = gamePlacementRepository;
     }
 
     @Override
     public WasteItemResponseDto createWasteItem(String userId, WasteItemRequestDto request) {
         CreatedBy userRole = getUserRole(userId);
-        WasteItem wasteItem = wasteItemMapper.toWasteItem(request, null, uploadFile);
+
+        WasteItem wasteItem = wasteItemMapper.toWasteItem(request, null);
         wasteItem.setCreatedBy(userRole);
         Optional<WasteBin> wasteBin = wasteBinRepository.findByCode(request.getCorrectBinCode());
         if (wasteBin.isEmpty()) {
             throw new NotFoundException("Not found waste bin or waste bin is not active");
         }
         wasteItem.setWasteBin(wasteBin.get());
+        if (userRole == CreatedBy.PARTNERSHIP) {
+            Optional<Partner> partnerOpt = partnerRepository.findById(userId);
+            if (partnerOpt.isEmpty()) {
+                throw new NotFoundException("Partner not found");
+            }
+            wasteItem.setPartner(partnerOpt.get());
+        }
+        if (request.getImage() != null) {
+            String imageUrl = uploadFile.imageToUrl(request.getImage());
+            wasteItem.setImageUrl(imageUrl);
+        }
         wasteItemRepository.save(wasteItem);
         WasteItemResponseDto response = wasteItemMapper.toWasteItemResponse(wasteItem, null);
         response.setCorrectBinCode(wasteBin.get().getCode());
         response.setCreatedBy(userRole.toString());
-        return wasteItemMapper.toWasteItemResponse(wasteItem, null);
+        return response;
     }
 
     @Override
@@ -77,7 +98,11 @@ public class WasteServiceImp implements WasteService {
         if (wasteBinExisting.isPresent()) {
             throw new ForbiddenException("Waste bin code already exist");
         }
-        WasteBin wasteBin = wasteBinMapper.toWasteBin(request, null, uploadFile);
+        WasteBin wasteBin = wasteBinMapper.toWasteBin(request, null);
+        if (request.getIcon() != null) {
+            String iconUrl = uploadFile.imageToUrl(request.getIcon());
+            wasteBin.setIconUrl(iconUrl);
+        }
         wasteBinRepository.save(wasteBin);
         return wasteBinMapper.toWasteBinResponse(wasteBin);
     }
@@ -94,6 +119,16 @@ public class WasteServiceImp implements WasteService {
         if (wasteItemWithOrder.isEmpty()) {
             throw new NotFoundException("Waste items not found");
         }
+        GameAttempt gameAttempt = new GameAttempt();
+        Optional<GameRound> gameRoundOptional = gameRoundRepository.findById(gameRoundId);
+        if (gameRoundOptional.isEmpty()) {
+            throw new NotFoundException("Game round not found");
+        }
+        gameAttempt.setGameRound(gameRoundOptional.get());
+        gameAttempt.setStudent(gameAttempt.getStudent());
+        gameAttempt.setTotalItems(wasteItemWithOrder.size());
+        gameAttempt.setAttemptNumber(1);
+        gameAttemptRepository.save(gameAttempt);
         return wasteItemWithOrder.stream().map(projection ->
                 wasteItemMapper.toWasteItemResponse(projection.getWasteItem(), projection.getOrderIndex())).toList();
     }
@@ -101,24 +136,23 @@ public class WasteServiceImp implements WasteService {
     @Override
     public WasteItemResponseDto updateWasteItem(String userId, String wasteItemId, WasteItemRequestDto request) {
         CreatedBy userRole = getUserRole(userId);
-        Optional<WasteItem> wasteItemOptional;
-        if (userRole == CreatedBy.PARTNERSHIP) {
-            wasteItemOptional = wasteItemRepository.findWasteItemByPartnerId(userId);
-            if (wasteItemOptional.isEmpty()) {
-                throw new NotFoundException("Waste item not found");
-            }
-            wasteItemMapper.toWasteItem(request, wasteItemOptional.get().getId(), uploadFile);
-            wasteItemRepository.save(wasteItemOptional.get());
-            return wasteItemMapper.toWasteItemResponse(wasteItemOptional.get(), null);
-        } else {
-            wasteItemOptional = wasteItemRepository.findById(wasteItemId);
-            if (wasteItemOptional.isEmpty()) {
-                throw new NotFoundException("Waste item not found");
-            }
-            wasteItemMapper.toWasteItem(request, wasteItemOptional.get().getId(), uploadFile);
-            wasteItemRepository.save(wasteItemOptional.get());
-            return wasteItemMapper.toWasteItemResponse(wasteItemOptional.get(), null);
+        Optional<WasteItem> wasteItemOptional = wasteItemRepository.findById(wasteItemId);
+        if (wasteItemOptional.isEmpty()) {
+            throw new NotFoundException("Waste item not found");
         }
+        WasteItem wasteItem = wasteItemOptional.get();
+        wasteItemMapper.updateWasteItem(wasteItem, request);
+        Optional<WasteBin> wasteBin = wasteBinRepository.findByCode(request.getCorrectBinCode());
+        if (wasteBin.isEmpty()) {
+            throw new NotFoundException("Not found waste bin or waste bin is not active");
+        }
+        wasteItem.setWasteBin(wasteBin.get());
+        if (request.getImage() != null) {
+            String imageUrl = uploadFile.imageToUrl(request.getImage());
+            wasteItem.setImageUrl(imageUrl);
+        }
+        wasteItemRepository.save(wasteItem);
+        return wasteItemMapper.toWasteItemResponse(wasteItem, null);
     }
 
     @Override
@@ -131,30 +165,60 @@ public class WasteServiceImp implements WasteService {
         if (wasteBinOptional.isEmpty()) {
             throw new NotFoundException("Waste bin not found");
         }
-        wasteBinMapper.toWasteBin(request, wasteBinOptional.get().getId(), uploadFile);
-        wasteBinRepository.save(wasteBinOptional.get());
-        return wasteBinMapper.toWasteBinResponse(wasteBinOptional.get());
+        WasteBin wasteBin = wasteBinMapper.toWasteBin(request, wasteBinOptional.get().getId());
+        if (request.getIcon() != null) {
+            String iconUrl = uploadFile.imageToUrl(request.getIcon());
+            wasteBin.setIconUrl(iconUrl);
+        }
+        wasteBinRepository.save(wasteBin);
+        return wasteBinMapper.toWasteBinResponse(wasteBin);
     }
 
     @Override
     public WasteItemResponseDto deleteWasteItem(String userId, String wasteItemId) {
         CreatedBy userRole = getUserRole(userId);
-        Optional<WasteItem> wasteItemOptional;
-        if (userRole == CreatedBy.PARTNERSHIP) {
-            wasteItemOptional = wasteItemRepository.findWasteItemByPartnerId(userId);
-            if (wasteItemOptional.isEmpty()) {
-                throw new NotFoundException("Waste item not found");
-            }
-            wasteItemRepository.delete(wasteItemOptional.get());
-            return wasteItemMapper.toWasteItemResponse(wasteItemOptional.get(), null);
-        } else {
-            wasteItemOptional = wasteItemRepository.findById(wasteItemId);
-            if (wasteItemOptional.isEmpty()) {
-                throw new NotFoundException("Waste item not found");
-            }
-            wasteItemRepository.delete(wasteItemOptional.get());
-            return wasteItemMapper.toWasteItemResponse(wasteItemOptional.get(), null);
+        Optional<WasteItem> wasteItemOptional = wasteItemRepository.findById(wasteItemId);
+        if (wasteItemOptional.isEmpty()) {
+            throw new NotFoundException("Waste item not found");
         }
+        wasteItemRepository.delete(wasteItemOptional.get());
+        return wasteItemMapper.toWasteItemResponse(wasteItemOptional.get(), null);
+    }
+
+    @Override
+    public List<WasteItemResponseDto> getWasteItemsByFilter(String userId, PageFilterRequestDto pageFilterRequestDto) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isEmpty()) {
+            throw new NotFoundException("User not found");
+        }
+        Pageable pageable = PageRequest.of(
+                pageFilterRequestDto.getPageNo()-1,
+                pageFilterRequestDto.getPageSize());
+        WasteBinCode type = null;
+        if (pageFilterRequestDto.getType() != null) {
+            type = WasteBinCode.valueOf(pageFilterRequestDto.getType().toUpperCase());
+        }
+        Page<WasteItem> wasteItems = wasteItemRepository.findWasteItemsByUserId(userId, type, pageFilterRequestDto.getSearching(), pageable);
+
+        return wasteItems.stream().map(wasteItem -> {
+            WasteItemResponseDto response = wasteItemMapper.toWasteItemResponse(wasteItem, null);
+            response.setCorrectBinCode(wasteItem.getWasteBin().getCode());
+            response.setCreatedBy(wasteItem.getCreatedBy().toString());
+            return response;
+        }).toList();
+    }
+
+    @Override
+    public WasteItemResponseDto getDetailWasteItem(String gamePlacementId) {
+        Optional<GamePlacement> gamePlacement = gamePlacementRepository.findById(gamePlacementId);
+        if (gamePlacement.isEmpty()) {
+            throw new NotFoundException("Not found game placement");
+        }
+        WasteItem wasteItem = gamePlacement.get().getWasteItem();
+        GameAttempt gameAttempt = gamePlacement.get().getGameAttempt();
+        gameAttempt.setAttemptNumber(gameAttempt.getAttemptNumber()+1);
+        gameAttemptRepository.save(gameAttempt);
+        return wasteItemMapper.toWasteItemResponse(wasteItem, null);
     }
 
     private CreatedBy getUserRole(String userId) {
@@ -167,7 +231,7 @@ public class WasteServiceImp implements WasteService {
         } else if (userOpt.get().getRole() == UserType.PARTNERSHIP) {
             return CreatedBy.PARTNERSHIP;
         }
-        throw new ForbiddenException("Only partnership and admin can create waste item");
+        return CreatedBy.ADMIN;
     }
 }
 

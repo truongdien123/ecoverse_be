@@ -2,11 +2,14 @@ package com.fpt.ecoverse_backend.services.imp;
 
 import com.fpt.ecoverse_backend.dtos.requests.ChangePasswordRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.ForgotPasswordRequestDto;
+import com.fpt.ecoverse_backend.dtos.StatisticPartner;
+import com.fpt.ecoverse_backend.dtos.StatisticStudent;
 import com.fpt.ecoverse_backend.dtos.requests.LoginRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.ResetPasswordRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.StudentLoginRequestDto;
 import com.fpt.ecoverse_backend.dtos.responses.*;
 import com.fpt.ecoverse_backend.entities.OtpToken;
+import com.fpt.ecoverse_backend.entities.Parent;
 import com.fpt.ecoverse_backend.entities.Partner;
 import com.fpt.ecoverse_backend.entities.Student;
 import com.fpt.ecoverse_backend.entities.User;
@@ -16,12 +19,14 @@ import com.fpt.ecoverse_backend.exceptions.BadRequestException;
 import com.fpt.ecoverse_backend.exceptions.NotFoundException;
 import com.fpt.ecoverse_backend.filter.CustomUserDetails;
 import com.fpt.ecoverse_backend.repositories.OtpTokenRepository;
+import com.fpt.ecoverse_backend.repositories.ParentRepository;
 import com.fpt.ecoverse_backend.repositories.PartnerRepository;
 import com.fpt.ecoverse_backend.repositories.StudentRepository;
 import com.fpt.ecoverse_backend.repositories.UserRepository;
 import com.fpt.ecoverse_backend.services.AuthService;
 import com.fpt.ecoverse_backend.services.CustomUserDetailsService;
 import com.fpt.ecoverse_backend.services.MailService;
+import com.fpt.ecoverse_backend.services.StatisticService;
 import com.fpt.ecoverse_backend.utils.JwtUtils;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -47,6 +52,8 @@ public class AuthServiceImp implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final OtpTokenRepository otpTokenRepository;
     private final MailService mailService;
+    private final ParentRepository parentRepository;
+    private final StatisticService statisticService;
 
     public AuthServiceImp(JwtUtils jwtUtils,
                           CustomUserDetailsService customUserDetailsService,
@@ -55,7 +62,9 @@ public class AuthServiceImp implements AuthService {
                           PartnerRepository partnerRepository,
                           PasswordEncoder passwordEncoder,
                           OtpTokenRepository otpTokenRepository,
-                          MailService mailService) {
+                          MailService mailService,
+                          ParentRepository parentRepository,
+                          StatisticService statisticService) {
         this.jwtUtils = jwtUtils;
         this.customUserDetailsService = customUserDetailsService;
         this.userRepository = userRepository;
@@ -64,6 +73,8 @@ public class AuthServiceImp implements AuthService {
         this.passwordEncoder = passwordEncoder;
         this.otpTokenRepository = otpTokenRepository;
         this.mailService = mailService;
+        this.parentRepository = parentRepository;
+        this.statisticService = statisticService;
     }
 
     @Override
@@ -113,7 +124,7 @@ public class AuthServiceImp implements AuthService {
         CustomUserDetails customUser = (CustomUserDetails) userDetails;
 
         if (!customUser.isEnabled()) {
-            throw new DisabledException("Student account is disabled");
+            throw new DisabledException("Student account is disabled.");
         }
 
         Student student = studentRepository.findByStudentCode(request.getStudentCode())
@@ -195,6 +206,8 @@ public class AuthServiceImp implements AuthService {
             case PARENT -> {
                 User user = userRepository.findById(customUser.getId())
                         .orElseThrow(() -> new NotFoundException("Parent not found"));
+                Parent parent = parentRepository.findById(customUser.getId())
+                        .orElseThrow(() -> new NotFoundException("Parent profile not found"));
                 yield new ParentResponseDto(
                         user.getId(),
                         user.getFullName(),
@@ -203,7 +216,7 @@ public class AuthServiceImp implements AuthService {
                         user.getEmail(),
                         user.getAvatarUrl(),
                         user.getActive(),
-                        null
+                        parent.getStudents().size()
                 );
             }
             case PARTNERSHIP -> {
@@ -211,6 +224,7 @@ public class AuthServiceImp implements AuthService {
                         .orElseThrow(() -> new NotFoundException("Partner not found"));
                 Partner partner = partnerRepository.findById(customUser.getId())
                         .orElseThrow(() -> new NotFoundException("Partner profile not found"));
+                StatisticPartner statisticPartner = statisticService.getPartnerStatistic(partner.getId());
                 yield new PartnerResponseDto(
                         partner.getId(),
                         partner.getOrganizationName(),
@@ -222,7 +236,7 @@ public class AuthServiceImp implements AuthService {
                         user.getAvatarUrl(),
                         user.getCreatedAt(),
                         user.getUpdatedAt(),
-                        null
+                        statisticPartner
                 );
             }
             default -> throw new BadCredentialsException("Unsupported user type");
@@ -230,6 +244,13 @@ public class AuthServiceImp implements AuthService {
     }
 
     private StudentResponseDto buildStudentInfo(User user, Student student) {
+        String parentId = null;
+        String parentName = null;
+        if (student.getParent() != null) {
+            parentId = student.getParent().getId();
+            parentName = student.getParent().getUser().getFullName();
+        }
+        StatisticStudent statisticStudent = statisticService.getStudentStatistic(student.getId());
         return new StudentResponseDto(
                 student.getId(),
                 user.getFullName(),
@@ -237,8 +258,10 @@ public class AuthServiceImp implements AuthService {
                 student.getGrade(),
                 student.getPoints() != null ? student.getPoints() : 0,
                 user.getAvatarUrl(),
-                null,
-                null,
+                parentId,
+                parentName,
+                student.getPartner().getId(),
+                statisticStudent,
                 user.getCreatedAt(),
                 user.getUpdatedAt(),
                 user.getActive() != null && user.getActive()

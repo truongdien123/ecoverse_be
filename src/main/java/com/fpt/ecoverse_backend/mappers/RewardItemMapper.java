@@ -15,9 +15,23 @@ public interface RewardItemMapper {
         @Mapping(target = "description", source = "request.description"),
         @Mapping(target = "pointsRequired", source = "request.pointRequired"),
         @Mapping(target = "id", source = "id"),
-        @Mapping(target = "imageUrl", source = "request.image", qualifiedByName = "convertImg")
+        @Mapping(target = "available", source = "request.available"),
+        @Mapping(target = "redemptionRequests", ignore = true),
+        @Mapping(target = "partner", ignore = true)
     })
-    RewardItem toRewardItem(RewardItemRequestDto request, String id, @Context UploadFile uploadFile);
+    RewardItem toRewardItem(RewardItemRequestDto request, String id);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mappings({
+            @Mapping(target = "name", source = "request.name"),
+            @Mapping(target = "description", source = "request.description"),
+            @Mapping(target = "pointsRequired", source = "request.pointRequired"),
+            @Mapping(target = "available", source = "request.available"),
+            @Mapping(target = "redemptionRequests", ignore = true),
+            @Mapping(target = "partner", ignore = true),
+            @Mapping(target = "id", ignore = true)
+    })
+    void updateRewardItem(@MappingTarget RewardItem entity, RewardItemRequestDto request);
 
     @Mappings({
         @Mapping(target = "id", source = "rewardItem.id"),
@@ -29,12 +43,4 @@ public interface RewardItemMapper {
     })
     RewardItemResponseDto toRewardItemResponse(RewardItem rewardItem);
 
-
-    @Named("convertImg")
-    static String convertImg(MultipartFile multipartFile, @Context UploadFile uploadFile) {
-        if (multipartFile == null) {
-            return "";
-        }
-        return uploadFile.imageToUrl(multipartFile);
-    }
 }

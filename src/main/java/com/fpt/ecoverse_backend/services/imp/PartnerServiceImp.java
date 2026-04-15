@@ -17,6 +17,7 @@ import com.fpt.ecoverse_backend.mappers.StudentMapper;
 import com.fpt.ecoverse_backend.mappers.UserMapper;
 import com.fpt.ecoverse_backend.repositories.*;
 import com.fpt.ecoverse_backend.services.PartnerService;
+import com.fpt.ecoverse_backend.services.StatisticService;
 import com.fpt.ecoverse_backend.utils.UploadFile;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -24,13 +25,13 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -40,7 +41,7 @@ import java.util.regex.Pattern;
 public class PartnerServiceImp implements PartnerService {
 
     private static final Pattern EMAIL_REGEX =
-            Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
+            Pattern.compile("^[A-Za-z0-9]+([._+-]?[A-Za-z0-9]+)*@[A-Za-z0-9-]+(\\\\.[A-Za-z0-9-]+)+$");
     private static final Pattern PHONE_REGEX =
             Pattern.compile("^\\+?[0-9]{9,11}$");
     private static final String CHARACTERS =
@@ -58,8 +59,9 @@ public class PartnerServiceImp implements PartnerService {
     private final ParentMapper parentMapper;
     private final StudentMapper studentMapper;
     private final UserMapper userMapper;
+    private final StatisticService statisticService;
 
-    public PartnerServiceImp(PartnerRepository partnerRepository, PartnerMapper partnerMapper, PasswordEncoder passwordEncoder, UploadFile uploadFile, ParentRepository parentRepository, StudentRepository studentRepository, UserRepository userRepository, ApplicationEventPublisher eventPublisher, ParentMapper parentMapper, StudentMapper studentMapper, UserMapper userMapper) {
+    public PartnerServiceImp(PartnerRepository partnerRepository, PartnerMapper partnerMapper, PasswordEncoder passwordEncoder, UploadFile uploadFile, ParentRepository parentRepository, StudentRepository studentRepository, UserRepository userRepository, ApplicationEventPublisher eventPublisher, ParentMapper parentMapper, StudentMapper studentMapper, UserMapper userMapper, StatisticService statisticService) {
         this.partnerRepository = partnerRepository;
         this.partnerMapper = partnerMapper;
         this.passwordEncoder = passwordEncoder;
@@ -71,6 +73,7 @@ public class PartnerServiceImp implements PartnerService {
         this.parentMapper = parentMapper;
         this.studentMapper = studentMapper;
         this.userMapper = userMapper;
+        this.statisticService = statisticService;
     }
 
     @Override
@@ -105,13 +108,7 @@ public class PartnerServiceImp implements PartnerService {
             throw new NotFoundException("Not found user for partner");
         }
         PartnerResponseDto partnerResponseDto = partnerMapper.toPartnerResponse(partner.get(), user.get());
-        StatisticPartner statisticPartner = new StatisticPartner();
-        statisticPartner.setTotalParents(parentRepository.countParentsByPartnerId(partnerId));
-        statisticPartner.setTotalStudents(studentRepository.countStudentByPartnerId(partnerId));
-        statisticPartner.setTotalActiveGames(0);
-        statisticPartner.setTotalActiveQuizzes(0);
-        statisticPartner.setTotalPointDistributed(0);
-        statisticPartner.setTotalRedemptions(0);
+        StatisticPartner statisticPartner = statisticService.getPartnerStatistic(partnerId);
         partnerResponseDto.setStatistics(statisticPartner);
         return partnerResponseDto;
     }
@@ -133,25 +130,19 @@ public class PartnerServiceImp implements PartnerService {
         }
         partnerRepository.save(partner.get());
         PartnerResponseDto partnerResponseDto = partnerMapper.toPartnerResponse(partner.get(), user.get());
-        StatisticPartner statisticPartner = new StatisticPartner();
-        statisticPartner.setTotalParents(parentRepository.countParentsByPartnerId(partnerId));
-        statisticPartner.setTotalStudents(studentRepository.countStudentByPartnerId(partnerId));
-        statisticPartner.setTotalActiveGames(0);
-        statisticPartner.setTotalActiveQuizzes(0);
-        statisticPartner.setTotalPointDistributed(0);
-        statisticPartner.setTotalRedemptions(0);
+        StatisticPartner statisticPartner = statisticService.getPartnerStatistic(partnerId);
         partnerResponseDto.setStatistics(statisticPartner);
         return partnerResponseDto;
     }
 
     @Override
     @Transactional
-    public BulkCreateReportResponseDto bulkCreate(MultipartFile file, String partnerId) {
+    public BulkCreateReportResponseDto bulkCreate(byte[] bytes, String partnerId) {
         Optional<Partner> partner = partnerRepository.findById(partnerId);
         if (partner.isEmpty()) {
             throw new NotFoundException("Not found partner");
         }
-        ParsedTwoSheets parsed = readTwoSheets(file);
+        ParsedTwoSheets parsed = readTwoSheets(bytes);
         List<RowResult<ParentExcelRowDto>> parentResults = new ArrayList<>();
         List<RowResult<StudentExcelRowDto>> studentResults = new ArrayList<>();
         List<ParentCredentialMail> createdParentMails = new ArrayList<>();
@@ -189,6 +180,7 @@ public class PartnerServiceImp implements PartnerService {
             user.setAddress(dto.getAddress().trim());
             user.setPassword(rawPassword);
             parent.setPartner(partner.get());
+            user.setRole(UserType.PARENT);
             userRepository.save(user);
             parent.setUser(user);
             parentRepository.save(parent);
@@ -215,6 +207,7 @@ public class PartnerServiceImp implements PartnerService {
             student.setGrade(dto.getGrade());
             student.setStudentCode(studentCode);
             student.setPartner(partner.get());
+            user.setRole(UserType.STUDENT);
             userRepository.save(user);
             student.setUser(user);
             studentRepository.save(student);
@@ -277,11 +270,11 @@ public class PartnerServiceImp implements PartnerService {
             throw new NotFoundException("Not found user for student");
         }
         StatisticStudent statistic = new StatisticStudent();
-        StudentResponseDto studentResponseDto = studentMapper.toStudentResponse(student.get(), user.get());
+        StudentResponseDto studentResponseDto = studentMapper.toStudentResponse(student.get());
         if (student.get().getParent() != null) {
             Optional<Parent> parent = parentRepository.findById(student.get().getParent().getId());
             Optional<User> parentUser = userRepository.findById(parent.get().getUser().getId());
-            studentResponseDto.setParent(parentMapper.toParentResponse(parent.get(), parentUser.get()));
+            studentResponseDto.setParentId(parent.get().getId());
         }
         studentResponseDto.setStatistics(statistic);
         return studentResponseDto;
@@ -305,7 +298,7 @@ public class PartnerServiceImp implements PartnerService {
             user.get().setActive(false);
             userRepository.save(user.get());
         }
-        return studentMapper.toStudentResponse(student.get(), user.get());
+        return studentMapper.toStudentResponse(student.get());
     }
 
     @Override
@@ -319,7 +312,14 @@ public class PartnerServiceImp implements PartnerService {
             List<StudentResponseDto> list = students.getContent().stream().map(row -> {
                 Student student = (Student) row[0];
                 User user = (User) row[1];
-                return studentMapper.toStudentResponse(student, user);
+                StudentResponseDto response = studentMapper.toStudentResponse(student);
+                 if (student.getParent() != null) {
+                    Optional<User> parentUser = userRepository.findById(student.getParent().getUser().getId());
+                    response.setParentId(parentUser.get().getId());
+                    response.setParentName(parentUser.get().getFullName());
+                    response.setPartnerId(student.getPartner().getId());
+                }
+                return response;
             }).toList();
             return new UserListResponseDto<>(
                     list,
@@ -332,8 +332,11 @@ public class PartnerServiceImp implements PartnerService {
                     partnerId, pageFilterRequestDto.getSearching(), pageFilterRequestDto.getHasChildren(), pageable);
             List<ParentResponseDto> list = parents.getContent().stream().map(row -> {
                 Parent parent = (Parent) row[0];
+                List<Student> studentOpt = studentRepository.findByParentId(parent.getId());
                 User user = (User) row[1];
-                return parentMapper.toParentResponse(parent, user);
+                ParentResponseDto parentResponse = parentMapper.toParentResponse(parent);
+                parentResponse.setNumberChildren(studentOpt.size());
+                return parentResponse;
             }).toList();
             return new UserListResponseDto<>(
                     list,
@@ -364,13 +367,17 @@ public class PartnerServiceImp implements PartnerService {
                     dto.getGrade(),
                     dto.getClassNumber()
             );
+            Optional<Student> studentOptional = studentRepository.findByStudentCode(studentCode);
+            if (studentOptional.isPresent()) {
+                throw new BadRequestException("Student have class number in class already exist");
+            }
             student.setStudentCode(studentCode);
             return studentRepository.save(student);
 
         }).toList();
         List<StudentResponseDto> response = new ArrayList<>();
         for (Student student : students) {
-            response.add(studentMapper.toStudentResponse(student, student.getUser()));
+            response.add(studentMapper.toStudentResponse(student));
         }
         return response;
     }
@@ -387,23 +394,38 @@ public class PartnerServiceImp implements PartnerService {
     }
 
     @Override
+    @Transactional
     public List<ParentResponseDto> createParents(String partnerId, List<ParentRequestDto> request) {
         Optional<Partner> partner = partnerRepository.findById(partnerId);
         if (partner.isEmpty()) {
             throw new NotFoundException("Not found partner");
         }
+        List<ParentCredentialMail> createdParentMails = new ArrayList<>();
         List<Parent> parents = request.stream().map(dto -> {
-            User user = userMapper.toUser(dto, null, uploadFile);
+            Optional<User> userOptional = userRepository.findByEmail(dto.getEmail());
+            if (userOptional.isPresent()) {
+                throw new BadRequestException("Email already exist: " + dto.getEmail());
+            }
+            Optional<User> phoneOptional = userRepository.findByPhoneNumber(dto.getPhoneNumber());
+            if (phoneOptional.isPresent()) {
+                throw new BadRequestException("Phone number already exist: " + dto.getPhoneNumber());
+            }
+            User user = userMapper.toUser(dto, null);
             user.setRole(UserType.PARENT);
+            String password = generatePassword();
+            user.setPassword(passwordEncoder.encode(password));
             User savedUser = userRepository.save(user);
             Parent parent = new Parent();
             parent.setUser(savedUser);
             parent.setPartner(partner.get());
+            ParentCredentialMail mail = new ParentCredentialMail(savedUser.getEmail(), savedUser.getFullName(), password);
+            createdParentMails.add(mail);
             return parentRepository.save(parent);
         }).toList();
+        eventPublisher.publishEvent(new ParentsCreatedEvent(createdParentMails));
         List<ParentResponseDto> response = new ArrayList<>();
         for (Parent parent : parents) {
-            response.add(parentMapper.toParentResponse(parent, parent.getUser()));
+            response.add(parentMapper.toParentResponse(parent));
         }
         return response;
     }
@@ -484,8 +506,13 @@ public class PartnerServiceImp implements PartnerService {
         return null;
     }
 
-    private ParsedTwoSheets readTwoSheets(MultipartFile file) {
-        try(Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+    private ParsedTwoSheets readTwoSheets(byte[] bytes) {
+        try {
+            InputStream inputStream = new ByteArrayInputStream(bytes);
+            Workbook workbook = WorkbookFactory.create(inputStream);
+            if (workbook.getNumberOfSheets() < 2) {
+                throw new FileHandlingException("Excel file must contain at least 2 sheets");
+            }
             DataFormatter fmt = new DataFormatter();
             Sheet parentSheet = workbook.getSheetAt(0);
             Sheet studentSheet = workbook.getSheetAt(1);

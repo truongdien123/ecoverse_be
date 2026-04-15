@@ -18,6 +18,7 @@ import com.fpt.ecoverse_backend.services.ParentService;
 import com.fpt.ecoverse_backend.utils.UploadFile;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,12 +44,12 @@ public class ParentServiceImp implements ParentService {
     }
 
     @Override
-    public ParentResponseDto linkParentToStudent(String parentId, String studentId) {
+    public ParentResponseDto linkParentToStudent(String parentId, String studentCode) {
         Optional<Parent> parentOpt = parentRepository.findById(parentId);
         if (parentOpt.isEmpty()) {
             throw new NotFoundException("Parent not found");
         }
-        Optional<Student> studentOpt = studentRepository.findById(studentId);
+        Optional<Student> studentOpt = studentRepository.findByStudentCode(studentCode);
         if (studentOpt.isEmpty()) {
             throw new NotFoundException("Student not found");
         }
@@ -59,11 +60,11 @@ public class ParentServiceImp implements ParentService {
         student.setParent(parentOpt.get());
         studentRepository.save(student);
         List<Student> students = studentRepository.findByParentId(parentId);
-        ParentResponseDto response = parentMapper.toParentResponse(parentOpt.get(), parentOpt.get().getUser());
+        ParentResponseDto response = parentMapper.toParentResponse(parentOpt.get());
         List<StudentResponseDto> studentResponseDtos = students.stream()
-                .map(s -> studentMapper.toStudentResponse(s, s.getUser()))
+                .map(studentMapper::toStudentResponse)
                 .toList();
-        response.setStudents(studentResponseDtos);
+        response.setNumberChildren(students.size());
         return response;
     }
 
@@ -74,7 +75,15 @@ public class ParentServiceImp implements ParentService {
             throw new NotFoundException("Parent not found");
         }
         List<Student> students = studentRepository.findByParentId(parentId);
-        return students.stream().map(st -> studentMapper.toStudentResponse(st, st.getUser())).toList();
+        List<StudentResponseDto> response = new ArrayList<>();
+        for (Student student : students) {
+            StudentResponseDto studentResponseDto = studentMapper.toStudentResponse(student);
+            studentResponseDto.setParentId(parentId);
+            studentResponseDto.setParentName(parent.get().getUser().getFullName());
+            studentResponseDto.setPartnerId(student.getPartner().getId());
+            response.add(studentResponseDto);
+        }
+        return response;
     }
 
     @Override
@@ -83,7 +92,10 @@ public class ParentServiceImp implements ParentService {
         if (parent.isEmpty()) {
             throw new NotFoundException("Parent not found");
         }
-        return parentMapper.toParentResponse(parent.get(), parent.get().getUser());
+        List<Student> students = studentRepository.findByParentId(parentId);
+        ParentResponseDto response = parentMapper.toParentResponse(parent.get());
+        response.setNumberChildren(students.size());
+        return response;
     }
 
     @Override
@@ -92,9 +104,17 @@ public class ParentServiceImp implements ParentService {
         if (parent.isEmpty()) {
             throw new NotFoundException("Parent not found");
         }
-        User user = userMapper.toUser(request, parentId, uploadFile);
+        User user = parent.get().getUser();
+        userMapper.updateUserFromDto(request, user);
+        if (request.getAvatar() != null) {
+            String avatarUrl = uploadFile.imageToUrl(request.getAvatar());
+            user.setAvatarUrl(avatarUrl);
+        }
+        List<Student> students = studentRepository.findByParentId(parentId);
         userRepository.save(user);
-        return parentMapper.toParentResponse(parent.get(), user);
+        ParentResponseDto response = parentMapper.toParentResponse(parent.get());
+        response.setNumberChildren(students.size());
+        return response;
     }
 
     @Override
@@ -105,7 +125,7 @@ public class ParentServiceImp implements ParentService {
         }
         parentRepository.delete(parentOpt.get());
         userRepository.delete(parentOpt.get().getUser());
-        return parentMapper.toParentResponse(parentOpt.get(), parentOpt.get().getUser());
+        return parentMapper.toParentResponse(parentOpt.get());
     }
 
 

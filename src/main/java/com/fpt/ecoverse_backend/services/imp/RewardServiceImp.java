@@ -40,10 +40,15 @@ public class RewardServiceImp implements RewardService {
         if (partnerOpt.isEmpty()) {
             throw new NotFoundException("Partner not found");
         }
-        RewardItem rewardItem = rewardItemMapper.toRewardItem(request, null, uploadFile);
+        RewardItem rewardItem = rewardItemMapper.toRewardItem(request, null);
+        if (request.getImage() != null && !request.getImage().isEmpty()) {
+            rewardItem.setImageUrl(uploadFile.imageToUrl(request.getImage()));
+        }
         rewardItem.setPartner(partnerOpt.get());
         rewardItemRepository.save(rewardItem);
-        return rewardItemMapper.toRewardItemResponse(rewardItem);
+        RewardItemResponseDto response = rewardItemMapper.toRewardItemResponse(rewardItem);
+        response.setPartnerId(partnerId);
+        return response;
     }
 
     @Override
@@ -57,7 +62,9 @@ public class RewardServiceImp implements RewardService {
                 pageFilterRequestDto.getPageSize());
         Page<RewardItem> rewardItemsPage = rewardItemRepository.findRewardItems(partnerId, pageable);
         List<RewardItem> rewardItems = rewardItemsPage.getContent();
-        return rewardItems.stream().map(rewardItemMapper::toRewardItemResponse).toList();
+        List<RewardItemResponseDto> response = rewardItems.stream().map(rewardItemMapper::toRewardItemResponse).toList();
+        response.forEach(r -> r.setPartnerId(partnerId));
+        return response;
     }
 
     @Override
@@ -70,7 +77,9 @@ public class RewardServiceImp implements RewardService {
          if (rewardItemOpt.isEmpty() || !rewardItemOpt.get().getPartner().getId().equals(partnerId)) {
              throw new NotFoundException("Reward item not found");
          }
-         return rewardItemMapper.toRewardItemResponse(rewardItemOpt.get());
+        RewardItemResponseDto response = rewardItemMapper.toRewardItemResponse(rewardItemOpt.get());
+        response.setPartnerId(partnerId);
+        return response;
     }
 
     @Override
@@ -83,9 +92,15 @@ public class RewardServiceImp implements RewardService {
         if (rewardItemOpt.isEmpty() || !rewardItemOpt.get().getPartner().getId().equals(partnerId)) {
             throw new NotFoundException("Reward item not found");
         }
-        RewardItem rewardItem = rewardItemMapper.toRewardItem(request, rewardItemId, uploadFile);
+        RewardItem rewardItem = rewardItemOpt.get();
+        rewardItemMapper.updateRewardItem(rewardItem, request);
+        if (request.getImage() != null && !request.getImage().isEmpty()) {
+            rewardItem.setImageUrl(uploadFile.imageToUrl(request.getImage()));
+        }
         rewardItemRepository.save(rewardItem);
-        return rewardItemMapper.toRewardItemResponse(rewardItem);
+        RewardItemResponseDto response = rewardItemMapper.toRewardItemResponse(rewardItem);
+        response.setPartnerId(partnerId);
+        return response;
     }
 
     @Override

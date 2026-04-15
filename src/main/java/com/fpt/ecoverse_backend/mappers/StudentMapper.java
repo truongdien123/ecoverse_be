@@ -12,17 +12,17 @@ import org.mapstruct.Mappings;
 public interface StudentMapper {
 
     @Mappings({
-            @Mapping(target = "studentId", source = "student.id"),
+            @Mapping(target = "studentId", source = "id"),
             @Mapping(target = "fullName", source = "user.fullName"),
-            @Mapping(target = "studentCode", source = "student.studentCode"),
-            @Mapping(target = "grade", source = "student.grade"),
-            @Mapping(target = "points", source = "student.points"),
+            @Mapping(target = "studentCode", source = "studentCode"),
+            @Mapping(target = "grade", source = "grade"),
+            @Mapping(target = "points", source = "points"),
             @Mapping(target = "avatarUrl", source = "user.avatarUrl"),
             @Mapping(target = "createdDate", source = "user.createdAt"),
             @Mapping(target = "updatedDate", source = "user.updatedAt"),
             @Mapping(target = "active", source = "user.active")
     })
-    StudentResponseDto toStudentResponse(Student student, User user);
+    StudentResponseDto toStudentResponse(Student student);
 
     @Mappings({
             @Mapping(target = "grade", source = "request.grade"),

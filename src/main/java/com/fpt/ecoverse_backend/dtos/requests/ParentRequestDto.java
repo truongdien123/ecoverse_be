@@ -12,13 +12,13 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ParentRequestDto {
-    @JsonProperty("full_name")
+
+    private String email;
+
     private String fullName;
 
-    @JsonProperty("address")
     private String address;
 
-    @JsonProperty("phone_number")
     private String phoneNumber;
 
     private MultipartFile avatar;

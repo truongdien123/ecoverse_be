@@ -5,12 +5,14 @@ import com.fpt.ecoverse_backend.dtos.responses.*;
 import com.fpt.ecoverse_backend.services.PartnerService;
 import com.fpt.ecoverse_backend.utils.ResponseUtil;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -45,9 +47,18 @@ public class PartnerController {
 
     @PostMapping(value = "/{partnership_id}/bulk-create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('PARTNERSHIP')")
-    public ResponseEntity<?> bulkCreate(@PathVariable("partnership_id") String partnerId, @ModelAttribute @RequestParam("file") MultipartFile file) {
-        BulkCreateReportResponseDto response = partnerService.bulkCreate(file, partnerId);
-        return ResponseUtil.success("Bulk create students and parent successfully. Please check file report", response);
+    public ResponseEntity<?> bulkCreate(
+            @PathVariable("partnership_id") String partnerId,
+            @RequestParam("file") MultipartFile file) throws IOException {
+
+        byte[] bytes = file.getBytes();
+
+        BulkCreateReportResponseDto response = partnerService.bulkCreate(bytes, partnerId);
+
+        return ResponseUtil.success(
+                "Bulk create students and parent successfully. Please check file report",
+                response
+        );
     }
 
     @GetMapping("/{partnership_id}/students/{student_id}")
@@ -64,7 +75,7 @@ public class PartnerController {
         return ResponseUtil.success("Change status student successfully", response);
     }
 
-    @GetMapping("/{partnership_id}/accounts")
+    @PostMapping("/{partnership_id}/accounts")
     @PreAuthorize("hasAnyRole('PARTNERSHIP', 'ADMIN')")
     public ResponseEntity<?> getListUser(@PathVariable("partnership_id") String partnerId, @RequestBody PageFilterRequestDto pageFilterRequestDto) {
         UserListResponseDto<?> list = partnerService.getListUser(partnerId, pageFilterRequestDto);

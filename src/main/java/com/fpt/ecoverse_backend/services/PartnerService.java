@@ -10,7 +10,7 @@ public interface PartnerService {
     PartnerResponseDto createPartner(PartnerRegisterRequestDto request);
     PartnerResponseDto getDetailPartner(String partnerId);
     PartnerResponseDto updatePartner(String partnerId, PartnerUpdateRequestDto request);
-    BulkCreateReportResponseDto bulkCreate(MultipartFile file, String partnerId);
+    BulkCreateReportResponseDto bulkCreate(byte[] bytes, String partnerId);
     StudentResponseDto getStudentDetail(String partnerId, String studentId);
     StudentResponseDto changeStatusStudent(String partnerId, String studentId, String status);
     UserListResponseDto<?> getListUser(String partnerId, PageFilterRequestDto pageFilterRequestDto);
