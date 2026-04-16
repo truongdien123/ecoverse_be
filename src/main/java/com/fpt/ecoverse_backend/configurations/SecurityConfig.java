@@ -104,7 +104,7 @@ public class SecurityConfig {
 
                         // Waste endpoints
                         .requestMatchers(HttpMethod.GET, "/wastes/bins").hasAnyRole("STUDENT", "PARTNERSHIP", "ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/wastes/{user_id}").hasAnyRole("PARTNERSHIP", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/wastes/{user_id}").hasAnyRole("PARTNERSHIP", "ADMIN", "STUDENT")
                         .requestMatchers(HttpMethod.POST, "wastes/bins/{admin_id}").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/wastes/items/users/{user_id}/game-rounds/{game_round_id}").hasAnyRole("STUDENT", "PARTNERSHIP", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/wastes/items/{waste_item_id}/users/{user_id}").hasAnyRole("PARTNERSHIP", "ADMIN")
