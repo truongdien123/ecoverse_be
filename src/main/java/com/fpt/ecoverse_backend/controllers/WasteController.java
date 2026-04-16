@@ -25,7 +25,7 @@ public class WasteController {
     }
 
     @PostMapping(value = "/{user_id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAnyRole('ADMIN', 'PARTNERSHIP')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PARTNERSHIP', 'STUDENT')")
     public ResponseEntity<?> createWasteItem(@PathVariable("user_id") String userId, @ModelAttribute WasteItemRequestDto request) {
         WasteItemResponseDto response = wasteService.createWasteItem(userId, request);
         return ResponseUtil.success("Create waste item successfully", response);

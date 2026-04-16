@@ -73,6 +73,12 @@ public class WasteServiceImp implements WasteService {
                 throw new NotFoundException("Partner not found");
             }
             wasteItem.setPartner(partnerOpt.get());
+        } else if (userRole == CreatedBy.AI) {
+            Optional<Student> student = studentRepository.findById(userId);
+            if (student.isEmpty()) {
+                throw new NotFoundException("Not found student");
+            }
+            wasteItem.setStudent(student.get());
         }
         if (request.getImage() != null) {
             String imageUrl = uploadFile.imageToUrl(request.getImage());
@@ -231,7 +237,7 @@ public class WasteServiceImp implements WasteService {
         } else if (userOpt.get().getRole() == UserType.PARTNERSHIP) {
             return CreatedBy.PARTNERSHIP;
         }
-        return CreatedBy.ADMIN;
+        return CreatedBy.AI;
     }
 }
 

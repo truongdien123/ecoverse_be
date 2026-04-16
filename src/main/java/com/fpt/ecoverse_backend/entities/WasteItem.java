@@ -43,4 +43,8 @@ public class WasteItem extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "partner_id")
     private Partner partner;
+
+    @ManyToOne
+    @JoinColumn(name = "student_id")
+    private Student student;
 }

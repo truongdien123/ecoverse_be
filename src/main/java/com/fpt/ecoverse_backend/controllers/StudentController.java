@@ -7,6 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/students")
@@ -34,5 +35,17 @@ public class StudentController {
     @PreAuthorize("hasAnyRole('PARTNERSHIP', 'STUDENT')")
     public ResponseEntity<?> deleteStudent(@PathVariable("student_id") String studentId) {
         return ResponseUtil.success("Delete student successfully", studentService.deleteStudent(studentId));
+    }
+
+    @GetMapping("/{student_id}/waste-items/AI")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<?> getWasteItemByAI(@PathVariable("student_id") String studentId) {
+        return ResponseUtil.success("Get waste items by AI successfully", studentService.getWasteItemByAI(studentId));
+    }
+
+    @PatchMapping(value = "/{student_id}/update-avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<?> updateAvatarStudent(@PathVariable("student_id") String studentId, @ModelAttribute MultipartFile file) {
+        return ResponseUtil.success("Update avatar student successfully", studentService.updateAvatar(studentId, file));
     }
 }
