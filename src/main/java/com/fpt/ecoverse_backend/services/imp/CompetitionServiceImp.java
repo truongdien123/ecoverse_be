@@ -178,14 +178,14 @@ public class CompetitionServiceImp implements CompetitionService {
         List<CompetitionResponseDto> responses = new ArrayList<>();
         competitions.forEach(competition -> {
             Optional<CompetitionLink> competitionLink = competitionLinkRepository.findByCompetitionId(competition.getId());
-            if (competitionLink.isEmpty()) {
-                throw new NotFoundException("Not found competition link");
+            if (competitionLink.isPresent()) {
+                GameRound gameRound = competitionLink.get().getGameRound();
+                GameRoundResponseDto gameRoundResponseDto = gameRoundMapper.toGameRoundResponse(gameRound);
+                gameRoundResponseDto.setPartnerId(partnerId);
+                CompetitionResponseDto competitionResponseDto = competitionMapper.toCompetitionResponse(competition);
+                competitionResponseDto.setGameRound(gameRoundResponseDto);
+                responses.add(competitionResponseDto);
             }
-            GameRound gameRound = competitionLink.get().getGameRound();
-            GameRoundResponseDto gameRoundResponseDto = gameRoundMapper.toGameRoundResponse(gameRound);
-            CompetitionResponseDto competitionResponseDto = competitionMapper.toCompetitionResponse(competition);
-            competitionResponseDto.setGameRound(gameRoundResponseDto);
-            responses.add(competitionResponseDto);
         });
         return responses;
     }
