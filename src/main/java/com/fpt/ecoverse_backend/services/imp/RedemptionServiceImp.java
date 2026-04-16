@@ -1,5 +1,6 @@
 package com.fpt.ecoverse_backend.services.imp;
 
+import com.fpt.ecoverse_backend.dtos.RedemptionCreatedEvent;
 import com.fpt.ecoverse_backend.dtos.responses.RedemptionResponseDto;
 import com.fpt.ecoverse_backend.entities.*;
 import com.fpt.ecoverse_backend.enums.ApprovalStatus;
@@ -8,11 +9,15 @@ import com.fpt.ecoverse_backend.exceptions.BadRequestException;
 import com.fpt.ecoverse_backend.exceptions.NotFoundException;
 import com.fpt.ecoverse_backend.mappers.RedemptionRequestMapper;
 import com.fpt.ecoverse_backend.repositories.*;
+import com.fpt.ecoverse_backend.services.MailService;
 import com.fpt.ecoverse_backend.services.RedemptionService;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,8 +31,9 @@ public class RedemptionServiceImp implements RedemptionService {
     private final RewardItemRepository rewardItemRepository;
     private final RedemptionRequestMapper redemptionRequestMapper;
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public RedemptionServiceImp(RedemptionRequestRepository redemptionRequestRepository, StudentRepository studentRepository, ParentRepository parentRepository, PartnerRepository partnerRepository, RewardItemRepository rewardItemRepository, RedemptionRequestMapper redemptionRequestMapper, UserRepository userRepository) {
+    public RedemptionServiceImp(RedemptionRequestRepository redemptionRequestRepository, StudentRepository studentRepository, ParentRepository parentRepository, PartnerRepository partnerRepository, RewardItemRepository rewardItemRepository, RedemptionRequestMapper redemptionRequestMapper, UserRepository userRepository, ApplicationEventPublisher eventPublisher) {
         this.redemptionRequestRepository = redemptionRequestRepository;
         this.studentRepository = studentRepository;
         this.parentRepository = parentRepository;
@@ -35,9 +41,11 @@ public class RedemptionServiceImp implements RedemptionService {
         this.rewardItemRepository = rewardItemRepository;
         this.redemptionRequestMapper = redemptionRequestMapper;
         this.userRepository = userRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
+    @Transactional
     public RedemptionResponseDto createRedemption(String studentId, String rewardItemId) {
         Optional<Student> student = studentRepository.findById(studentId);
         if (student.isEmpty()) {
@@ -61,6 +69,7 @@ public class RedemptionServiceImp implements RedemptionService {
         redemptionRequestRepository.save(redemptionRequest);
         student.get().setPoints(student.get().getPoints() - rewardItem.get().getPointsRequired());
         studentRepository.save(student.get());
+        eventPublisher.publishEvent(new RedemptionCreatedEvent(redemptionRequest));
         RedemptionResponseDto response = redemptionRequestMapper.toRedemptionResponse(redemptionRequest, redemptionRequest.getId());
         response.setStudentName(student.get().getUser().getFullName());
         response.setRewardItemName(rewardItem.get().getName());
