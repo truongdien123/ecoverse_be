@@ -1,10 +1,13 @@
 package com.fpt.ecoverse_backend.services.imp;
 
 import com.fpt.ecoverse_backend.dtos.ParentCredentialMail;
+import com.fpt.ecoverse_backend.dtos.RedemptionCreatedEvent;
+import com.fpt.ecoverse_backend.entities.RedemptionRequest;
 import com.fpt.ecoverse_backend.services.MailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.event.EventListener;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -105,6 +108,33 @@ public class MailServiceImp implements MailService {
             mailSender.send(message);
         } catch (MessagingException e) {
             throw new RuntimeException("Failed to send OTP email to: " + email, e);
+        }
+    }
+
+    @Override
+    @Async("mailExecutor")
+    public void sendRewardRequestEmail(String toEmail, String studentName, String rewardName, int points, String requestTime) {
+        try {
+            Context context = new Context();
+            context.setVariable("studentName", studentName);
+            context.setVariable("rewardName", rewardName);
+            context.setVariable("points", points);
+            context.setVariable("requestTime", requestTime);
+
+            // Render HTML
+            String htmlContent = templateEngine.process("mail/reward-request", context);
+
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(toEmail);
+            helper.setSubject("Thông báo yêu cầu đổi thưởng");
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Send email failed", e);
         }
     }
 }
