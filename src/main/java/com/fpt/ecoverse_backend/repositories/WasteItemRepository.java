@@ -20,11 +20,14 @@ public interface WasteItemRepository extends JpaRepository<WasteItem, String> {
     @Query("select w from WasteItem w where w.createdBy = :role or w.partner.id = :userId")
     List<WasteItem> findWasteItems(CreatedBy role, String userId);
 
-    @Query("select w from WasteItem w where w.partner.id = :partnerId")
+    @Query("select w from WasteItem w where w.partner.id = :partnerId or w.createdBy = 'ADMIN'")
     Optional<WasteItem> findWasteItemByPartnerId(String partnerId);
 
     @Query("select w from WasteItem w where w.id in :ids")
     List<WasteItem> findWasteItemByIds(List<String> ids);
+
+    @Query("select w from WasteItem w where w.student.id = :studentId and w.createdBy = 'AI'")
+    List<WasteItem> findWasteItemByAI(@Param("studentId") String studentId);
 
     @Query("""
     select w as wasteItem, gri.orderIndex as orderIndex
