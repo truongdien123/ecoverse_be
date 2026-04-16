@@ -41,4 +41,7 @@ public class CompetitionResponseDto {
 
     @JsonProperty("game_round")
     private GameRoundResponseDto gameRound;
+
+    @JsonProperty("quiz_template")
+    private QuizTemplateResponseDto quizTemplate;
 }
