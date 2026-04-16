@@ -43,6 +43,8 @@ public class SecurityConfig {
             "/api/auth/student/login",
             "/api/auth/refresh",
             "/api/auth/logout",
+            "/api/auth/forgot-password",
+            "/api/auth/reset-password",
             "/swagger-ui/**",
             "/v3/api-docs/**",
             "/api-docs",
@@ -122,6 +124,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/games/attempts/{game_attempt_id}/replay-game-round").hasRole("STUDENT")
                         .requestMatchers(HttpMethod.PUT, "/games/placements/{game_placement_id}").hasRole("STUDENT")
                         .requestMatchers(HttpMethod.PUT, "/games/attempts/{game_attempt_id}/placements").hasRole("STUDENT")
+                        .requestMatchers(HttpMethod.GET, "/games/rounds/partners/{partner_id}/competitions").hasAnyRole("STUDENT", "PARTNERSHIP")
 
                         // Reward endpoints
                         .requestMatchers(HttpMethod.POST, "/rewards/{partner_id}").hasRole("PARTNERSHIP")
@@ -137,6 +140,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/quiz/templates/**").hasAnyRole("PARTNERSHIP", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/quiz/available", "/api/quiz/*/start", "/api/quiz/my-attempts").hasAnyRole("STUDENT", "PARENT")
                         .requestMatchers(HttpMethod.POST, "/api/quiz/submit").hasRole("STUDENT")
+                        .requestMatchers(HttpMethod.GET, "/api/quiz/partners/{partner_id}/competitions").hasAnyRole("PARTNERSHIP", "STUDENT")
 
                         // Question endpoints
                         .requestMatchers(HttpMethod.GET, "/api/questions", "/api/questions/**").hasAnyRole("STUDENT", "PARTNERSHIP", "ADMIN")

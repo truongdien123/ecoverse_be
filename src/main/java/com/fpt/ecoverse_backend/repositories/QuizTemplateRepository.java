@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -33,5 +34,6 @@ public interface QuizTemplateRepository extends JpaRepository<QuizTemplate, Stri
     @Query("select count(q.id) from QuizTemplate q where q.partner.id = :partnerId and q.active = true")
     long countByPartnerId(@Param("partnerId") String partnerId);
 
-
+    @Query("select qt from QuizTemplate qt where qt.partner.id = :partnerId and qt.isCompetition = true")
+    List<QuizTemplate> findQuizTemplateCompetition(@Param("partnerId") String partnerId);
 }

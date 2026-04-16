@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -16,8 +17,14 @@ public interface GameRoundRepository extends JpaRepository<GameRound, String> {
 
     @Query(
             "select gr from GameRound gr " +
-                    "where (:createdBy is null or gr.createdBy = :createdBy) " +
-                    "or (gr.createdBy = :createdBy and gr.partner.id = :userId) " +
+                    "where (" +
+                    "            gr.createdBy = 'ADMIN'" +
+                    "            or" +
+                    "            (" +
+                    "                gr.createdBy = :createdBy" +
+                    "                and gr.partner.id = :userId" +
+                    "            )" +
+                    "        ) " +
                     "and (:searching is null or gr.title ilike '%' || cast(:searching as string ) || '%' " +
                     "or gr.description ilike '%' || cast(:searching as string ) || '%')"
     )
@@ -28,4 +35,7 @@ public interface GameRoundRepository extends JpaRepository<GameRound, String> {
 
     @Query("select count(gr.id) from GameRound gr where gr.partner.id = :partnerId and gr.active = true")
     long countByPartnerId(@Param("partnerId") String partnerId);
+
+    @Query("select gr from GameRound gr where gr.partner.id = :partnerId and gr.isCompetition = true")
+    List<GameRound> findGameRoundCompetition(@Param("partnerId") String partnerId);
 }

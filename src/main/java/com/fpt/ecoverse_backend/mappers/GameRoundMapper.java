@@ -25,7 +25,8 @@ public interface GameRoundMapper {
             @Mapping(target = "shared", source = "shared"),
             @Mapping(target = "createdBy", source = "createdBy"),
             @Mapping(target = "itemCount", source = "itemCount"),
-            @Mapping(target = "active", source = "active")
+            @Mapping(target = "active", source = "active"),
+            @Mapping(target = "isCompetition", source = "isCompetition")
     })
     GameRoundResponseDto toGameRoundResponse(GameRound gameRound);
 }
