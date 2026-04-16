@@ -179,12 +179,26 @@ public class CompetitionServiceImp implements CompetitionService {
         competitions.forEach(competition -> {
             Optional<CompetitionLink> competitionLink = competitionLinkRepository.findByCompetitionId(competition.getId());
             if (competitionLink.isPresent()) {
-                GameRound gameRound = competitionLink.get().getGameRound();
-                GameRoundResponseDto gameRoundResponseDto = gameRoundMapper.toGameRoundResponse(gameRound);
-                gameRoundResponseDto.setPartnerId(partnerId);
                 CompetitionResponseDto competitionResponseDto = competitionMapper.toCompetitionResponse(competition);
-                competitionResponseDto.setGameRound(gameRoundResponseDto);
-                responses.add(competitionResponseDto);
+                if (competitionLink.get().getGameRound() != null) {
+                    GameRound gameRound = competitionLink.get().getGameRound();
+                    GameRoundResponseDto gameRoundResponseDto = gameRoundMapper.toGameRoundResponse(gameRound);
+                    gameRoundResponseDto.setPartnerId(partnerId);
+                    competitionResponseDto.setGameRound(gameRoundResponseDto);
+                    responses.add(competitionResponseDto);
+                } else if (competitionLink.get().getQuizTemplate() != null) {
+                    QuizTemplate quizTemplate = competitionLink.get().getQuizTemplate();
+                    QuizTemplateResponseDto quizTemplateResponseDto = new QuizTemplateResponseDto();
+                    quizTemplateResponseDto.setId(quizTemplate.getId());
+                    quizTemplateResponseDto.setTitle(quizTemplate.getTitle());
+                    quizTemplateResponseDto.setDescription(quizTemplate.getDescription());
+                    quizTemplateResponseDto.setActive(quizTemplate.getActive());
+                    quizTemplateResponseDto.setIsCompetition(quizTemplate.getIsCompetition());
+                    quizTemplateResponseDto.setPartnerId(partnerId);
+                    competitionResponseDto.setQuizTemplate(quizTemplateResponseDto);
+                    responses.add(competitionResponseDto);
+
+                }
             }
         });
         return responses;
