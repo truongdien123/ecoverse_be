@@ -99,10 +99,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/students/{student_id}").hasAnyRole("STUDENT", "PARTNERSHIP", "PARENT")
                         .requestMatchers(HttpMethod.PUT, "/students/{student_id}").hasAnyRole("STUDENT", "PARTNERSHIP")
                         .requestMatchers(HttpMethod.DELETE, "/students/{student_id}").hasAnyRole("STUDENT", "PARTNERSHIP")
+                        .requestMatchers(HttpMethod.GET, "/students/{student_id}/waste-items/AI").hasRole("STUDENT")
+                        .requestMatchers(HttpMethod.PATCH, "/students/{student_id}/update-avatar").hasRole("STUDENT")
 
                         // Waste endpoints
                         .requestMatchers(HttpMethod.GET, "/wastes/bins").hasAnyRole("STUDENT", "PARTNERSHIP", "ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/wastes/{user_id}").hasAnyRole("PARTNERSHIP", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/wastes/{user_id}").hasAnyRole("PARTNERSHIP", "ADMIN", "STUDENT")
                         .requestMatchers(HttpMethod.POST, "wastes/bins/{admin_id}").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/wastes/items/users/{user_id}/game-rounds/{game_round_id}").hasAnyRole("STUDENT", "PARTNERSHIP", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/wastes/items/{waste_item_id}/users/{user_id}").hasAnyRole("PARTNERSHIP", "ADMIN")
