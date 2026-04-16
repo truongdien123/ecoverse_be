@@ -15,4 +15,12 @@ public interface MailService {
      * @param purposeMessage mô tả mục đích (hiện trong body mail)
      */
     void sendOtpMail(String email, String fullName, String otpCode, String purposeMessage);
+
+    void sendRewardRequestEmail(
+            String toEmail,
+            String studentName,
+            String rewardName,
+            int points,
+            String requestTime
+    );
 }
