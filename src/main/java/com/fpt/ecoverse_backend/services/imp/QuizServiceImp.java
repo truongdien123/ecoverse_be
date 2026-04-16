@@ -38,6 +38,7 @@ public class QuizServiceImp implements QuizService {
     private final PartnerRepository partnerRepository;
     private final StudentRepository studentRepository;
     private final ObjectMapper objectMapper;
+    private final QuestionRepository questionRepository;
     private final LeaderboardService leaderboardService;
 
     public QuizServiceImp(QuizTemplateRepository quizTemplateRepository,
@@ -45,13 +46,16 @@ public class QuizServiceImp implements QuizService {
                           QuizPlacementRepository quizPlacementRepository,
                           PartnerRepository partnerRepository,
                           StudentRepository studentRepository,
-                          ObjectMapper objectMapper, LeaderboardService leaderboardService) {
+                          ObjectMapper objectMapper, 
+                          QuestionRepository questionRepository,
+                          LeaderboardService leaderboardService) {
         this.quizTemplateRepository = quizTemplateRepository;
         this.quizAttemptRepository = quizAttemptRepository;
         this.quizPlacementRepository = quizPlacementRepository;
         this.partnerRepository = partnerRepository;
         this.studentRepository = studentRepository;
         this.objectMapper = objectMapper;
+        this.questionRepository = questionRepository;
         this.leaderboardService = leaderboardService;
     }
 
@@ -67,15 +71,24 @@ public class QuizServiceImp implements QuizService {
 
         QuizTemplate template = new QuizTemplate();
         template.setTitle(request.getTitle());
+        List<Question> questions = new ArrayList<>();
+        List<String> questionStrings = request.getListIdQuestion();
+        for (String questionString : questionStrings) {
+            Question question = questionRepository.findById(questionString)
+                    .orElseThrow(() -> new NotFoundException("Question not found: " + questionString)) ;
+            question.setQuizTemplate(template);
+            questions.add(question);
+        }
+
+        template.setQuestions(questions);
         template.setDescription(request.getDescription());
         template.setCreatedBy(CreatedBy.PARTNERSHIP);
         template.setPartner(partner);
         template.setActive(true);
         template.setIsCompetition(request.getIsCompetition());
 
-        // Tạo danh sách Questions
-        List<Question> questions = buildQuestions(request.getQuestions(), template);
-        template.setQuestions(questions);
+        // Khởi tạo danh sách rỗng (Frontend sẽ dùng QuestionController để thêm sau)
+        template.setQuestions(new ArrayList<>());
 
         QuizTemplate saved = quizTemplateRepository.save(template);
         return toDetailResponse(saved, true);
@@ -90,9 +103,8 @@ public class QuizServiceImp implements QuizService {
         template.setTitle(request.getTitle());
         template.setDescription(request.getDescription());
 
-        // Xoá câu hỏi cũ, thêm câu hỏi mới
-        template.getQuestions().clear();
-        template.getQuestions().addAll(buildQuestions(request.getQuestions(), template));
+        // Không cập nhật List<Question> ở đây để tránh lỗi mất dữ liệu.
+        // Frontend sẽ sử dụng QuestionController để chỉnh sửa từng câu hỏi.
 
         QuizTemplate saved = quizTemplateRepository.save(template);
         return toDetailResponse(saved, true);
@@ -236,23 +248,7 @@ public class QuizServiceImp implements QuizService {
     // PRIVATE HELPERS
     // ════════════════════════════════════════════════════════════════
 
-    private List<Question> buildQuestions(List<QuizTemplateRequestDto.QuestionRequestDto> dtos, QuizTemplate template) {
-        List<Question> questions = new ArrayList<>();
-        for (QuizTemplateRequestDto.QuestionRequestDto dto : dtos) {
-            Question q = new Question();
-            q.setText(dto.getText());
-            q.setCorrectAnswer(dto.getCorrectAnswer());
-            q.setExplanation(dto.getExplanation());
-            q.setQuizTemplate(template);
-            try {
-                q.setOptionsJson(objectMapper.writeValueAsString(dto.getOptions()));
-            } catch (JsonProcessingException e) {
-                throw new BadRequestException("Invalid options format for question: " + dto.getText());
-            }
-            questions.add(q);
-        }
-        return questions;
-    }
+
 
     /** Response dành cho PARTNER (kèm correct_answer) */
     private QuizTemplateResponseDto toDetailResponse(QuizTemplate t, boolean includeQuestions) {
