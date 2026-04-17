@@ -22,8 +22,8 @@ public interface GameRoundRepository extends JpaRepository<GameRound, String> {
                     "            or" +
                     "            (" +
                     "                gr.createdBy = :createdBy" +
-                    "                and gr.partner.id = :userId" +
-                    "            )" +
+                    "                and gr.partner.id = :userId and gr.isCompetition = false" +
+                    "           )" +
                     "        ) " +
                     "and (:searching is null or gr.title ilike '%' || cast(:searching as string ) || '%' " +
                     "or gr.description ilike '%' || cast(:searching as string ) || '%')"

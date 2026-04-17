@@ -175,6 +175,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/competitions/{partner_id}").hasAnyRole("STUDENT", "PARENT", "PARTNERSHIP")
                         .requestMatchers(HttpMethod.GET, "/competitions/{competition_id}/participants").hasAnyRole("STUDENT", "PARENT", "PARTNERSHIP")
                         .requestMatchers(HttpMethod.PUT, "/competitions/{competition_id}").hasRole("PARTNERSHIP")
+                        .requestMatchers(HttpMethod.DELETE, "/competitions/{competition_id}").hasRole("PARTNERSHIP")
 
                         // All other requests need authentication
                         .anyRequest().authenticated()
