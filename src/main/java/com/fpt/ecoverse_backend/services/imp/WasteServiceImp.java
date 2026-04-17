@@ -171,7 +171,8 @@ public class WasteServiceImp implements WasteService {
         if (wasteBinOptional.isEmpty()) {
             throw new NotFoundException("Waste bin not found");
         }
-        WasteBin wasteBin = wasteBinMapper.toWasteBin(request, wasteBinOptional.get().getId());
+        WasteBin wasteBin = wasteBinOptional.get();
+        wasteBinMapper.updateWasteBinFromDto(request, wasteBin);
         if (request.getIcon() != null) {
             String iconUrl = uploadFile.imageToUrl(request.getIcon());
             wasteBin.setIconUrl(iconUrl);
