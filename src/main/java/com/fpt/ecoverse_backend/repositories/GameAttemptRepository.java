@@ -46,4 +46,6 @@ public interface GameAttemptRepository extends JpaRepository<GameAttempt, String
     WHERE ga.student.partner.id = :partnerId and ga.completed = true
 """)
     Long sumGamePoints(@Param("partnerId") String partnerId);
+
+    long countByCreatedAtAfter(java.time.LocalDateTime time);
 }

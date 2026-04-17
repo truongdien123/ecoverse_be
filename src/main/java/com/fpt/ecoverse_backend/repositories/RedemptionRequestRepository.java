@@ -22,4 +22,7 @@ public interface RedemptionRequestRepository extends JpaRepository<RedemptionReq
 
     @Query("select count(r.id) from RedemptionRequest r where r.partner.id = :partnerId")
     long countByPartnerId(@Param("partnerId") String partnerId);
+
+    @Query("SELECT r.partnerApproval, COUNT(r.id) FROM RedemptionRequest r GROUP BY r.partnerApproval")
+    List<Object[]> countRedemptionByStatus();
 }
