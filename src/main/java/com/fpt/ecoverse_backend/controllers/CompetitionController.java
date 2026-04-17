@@ -54,4 +54,10 @@ public class CompetitionController {
     public ResponseEntity<?> updateCompetition(@PathVariable("competition_id") String competitionId, @RequestBody CompetitionRequestDto request) {
         return ResponseUtil.success("Update competition successfully", competitionService.updateCompetition(competitionId, request));
     }
+
+    @DeleteMapping("/{competition_id}")
+    @PreAuthorize("hasRole('PARTNERSHIP')")
+    public ResponseEntity<?> deleteCompetition(@PathVariable("competition_id") String competitionId) {
+        return ResponseUtil.success("Delete competition successfully", competitionService.deleteCompetition(competitionId));
+    }
 }

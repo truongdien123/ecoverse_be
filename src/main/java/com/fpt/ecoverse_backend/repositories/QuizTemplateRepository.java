@@ -14,7 +14,7 @@ import java.util.Optional;
 @Repository
 public interface QuizTemplateRepository extends JpaRepository<QuizTemplate, String> {
 
-    @Query("SELECT qt FROM QuizTemplate qt WHERE qt.partner.id = :partnerId AND qt.active = true " +
+    @Query("SELECT qt FROM QuizTemplate qt WHERE qt.partner.id = :partnerId AND qt.active = true and qt.isCompetition = false " +
            "AND (:title IS NULL OR qt.title ILIKE '%' || cast(:title as string ) || '%')")
     Page<QuizTemplate> findByPartnerIdAndActiveTrue(
             @Param("partnerId") String partnerId,
