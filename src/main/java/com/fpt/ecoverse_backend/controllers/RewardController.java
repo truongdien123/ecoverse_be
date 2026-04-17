@@ -30,7 +30,7 @@ public class RewardController {
     }
 
     @PostMapping("/{partner_id}/get-list")
-    @PreAuthorize("hasAnyRole('PARTNERSHIP', 'STUDENT')")
+    @PreAuthorize("hasAnyRole('PARTNERSHIP', 'STUDENT', 'PARENT')")
     public ResponseEntity<?> getRewards(@PathVariable("partner_id") String partnerId, @RequestBody PageFilterRequestDto pageFilterRequestDto) {
         List<RewardItemResponseDto> response = rewardService.getRewardItems(partnerId, pageFilterRequestDto);
         return ResponseUtil.success("Reward items retrieved successfully", response);
