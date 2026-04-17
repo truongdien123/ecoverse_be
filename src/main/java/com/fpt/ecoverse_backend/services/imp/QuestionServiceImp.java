@@ -43,15 +43,12 @@ public class QuestionServiceImp implements QuestionService {
 
     @Override
     @Transactional
-    public QuizTemplateResponseDto.QuestionResponseDto addQuestionToQuiz(String partnerId, String quizId, QuestionRequestDto request) {
-        QuizTemplate template = quizTemplateRepository.findByIdAndPartnerId(quizId, partnerId)
-                .orElseThrow(() -> new NotFoundException("Quiz template not found or access denied"));
-
+    public QuizTemplateResponseDto.QuestionResponseDto addQuestionToQuiz(String partnerId, QuestionRequestDto request) {
         Question question = new Question();
         question.setText(request.getText());
         question.setCorrectAnswer(request.getCorrectAnswer());
         question.setExplanation(request.getExplanation());
-        question.setQuizTemplate(template);
+        question.setQuizTemplate(null);
 
         try {
             question.setOptionsJson(objectMapper.writeValueAsString(request.getOptions()));
