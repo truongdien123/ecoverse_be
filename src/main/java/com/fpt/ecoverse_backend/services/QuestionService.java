@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface QuestionService {
     List<QuizTemplateResponseDto.QuestionResponseDto> getQuestionsByQuizId(String partnerId, String quizId);
-    QuizTemplateResponseDto.QuestionResponseDto addQuestionToQuiz(String partnerId, String quizId, QuestionRequestDto request);
+    QuizTemplateResponseDto.QuestionResponseDto addQuestionToQuiz(String partnerId, QuestionRequestDto request);
     List<QuizTemplateResponseDto.QuestionResponseDto> addMultipleQuestionsToQuiz(String partnerId, String quizId, List<QuestionRequestDto> requests);
     List<QuizTemplateResponseDto.QuestionResponseDto> getQuestionBank(String partnerId);
     List<QuizTemplateResponseDto.QuestionResponseDto> importQuestionsFromBank(String partnerId, String quizId, List<String> questionIds);

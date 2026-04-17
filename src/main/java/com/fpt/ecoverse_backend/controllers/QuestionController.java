@@ -33,13 +33,12 @@ public class QuestionController {
         return ResponseUtil.success("Questions retrieved successfully", result);
     }
 
-    @PostMapping("/quiz/{quizId}")
+    @PostMapping("/quiz")
     public ResponseEntity<?> addQuestionToQuiz(
             @AuthenticationPrincipal CustomUserDetails currentUser,
-            @PathVariable String quizId,
             @Valid @RequestBody QuestionRequestDto request
     ) {
-        QuizTemplateResponseDto.QuestionResponseDto result = questionService.addQuestionToQuiz(currentUser.getId(), quizId, request);
+        QuizTemplateResponseDto.QuestionResponseDto result = questionService.addQuestionToQuiz(currentUser.getId(), request);
         return ResponseUtil.success("Question created successfully", result);
     }
 
