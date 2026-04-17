@@ -41,4 +41,6 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, String
       AND qa.completed = true
 """)
     Long sumQuizPoints(@Param("partnerId") String partnerId);
+
+    long countByCreatedAtAfter(java.time.LocalDateTime time);
 }
