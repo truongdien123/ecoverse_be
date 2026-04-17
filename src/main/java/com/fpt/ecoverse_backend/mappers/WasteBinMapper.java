@@ -20,6 +20,16 @@ public interface WasteBinMapper {
     WasteBin toWasteBin(WasteBinRequestDto request, String id);
 
     @Mappings({
+            @Mapping(target = "code", source = "request.code"),
+            @Mapping(target = "displayName", source = "request.displayName"),
+            @Mapping(target = "colorHex", source = "request.colorHex"),
+            @Mapping(target = "description", source = "request.description"),
+            @Mapping(target = "id", ignore = true),
+            @Mapping(target = "iconUrl", ignore = true)
+    })
+    void updateWasteBinFromDto(WasteBinRequestDto request, @MappingTarget WasteBin wasteBin);
+
+    @Mappings({
             @Mapping(target = "id", source = "id"),
             @Mapping(target = "code", source = "code"),
             @Mapping(target = "displayName", source = "displayName"),
