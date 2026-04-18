@@ -26,25 +26,25 @@ public interface WasteItemRepository extends JpaRepository<WasteItem, String> {
     @Query("select w from WasteItem w where w.id in :ids")
     List<WasteItem> findWasteItemByIds(List<String> ids);
 
-    @Query("select w from WasteItem w where w.student.id = :studentId and w.createdBy = 'AI'")
+    @Query("select w from WasteItem w where w.student.id = :studentId and w.createdBy = 'STUDENT'")
     List<WasteItem> findWasteItemByAI(@Param("studentId") String studentId);
 
     @Query("""
     select w as wasteItem, gri.orderIndex as orderIndex
-    from GameRoundItem gri 
+    from GameRoundItem gri
     join gri.wasteItem w
     where gri.gameRound.id = :gameRoundId
-      and (gri.gameRound.partner.id = :userId 
+      and (gri.gameRound.partner.id = :userId
            or gri.gameRound.createdBy = 'ADMIN')
 """
     )
     List<WasteItemWithOrderProjection> findByUserIdAndGameRoundId(@Param("userId") String userId, @Param("gameRoundId") String gameRoundId);
 
     @Query("""
-    SELECT w 
-    FROM WasteItem w 
-    WHERE 
-        (w.partner.id = :userId 
+    SELECT w
+    FROM WasteItem w
+    WHERE
+        (w.partner.id = :userId
             OR w.createdBy = 'ADMIN')
         AND (:type IS NULL OR w.wasteBin.code = :type)
         AND (:searching IS NULL OR w.name ILIKE '%' || CAST(:searching AS STRING ) || '%' OR w.description ILIKE '%' || CAST(:searching AS STRING ) || '%')
