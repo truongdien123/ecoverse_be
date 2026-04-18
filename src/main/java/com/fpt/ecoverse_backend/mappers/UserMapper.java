@@ -60,6 +60,44 @@ public interface UserMapper {
     })
     void updateUserFromDto(ParentRequestDto dto, @MappingTarget User user);
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mappings({
+            @Mapping(target = "fullName", source = "request.fullName"),
+            @Mapping(target = "id", ignore = true),
+            @Mapping(target = "email", ignore = true),
+            @Mapping(target = "password", ignore = true),
+            @Mapping(target = "role", ignore = true),
+            @Mapping(target = "active", ignore = true)
+    })
+    void updateStudent(@MappingTarget User user, StudentRequestDto request);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mappings({
+            @Mapping(target = "fullName", source = "request.fullName"),
+            @Mapping(target = "address", source = "request.address"),
+            @Mapping(target = "phoneNumber", source = "request.phoneNumber"),
+            @Mapping(target = "email", source = "request.email"),
+
+            @Mapping(target = "id", ignore = true),
+            @Mapping(target = "password", ignore = true),
+            @Mapping(target = "role", ignore = true),
+            @Mapping(target = "active", ignore = true),
+            @Mapping(target = "notifications", ignore = true)
+    })
+    void updateParent(@MappingTarget User user, ParentRequestDto request);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mappings({
+            @Mapping(target = "address", source = "request.address"),
+
+            @Mapping(target = "id", ignore = true),
+            @Mapping(target = "email", ignore = true),
+            @Mapping(target = "password", ignore = true),
+            @Mapping(target = "role", ignore = true),
+            @Mapping(target = "active", ignore = true)
+    })
+    void updatePartner(@MappingTarget User user, PartnerUpdateRequestDto request);
+
     @Named("convertImg")
     static String convertImg(MultipartFile multipartFile, @Context UploadFile uploadFile) {
         if (multipartFile == null) {

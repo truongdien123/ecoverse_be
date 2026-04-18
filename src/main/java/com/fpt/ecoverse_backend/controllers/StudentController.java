@@ -45,7 +45,7 @@ public class StudentController {
 
     @PatchMapping(value = "/{student_id}/update-avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<?> updateAvatarStudent(@PathVariable("student_id") String studentId, @ModelAttribute MultipartFile file) {
+    public ResponseEntity<?> updateAvatarStudent(@PathVariable("student_id") String studentId, @RequestParam("file") MultipartFile file) {
         return ResponseUtil.success("Update avatar student successfully", studentService.updateAvatar(studentId, file));
     }
 }
