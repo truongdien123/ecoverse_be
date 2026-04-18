@@ -3,7 +3,7 @@ package com.fpt.ecoverse_backend.enums;
 public enum CreatedBy {
     PARTNERSHIP("Đơn vị hợp tác"),
     ADMIN("Quản trị viên"),
-    AI("AI");
+    STUDENT("Học sinh");
 
     private final String displayName;
 

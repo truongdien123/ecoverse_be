@@ -73,7 +73,7 @@ public class WasteServiceImp implements WasteService {
                 throw new NotFoundException("Partner not found");
             }
             wasteItem.setPartner(partnerOpt.get());
-        } else if (userRole == CreatedBy.AI) {
+        } else if (userRole == CreatedBy.STUDENT) {
             Optional<Student> student = studentRepository.findById(userId);
             if (student.isEmpty()) {
                 throw new NotFoundException("Not found student");
@@ -238,7 +238,7 @@ public class WasteServiceImp implements WasteService {
         } else if (userOpt.get().getRole() == UserType.PARTNERSHIP) {
             return CreatedBy.PARTNERSHIP;
         }
-        return CreatedBy.AI;
+        return CreatedBy.STUDENT;
     }
 }
 
