@@ -64,8 +64,10 @@ public class StudentServiceImp implements StudentService {
         if (studentOpt.isEmpty()) {
             throw new NotFoundException("Student not found");
         }
-        Student student = studentMapper.toStudent(request, studentOpt.get().getId());
-        User user = userMapper.toUser(request, studentOpt.get().getId());
+        Student student = studentOpt.get();
+        studentMapper.updateStudent(student, request);
+        User user = student.getUser();
+        userMapper.updateStudent(user, request);
         userRepository.save(user);
         studentRepository.save(student);
         return studentMapper.toStudentResponse(student);

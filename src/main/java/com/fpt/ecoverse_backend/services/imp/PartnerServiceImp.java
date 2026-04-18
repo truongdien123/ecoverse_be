@@ -128,7 +128,9 @@ public class PartnerServiceImp implements PartnerService {
         if (request.getAvatar() != null) {
             user.get().setAvatarUrl(uploadFile.imageToUrl(request.getAvatar()));
         }
+        userMapper.updatePartner(user.get(), request);
         partnerRepository.save(partner.get());
+        userRepository.save(user.get());
         PartnerResponseDto partnerResponseDto = partnerMapper.toPartnerResponse(partner.get(), user.get());
         StatisticPartner statisticPartner = statisticService.getPartnerStatistic(partnerId);
         partnerResponseDto.setStatistics(statisticPartner);

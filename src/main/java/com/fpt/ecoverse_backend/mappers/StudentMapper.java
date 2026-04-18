@@ -4,9 +4,7 @@ import com.fpt.ecoverse_backend.dtos.requests.StudentRequestDto;
 import com.fpt.ecoverse_backend.dtos.responses.StudentResponseDto;
 import com.fpt.ecoverse_backend.entities.Student;
 import com.fpt.ecoverse_backend.entities.User;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
+import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface StudentMapper {
@@ -23,6 +21,16 @@ public interface StudentMapper {
             @Mapping(target = "active", source = "user.active")
     })
     StudentResponseDto toStudentResponse(Student student);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mappings({
+            @Mapping(target = "grade", source = "request.grade"),
+            @Mapping(target = "id", ignore = true),
+            @Mapping(target = "user", ignore = true),
+            @Mapping(target = "studentCode", ignore = true),
+            @Mapping(target = "points", ignore = true)
+    })
+    void updateStudent(@MappingTarget Student student, StudentRequestDto request);
 
     @Mappings({
             @Mapping(target = "grade", source = "request.grade"),
