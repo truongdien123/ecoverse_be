@@ -15,6 +15,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -146,10 +147,11 @@ public class CompetitionServiceImp implements CompetitionService {
         if (competition.isEmpty()) {
             throw new NotFoundException("Not found competition");
         }
-        if (competition.get().getStartTime() != null && LocalDateTime.now().isBefore(competition.get().getStartTime())) {
+        LocalDateTime nowInVietNam = LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+        if (competition.get().getStartTime() != null && nowInVietNam.isBefore(competition.get().getStartTime())) {
             throw new BadRequestException("Competition has not started yet");
         }
-        if (competition.get().getEndTime() != null && LocalDateTime.now().isAfter(competition.get().getEndTime())) {
+        if (competition.get().getEndTime() != null && nowInVietNam.isAfter(competition.get().getEndTime())) {
             throw new BadRequestException("Competition has ended");
         }
         Optional<Student> student = studentRepository.findById(studentId);
