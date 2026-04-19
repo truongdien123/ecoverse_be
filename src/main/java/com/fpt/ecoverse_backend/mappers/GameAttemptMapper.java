@@ -39,7 +39,9 @@ public interface GameAttemptMapper {
             @Mapping(target = "correctCount", source = "correctCount"),
             @Mapping(target = "completed", source = "completed"),
             @Mapping(target = "id", source = "id"),
-            @Mapping(target = "attemptNumber", source = "attemptNumber")
+            @Mapping(target = "attemptNumber", source = "attemptNumber"),
+            @Mapping(target = "createdAt", source = "createdAt"),
+            @Mapping(target = "updatedAt", source = "updatedAt")
     })
     GameAttemptResponseDto toGameAttemptResponse(GameAttempt gameAttempt);
 }
