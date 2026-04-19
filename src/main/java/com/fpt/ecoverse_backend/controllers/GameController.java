@@ -32,7 +32,7 @@ public class GameController {
     }
 
     @PostMapping("/rounds/users/{user_id}/get-list")
-    @PreAuthorize("hasAnyRole('ADMIN', 'PARTNERSHIP', 'STUDENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PARTNERSHIP', 'STUDENT', 'PARENT')")
     public ResponseEntity<?> getGameRounds(@PathVariable("user_id") String userId, @RequestBody PageFilterRequestDto pageFilterRequestDto) {
         return ResponseUtil.success("Get game rounds successfully", gameService.getGameRounds(userId, pageFilterRequestDto));
     }
@@ -58,7 +58,7 @@ public class GameController {
     }
 
     @PostMapping("/rounds/{game_round_id}/students/{student_id}/attempts/get-list")
-    @PreAuthorize("hasAnyRole('ADMIN', 'PARTNERSHIP', 'STUDENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PARTNERSHIP', 'STUDENT', 'PARENT')")
     public ResponseEntity<?> getGameAttempts(@PathVariable("student_id") String studentId, @PathVariable("game_round_id") String gameRoundId, @RequestBody PageFilterRequestDto pageFilterRequestDto) {
         return ResponseUtil.success("Get game attempts successfully", gameService.getGameAttempts(studentId, gameRoundId, pageFilterRequestDto));
     }
