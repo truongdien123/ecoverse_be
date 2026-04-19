@@ -13,16 +13,12 @@ import org.springframework.web.multipart.MultipartFile;
 @AllArgsConstructor
 public class PartnerUpdateRequestDto {
 
-    @JsonProperty("organization_name")
     private String organizationName;
 
-    @JsonProperty("contact_person")
     private String contactPerson;
 
-    @JsonProperty("avatar")
     private MultipartFile avatar;
 
-    @JsonProperty("address")
     private String address;
 }
 
