@@ -53,4 +53,11 @@ public class DashboardController {
     public ResponseEntity<List<PartnerPointResponseDto>> getPartnerPoints() {
         return ResponseEntity.ok(dashboardService.getPartnerPoints());
     }
+
+    @GetMapping("/attempt-stats-by-day/{partnerId}")
+    @Operation(summary = "Thống kê lượt chơi game và quiz theo ngày của đối tác")
+    public ResponseEntity<List<com.fpt.ecoverse_backend.dtos.responses.dashboard.AttemptStatsResponseDto>> getAttemptStatsByDay(
+            @org.springframework.web.bind.annotation.PathVariable String partnerId) {
+        return ResponseEntity.ok(dashboardService.getAttemptStatsByDay(partnerId));
+    }
 }

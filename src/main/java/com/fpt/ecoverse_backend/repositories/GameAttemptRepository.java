@@ -47,5 +47,13 @@ public interface GameAttemptRepository extends JpaRepository<GameAttempt, String
 """)
     Long sumGamePoints(@Param("partnerId") String partnerId);
 
+    @Query(value = "SELECT CAST(g.created_at AS date) as created_day, COUNT(*) as total_attempts " +
+                   "FROM game_attempts g " +
+                   "JOIN game_rounds gr ON g.game_round_id = gr.id " +
+                   "WHERE gr.partner_id = :partnerId " +
+                   "GROUP BY CAST(g.created_at AS date)",
+           nativeQuery = true)
+    List<Object[]> countGameAttemptsByPartnerGroupedByDate(@Param("partnerId") String partnerId);
+
     long countByCreatedAtAfter(java.time.LocalDateTime time);
 }

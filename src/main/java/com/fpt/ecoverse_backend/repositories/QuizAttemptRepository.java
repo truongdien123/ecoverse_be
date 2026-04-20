@@ -42,5 +42,13 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, String
 """)
     Long sumQuizPoints(@Param("partnerId") String partnerId);
 
+    @Query(value = "SELECT CAST(q.created_at AS date) as created_day, COUNT(*) as total_attempts " +
+                   "FROM quiz_attempts q " +
+                   "JOIN quiz_templates qt ON q.quiz_template_id = qt.id " +
+                   "WHERE qt.partner_id = :partnerId " +
+                   "GROUP BY CAST(q.created_at AS date)",
+           nativeQuery = true)
+    List<Object[]> countQuizAttemptsByPartnerGroupedByDate(@Param("partnerId") String partnerId);
+
     long countByCreatedAtAfter(java.time.LocalDateTime time);
 }
