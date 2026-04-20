@@ -7,6 +7,7 @@ import com.fpt.ecoverse_backend.entities.Parent;
 import com.fpt.ecoverse_backend.entities.Partner;
 import com.fpt.ecoverse_backend.entities.Student;
 import com.fpt.ecoverse_backend.entities.User;
+import com.fpt.ecoverse_backend.enums.PartnerStatus;
 import com.fpt.ecoverse_backend.enums.UserType;
 import com.fpt.ecoverse_backend.exceptions.BadRequestException;
 import com.fpt.ecoverse_backend.exceptions.FileHandlingException;
@@ -143,6 +144,8 @@ public class PartnerServiceImp implements PartnerService {
         Optional<Partner> partner = partnerRepository.findById(partnerId);
         if (partner.isEmpty()) {
             throw new NotFoundException("Not found partner");
+        } else if (partner.get().getStatus() == PartnerStatus.PENDING || partner.get().getStatus() == PartnerStatus.REJECTED) {
+            throw new BadRequestException("Partner has not permission yet");
         }
         ParsedTwoSheets parsed = readTwoSheets(bytes);
         List<RowResult<ParentExcelRowDto>> parentResults = new ArrayList<>();
@@ -267,6 +270,8 @@ public class PartnerServiceImp implements PartnerService {
         Optional<Partner> partner = partnerRepository.findById(partnerId);
         if (partner.isEmpty()) {
             throw new NotFoundException("Not found partner");
+        } else if (partner.get().getStatus() == PartnerStatus.PENDING || partner.get().getStatus() == PartnerStatus.REJECTED) {
+            throw new BadRequestException("Partner has not permission yet");
         }
         Optional<Student> student = studentRepository.findById(studentId);
         if (student.isEmpty()) {
@@ -292,6 +297,8 @@ public class PartnerServiceImp implements PartnerService {
         Optional<Partner> partner = partnerRepository.findById(partnerId);
         if (partner.isEmpty()) {
             throw new NotFoundException("Not found partner");
+        } else if (partner.get().getStatus() == PartnerStatus.PENDING || partner.get().getStatus() == PartnerStatus.REJECTED) {
+            throw new BadRequestException("Partner has not permission yet");
         }
         Optional<Student> student = studentRepository.findById(studentId);
         if (student.isEmpty()) {
@@ -310,6 +317,12 @@ public class PartnerServiceImp implements PartnerService {
 
     @Override
     public UserListResponseDto<?> getListUser(String partnerId, PageFilterRequestDto pageFilterRequestDto) {
+        Optional<Partner> partner = partnerRepository.findById(partnerId);
+        if (partner.isEmpty()) {
+            throw new NotFoundException("Not found partner");
+        } else if (partner.get().getStatus() == PartnerStatus.PENDING || partner.get().getStatus() == PartnerStatus.REJECTED) {
+            throw new BadRequestException("Partner has not permission yet");
+        }
         Pageable pageable = PageRequest.of(
                 pageFilterRequestDto.getPageNo()-1,
                 pageFilterRequestDto.getPageSize());
@@ -361,6 +374,8 @@ public class PartnerServiceImp implements PartnerService {
         Optional<Partner> partner = partnerRepository.findById(partnerId);
         if (partner.isEmpty()) {
             throw new NotFoundException("Not found partner");
+        } else if (partner.get().getStatus() == PartnerStatus.PENDING || partner.get().getStatus() == PartnerStatus.REJECTED) {
+            throw new BadRequestException("Partner has not permission yet");
         }
         List<Student> students = studentRequestDtos.stream().map(dto -> {
             User user = userMapper.toUser(dto, null);
@@ -406,6 +421,8 @@ public class PartnerServiceImp implements PartnerService {
         Optional<Partner> partner = partnerRepository.findById(partnerId);
         if (partner.isEmpty()) {
             throw new NotFoundException("Not found partner");
+        } else if (partner.get().getStatus() == PartnerStatus.PENDING || partner.get().getStatus() == PartnerStatus.REJECTED) {
+            throw new BadRequestException("Partner has not permission yet");
         }
         List<ParentCredentialMail> createdParentMails = new ArrayList<>();
         List<Parent> parents = request.stream().map(dto -> {

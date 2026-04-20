@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Account Rejected</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f6f8;">
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+        <td align="center" style="padding:20px 10px;">
+
+            <table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#ffffff;">
+
+                <!-- HEADER -->
+                <tr>
+                    <td align="center" style="background-color:#B71C1C;padding:20px;">
+                        <span style="color:#ffffff;font-size:20px;font-weight:bold;font-family:Arial;">
+                            Tài khoản bị từ chối
+                        </span>
+                    </td>
+                </tr>
+
+                <!-- BODY -->
+                <tr>
+                    <td style="padding:30px 25px;font-family:Arial;font-size:14px;color:#333;line-height:1.6;">
+
+                        <p style="margin:0 0 15px;">
+                            Xin chào <strong th:text="${name}">Partner</strong>,
+                        </p>
+
+                        <p style="margin:0 0 15px;">
+                            Tài khoản của bạn đã
+                            <span style="white-space:nowrap;">
+                                <strong style="color:#B71C1C;">không được phê duyệt</strong>
+                            </span>.
+                        </p>
+
+                        <p style="margin:0 0 20px;">
+                            Vui lòng kiểm tra lại thông tin và liên hệ với hệ thống nếu cần hỗ trợ.
+                        </p>
+                        <p style="margin:0 0 20px;">
+                            Thông tin liên hệ: ecoversesystem2026@gmail.com.
+                        </p>
+                        <p>
+                            Trân trọng,<br/>
+                            <strong>Ecoverse Team</strong>
+                        </p>
+
+                    </td>
+                </tr>
+
+                <!-- FOOTER -->
+                <tr>
+                    <td align="center" style="background:#f0f0f0;padding:15px;font-size:12px;color:#777;font-family:Arial;">
+                        © 2026 Ecoverse
+                    </td>
+                </tr>
+
+            </table>
+
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

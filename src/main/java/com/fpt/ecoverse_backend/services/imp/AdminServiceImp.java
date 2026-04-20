@@ -1,5 +1,6 @@
 package com.fpt.ecoverse_backend.services.imp;
 
+import com.fpt.ecoverse_backend.dtos.PartnerStatusChangedEvent;
 import com.fpt.ecoverse_backend.dtos.requests.PageFilterRequestDto;
 import com.fpt.ecoverse_backend.dtos.responses.PartnerResponseDto;
 import com.fpt.ecoverse_backend.entities.Partner;
@@ -13,6 +14,7 @@ import com.fpt.ecoverse_backend.mappers.PartnerMapper;
 import com.fpt.ecoverse_backend.repositories.PartnerRepository;
 import com.fpt.ecoverse_backend.repositories.UserRepository;
 import com.fpt.ecoverse_backend.services.AdminService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,11 +31,13 @@ public class AdminServiceImp implements AdminService {
     private final UserRepository userRepository;
     private final PartnerRepository partnerRepository;
     private final PartnerMapper partnerMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public AdminServiceImp(UserRepository userRepository, PartnerRepository partnerRepository, PartnerMapper partnerMapper) {
+    public AdminServiceImp(UserRepository userRepository, PartnerRepository partnerRepository, PartnerMapper partnerMapper, ApplicationEventPublisher eventPublisher) {
         this.userRepository = userRepository;
         this.partnerRepository = partnerRepository;
         this.partnerMapper = partnerMapper;
+        this.eventPublisher = eventPublisher;
     }
 
 
@@ -51,6 +55,7 @@ public class AdminServiceImp implements AdminService {
         }
         partner.setStatus(isApproved ? PartnerStatus.APPROVED : PartnerStatus.REJECTED);
         partnerRepository.save(partner);
+        eventPublisher.publishEvent(new PartnerStatusChangedEvent(partnerId, partner.getUser().getEmail(), partner.getStatus().name()));
         return partnerMapper.toPartnerResponse(partner, partner.getUser());
     }
 
