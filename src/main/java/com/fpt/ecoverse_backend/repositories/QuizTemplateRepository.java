@@ -21,19 +21,19 @@ public interface QuizTemplateRepository extends JpaRepository<QuizTemplate, Stri
             @Param("title") String title,
             Pageable pageable);
 
-    @Query("SELECT qt FROM QuizTemplate qt WHERE qt.id = :id AND qt.partner.id = :partnerId")
+    @Query("SELECT qt FROM QuizTemplate qt WHERE qt.id = :id AND qt.partner.id = :partnerId and qt.active = true")
     Optional<QuizTemplate> findByIdAndPartnerId(@Param("id") String id, @Param("partnerId") String partnerId);
 
     @Query("SELECT qt FROM QuizTemplate qt WHERE qt.active = true " +
            "AND (:title IS NULL OR qt.title ILIKE '%' || cast(:title as string ) || '%')")
     Page<QuizTemplate> findAllActive(@Param("title") String title, Pageable pageable);
 
-    @Query("SELECT qt FROM QuizTemplate qt WHERE qt.id = :quizTemplateId and qt.isCompetition = true")
+    @Query("SELECT qt FROM QuizTemplate qt WHERE qt.id = :quizTemplateId and qt.isCompetition = true and qt.active = true")
     Optional<QuizTemplate> findByIdForCompetition(@Param("quizTemplateId") String quizTemplateId);
 
     @Query("select count(q.id) from QuizTemplate q where q.partner.id = :partnerId and q.active = true")
     long countByPartnerId(@Param("partnerId") String partnerId);
 
-    @Query("select qt from QuizTemplate qt where qt.partner.id = :partnerId and qt.isCompetition = true")
+    @Query("select qt from QuizTemplate qt where qt.partner.id = :partnerId and qt.isCompetition = true and qt.active = true")
     List<QuizTemplate> findQuizTemplateCompetition(@Param("partnerId") String partnerId);
 }

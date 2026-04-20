@@ -231,11 +231,11 @@ public class RedemptionServiceImp implements RedemptionService {
                 );
             } else if (user.getRole() == UserType.PARTNERSHIP) {
                 response.setAvatarUrl(
-                        redemptionRequest.getPartner().getUser().getAvatarUrl()
+                        redemptionRequest.getStudent().getUser().getAvatarUrl()
                 );
             } else if (user.getRole() == UserType.STUDENT) {
                 response.setAvatarUrl(
-                        redemptionRequest.getParent().getUser().getAvatarUrl()
+                        redemptionRequest.getStudent().getUser().getAvatarUrl()
                 );
             }
             return response;

@@ -56,7 +56,7 @@ public class PartnerController {
         BulkCreateReportResponseDto response = partnerService.bulkCreate(bytes, partnerId);
 
         return ResponseUtil.success(
-                "Bulk create students and parent successfully. Please check file report",
+                "Process file successfully. Please check file report",
                 response
         );
     }
