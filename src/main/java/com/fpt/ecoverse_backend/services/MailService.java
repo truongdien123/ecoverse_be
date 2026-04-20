@@ -23,4 +23,6 @@ public interface MailService {
             int points,
             String requestTime
     );
+
+    void sendPartner(String to, String name, String status);
 }

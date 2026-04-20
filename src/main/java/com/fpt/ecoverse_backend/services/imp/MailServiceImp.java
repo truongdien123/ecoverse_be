@@ -137,5 +137,50 @@ public class MailServiceImp implements MailService {
             throw new RuntimeException("Send email failed", e);
         }
     }
+
+    @Override
+    @Async("mailExecutor")
+    public void sendPartner(String to, String name, String status) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(
+                    message,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                    StandardCharsets.UTF_8.name()
+            );
+
+            helper.setFrom("EcoVerse <" + from + ">");
+            helper.setTo(to);
+
+            Context context = new Context();
+            context.setVariable("name", name);
+
+            String template;
+            String subject;
+
+            if ("APPROVED".equalsIgnoreCase(status)) {
+                template = "mail/partner-approved";
+                subject = "[EcoVerse] Tài khoản Partner đã được phê duyệt";
+                context.setVariable("loginUrl", loginUrl);
+
+            } else if ("REJECTED".equalsIgnoreCase(status)) {
+                template = "mail/partner-rejected";
+                subject = "[EcoVerse] Tài khoản Partner bị từ chối";
+
+            } else {
+                throw new IllegalArgumentException("Invalid partner status: " + status);
+            }
+
+            helper.setSubject(subject);
+
+            String html = templateEngine.process(template, context);
+            helper.setText(html, true);
+
+            mailSender.send(message);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to send partner email to: " + to, e);
+        }
+    }
 }
 
