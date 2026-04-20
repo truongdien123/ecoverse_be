@@ -14,4 +14,5 @@ public interface DashboardService {
     Map<ApprovalStatus, Long> getRedemptionStatistics();
     long getPartnerCount();
     List<PartnerPointResponseDto> getPartnerPoints();
+    List<com.fpt.ecoverse_backend.dtos.responses.dashboard.AttemptStatsResponseDto> getAttemptStatsByDay(String partnerId);
 }
