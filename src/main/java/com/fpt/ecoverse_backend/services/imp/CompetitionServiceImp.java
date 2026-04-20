@@ -188,6 +188,7 @@ public class CompetitionServiceImp implements CompetitionService {
             Optional<CompetitionLink> competitionLink = competitionLinkRepository.findByCompetitionId(competition.getId());
             if (competitionLink.isPresent()) {
                 CompetitionResponseDto competitionResponseDto = competitionMapper.toCompetitionResponse(competition);
+                competitionResponseDto.setScore(competitionLink.get().getScore());
                 if (competitionLink.get().getGameRound() != null) {
                     GameRound gameRound = competitionLink.get().getGameRound();
                     GameRoundResponseDto gameRoundResponseDto = gameRoundMapper.toGameRoundResponse(gameRound);
