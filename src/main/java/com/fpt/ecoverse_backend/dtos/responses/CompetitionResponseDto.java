@@ -36,6 +36,9 @@ public class CompetitionResponseDto {
     @JsonProperty("scope")
     private TargetScope scope;
 
+    @JsonProperty("score")
+    private Integer score;
+
     @JsonProperty("target_class")
     private String targetClass;
 

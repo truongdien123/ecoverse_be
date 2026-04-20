@@ -50,9 +50,6 @@ public class AdminServiceImp implements AdminService {
         }
         Partner partner = partnerRepository.findById(partnerId)
                 .orElseThrow(() -> new NotFoundException("Partner not found"));
-        if (partner.getStatus() == PartnerStatus.APPROVED) {
-            throw new BadRequestException("Partner has already been approved");
-        }
         partner.setStatus(isApproved ? PartnerStatus.APPROVED : PartnerStatus.REJECTED);
         partnerRepository.save(partner);
         eventPublisher.publishEvent(new PartnerStatusChangedEvent(partnerId, partner.getUser().getEmail(), partner.getStatus().name()));
