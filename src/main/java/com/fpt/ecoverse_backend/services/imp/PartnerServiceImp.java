@@ -437,6 +437,43 @@ public class PartnerServiceImp implements PartnerService {
         return response;
     }
 
+    @Override
+    @Transactional
+    public StudentResponseDto deleteStudent(String partnerId, String studentId) {
+        Optional<Partner> partnerOpt = partnerRepository.findById(partnerId);
+        if (partnerOpt.isEmpty()) {
+            throw new NotFoundException("Not found partner");
+        }
+        Optional<Student> studentOpt = studentRepository.findById(studentId);
+        if (studentOpt.isEmpty() || !studentOpt.get().getPartner().getId().equals(partnerId)) {
+            throw new NotFoundException("Not found student");
+        }
+        Student student = studentOpt.get();
+        User user = student.getUser();
+        studentRepository.delete(student);
+        userRepository.delete(user);
+        return studentMapper.toStudentResponse(student);
+    }
+
+    @Override
+    @Transactional
+    public ParentResponseDto deleteParent(String partnerId, String parentId) {
+        Optional<Partner> partnerOpt = partnerRepository.findById(partnerId);
+        if (partnerOpt.isEmpty()) {
+            throw new NotFoundException("Not found partner");
+        }
+        Optional<Parent> parentOpt = parentRepository.findById(parentId);
+        if (parentOpt.isEmpty() || !parentOpt.get().getPartner().getId().equals(partnerId)) {
+            throw new NotFoundException("Not found parent");
+        }
+        Parent parent = parentOpt.get();
+        User user = parent.getUser();
+        parentRepository.delete(parent);
+        userRepository.delete(user);
+        return parentMapper.toParentResponse(parent);
+    }
+
+
     private String generateReportFile(
             List<RowResult<ParentExcelRowDto>> parentResults,
             List<RowResult<StudentExcelRowDto>> studentResults,
