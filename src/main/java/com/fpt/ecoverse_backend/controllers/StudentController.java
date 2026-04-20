@@ -48,4 +48,10 @@ public class StudentController {
     public ResponseEntity<?> updateAvatarStudent(@PathVariable("student_id") String studentId, @RequestParam("file") MultipartFile file) {
         return ResponseUtil.success("Update avatar student successfully", studentService.updateAvatar(studentId, file));
     }
+
+    @GetMapping("/{student_id}/competitions")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<?> getCompetitionsForStudent(@PathVariable("student_id") String studentId) {
+        return ResponseUtil.success("Get competitions for student successfully", studentService.getCompetitionsForStudent(studentId));
+    }
 }

@@ -17,6 +17,9 @@ public class LeaderboardResponseDto {
     @JsonProperty("student_name")
     private String studentName;
 
+    @JsonProperty("avatar_url")
+    private String avatarUrl;
+
     @JsonProperty("grade")
     private String grade;
 

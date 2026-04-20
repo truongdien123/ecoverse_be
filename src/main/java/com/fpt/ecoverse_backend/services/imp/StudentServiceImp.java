@@ -1,27 +1,25 @@
 package com.fpt.ecoverse_backend.services.imp;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fpt.ecoverse_backend.dtos.StatisticStudent;
 import com.fpt.ecoverse_backend.dtos.requests.StudentRequestDto;
-import com.fpt.ecoverse_backend.dtos.responses.StudentResponseDto;
-import com.fpt.ecoverse_backend.dtos.responses.WasteItemResponseDto;
-import com.fpt.ecoverse_backend.entities.Student;
-import com.fpt.ecoverse_backend.entities.User;
-import com.fpt.ecoverse_backend.entities.WasteItem;
+import com.fpt.ecoverse_backend.dtos.responses.*;
+import com.fpt.ecoverse_backend.entities.*;
 import com.fpt.ecoverse_backend.exceptions.NotFoundException;
-import com.fpt.ecoverse_backend.mappers.StudentMapper;
-import com.fpt.ecoverse_backend.mappers.UserMapper;
-import com.fpt.ecoverse_backend.mappers.WasteItemMapper;
-import com.fpt.ecoverse_backend.repositories.StudentRepository;
-import com.fpt.ecoverse_backend.repositories.UserRepository;
-import com.fpt.ecoverse_backend.repositories.WasteItemRepository;
+import com.fpt.ecoverse_backend.mappers.*;
+import com.fpt.ecoverse_backend.repositories.*;
 import com.fpt.ecoverse_backend.services.StatisticService;
 import com.fpt.ecoverse_backend.services.StudentService;
 import com.fpt.ecoverse_backend.utils.UploadFile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class StudentServiceImp implements StudentService {
@@ -34,8 +32,13 @@ public class StudentServiceImp implements StudentService {
     private final StatisticService statisticService;
     private final WasteItemRepository wasteItemRepository;
     private final WasteItemMapper wasteItemMapper;
+    private final CompetitionRepository competitionRepository;
+    private final CompetitionLinkRepository competitionLinkRepository;
+    private final GameRoundMapper gameRoundMapper;
+    private final CompetitionMapper competitionMapper;
+    private final ObjectMapper objectMapper;
 
-    public StudentServiceImp(StudentRepository studentRepository, StudentMapper studentMapper, UserMapper userMapper, UserRepository userRepository, UploadFile uploadFile, StatisticService statisticService, WasteItemRepository wasteItemRepository, WasteItemMapper wasteItemMapper) {
+    public StudentServiceImp(StudentRepository studentRepository, StudentMapper studentMapper, UserMapper userMapper, UserRepository userRepository, UploadFile uploadFile, StatisticService statisticService, WasteItemRepository wasteItemRepository, WasteItemMapper wasteItemMapper, CompetitionRepository competitionRepository, CompetitionLinkRepository competitionLinkRepository, GameRoundMapper gameRoundMapper, CompetitionMapper competitionMapper, ObjectMapper objectMapper) {
         this.studentRepository = studentRepository;
         this.studentMapper = studentMapper;
         this.userMapper = userMapper;
@@ -44,6 +47,11 @@ public class StudentServiceImp implements StudentService {
         this.statisticService = statisticService;
         this.wasteItemRepository = wasteItemRepository;
         this.wasteItemMapper = wasteItemMapper;
+        this.competitionRepository = competitionRepository;
+        this.competitionLinkRepository = competitionLinkRepository;
+        this.gameRoundMapper = gameRoundMapper;
+        this.competitionMapper = competitionMapper;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -108,5 +116,69 @@ public class StudentServiceImp implements StudentService {
             userRepository.save(student.get().getUser());
         }
         return studentMapper.toStudentResponse(student.get());
+    }
+
+    @Override
+    public List<CompetitionResponseDto> getCompetitionsForStudent(String studentId) {
+        Optional<Student> student = studentRepository.findById(studentId);
+        if (student.isEmpty()) {
+            throw new NotFoundException("Not found student");
+        }
+        Partner partner = student.get().getPartner();
+        String targetScopeClass = student.get().getGrade();
+        List<Competition> competitions = competitionRepository.findCompetitionsForStudent(partner.getId(), targetScopeClass);
+        List<CompetitionResponseDto> responses = new ArrayList<>();
+        competitions.forEach(competition -> {
+            Optional<CompetitionLink> competitionLink = competitionLinkRepository.findByCompetitionId(competition.getId());
+            if (competitionLink.isPresent()) {
+                CompetitionResponseDto competitionResponseDto = competitionMapper.toCompetitionResponse(competition);
+                if (competitionLink.get().getGameRound() != null) {
+                    GameRound gameRound = competitionLink.get().getGameRound();
+                    GameRoundResponseDto gameRoundResponseDto = gameRoundMapper.toGameRoundResponse(gameRound);
+                    gameRoundResponseDto.setPartnerId(partner.getId());
+                    competitionResponseDto.setGameRound(gameRoundResponseDto);
+                    responses.add(competitionResponseDto);
+                } else if (competitionLink.get().getQuizTemplate() != null) {
+                    QuizTemplate quizTemplate = competitionLink.get().getQuizTemplate();
+                    QuizTemplateResponseDto quizTemplateResponseDto = toDetailResponse(quizTemplate, true);
+                    competitionResponseDto.setQuizTemplate(quizTemplateResponseDto);
+                    responses.add(competitionResponseDto);
+                }
+            }
+        });
+        return responses;
+    }
+
+    private QuizTemplateResponseDto toDetailResponse(QuizTemplate t, boolean includeQuestions) {
+        return QuizTemplateResponseDto.builder()
+                .id(t.getId())
+                .title(t.getTitle())
+                .description(t.getDescription())
+                .questionCount(t.getQuestions() != null ? t.getQuestions().size() : 0)
+                .active(t.getActive())
+                .partnerId(t.getPartner() != null ? t.getPartner().getId() : null)
+                .partnerName(t.getPartner() != null ? t.getPartner().getOrganizationName() : null)
+                .isCompetition(t.getIsCompetition())
+                .questions(includeQuestions && t.getQuestions() != null ? t.getQuestions().stream()
+                        .map(q -> QuizTemplateResponseDto.QuestionResponseDto.builder()
+                                .id(q.getId())
+                                .text(q.getText())
+                                .options(parseOptions(q.getOptionsJson()))
+                                .correctAnswer(q.getCorrectAnswer())
+                                .explanation(q.getExplanation())
+                                .build())
+                        .collect(Collectors.toList()) : null)
+                .createdAt(t.getCreatedAt())
+                .updatedAt(t.getUpdatedAt())
+                .build();
+    }
+
+    private List<String> parseOptions(String json) {
+        if (json == null) return List.of();
+        try {
+            return objectMapper.readValue(json, new TypeReference<List<String>>() {});
+        } catch (JsonProcessingException e) {
+            return List.of();
+        }
     }
 }
