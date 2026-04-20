@@ -17,4 +17,5 @@ public interface CompetitionService {
     List<CompetitionParticipantResponseDto> getListParticipant(String competitionId);
     CompetitionResponseDto updateCompetition(String competitionId, CompetitionRequestDto request);
     CompetitionResponseDto deleteCompetition(String competitionId);
+    CompetitionParticipantResponseDto checkParticipant(String studentId, String competitionId);
 }
