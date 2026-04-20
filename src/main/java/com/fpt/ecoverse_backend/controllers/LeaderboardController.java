@@ -18,7 +18,7 @@ public class LeaderboardController {
     }
 
     @GetMapping("/{partner_id}")
-    @PreAuthorize("hasRole('STUDENT')")
+    @PreAuthorize("hasAnyRole('STUDENT', 'PARTNERSHIP', 'PARENT')")
     public ResponseEntity<?> getListLeaderboard(@PathVariable("partner_id") String partnerId, LeaderboardScope scope, @RequestParam(required = false)  String grade, int page, int size) {
         return ResponseUtil.success("Get list leaderboard successfully", leaderboardService.getListLeaderboard(partnerId, scope, grade, page, size));
     }
