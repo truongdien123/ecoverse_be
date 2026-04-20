@@ -13,4 +13,7 @@ public interface CompetitionRepository extends JpaRepository<Competition, String
 
     @Query("select c from Competition c where c.partner.id = :partnerId")
     List<Competition> findByPartnerId(@Param("partnerId") String partnerId);
+
+    @Query("select c from Competition c where (c.targetClassCode = :targetScopeClass and c.targetScope = 'CLASS' and c.partner.id = :partnerId) or (c.partner.id = :partnerId and c.targetScope = 'SCHOOL')")
+    List<Competition> findCompetitionsForStudent(@Param("partnerId") String partnerId, @Param("targetScopeClass") String targetScopeClass);
 }

@@ -1,5 +1,8 @@
 package com.fpt.ecoverse_backend.services.imp;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fpt.ecoverse_backend.dtos.requests.CompetitionLinkRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.CompetitionParticipantRequestDto;
 import com.fpt.ecoverse_backend.dtos.requests.CompetitionRequestDto;
@@ -19,6 +22,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CompetitionServiceImp implements CompetitionService {
@@ -35,8 +39,9 @@ public class CompetitionServiceImp implements CompetitionService {
     private final CompetitionParticipantRepository competitionParticipantRepository;
     private final StudentMapper studentMapper;
     private final GameRoundMapper gameRoundMapper;
+    private final ObjectMapper objectMapper;
 
-    public CompetitionServiceImp(CompetitionRepository competitionRepository, PartnerRepository partnerRepository, CompetitionMapper competitionMapper, QuizTemplateRepository quizTemplateRepository, GameRoundRepository gameRoundRepository, CompetitionLinkRepository competitionLinkRepository, CompetitionLinkMapper competitionLinkMapper, StudentRepository studentRepository, CompetitionParticipantMapper competitionParticipantMapper, CompetitionParticipantRepository competitionParticipantRepository, StudentMapper studentMapper, GameRoundMapper gameRoundMapper) {
+    public CompetitionServiceImp(CompetitionRepository competitionRepository, PartnerRepository partnerRepository, CompetitionMapper competitionMapper, QuizTemplateRepository quizTemplateRepository, GameRoundRepository gameRoundRepository, CompetitionLinkRepository competitionLinkRepository, CompetitionLinkMapper competitionLinkMapper, StudentRepository studentRepository, CompetitionParticipantMapper competitionParticipantMapper, CompetitionParticipantRepository competitionParticipantRepository, StudentMapper studentMapper, GameRoundMapper gameRoundMapper, ObjectMapper objectMapper) {
         this.competitionRepository = competitionRepository;
         this.partnerRepository = partnerRepository;
         this.competitionMapper = competitionMapper;
@@ -49,6 +54,7 @@ public class CompetitionServiceImp implements CompetitionService {
         this.competitionParticipantRepository = competitionParticipantRepository;
         this.studentMapper = studentMapper;
         this.gameRoundMapper = gameRoundMapper;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -190,16 +196,9 @@ public class CompetitionServiceImp implements CompetitionService {
                     responses.add(competitionResponseDto);
                 } else if (competitionLink.get().getQuizTemplate() != null) {
                     QuizTemplate quizTemplate = competitionLink.get().getQuizTemplate();
-                    QuizTemplateResponseDto quizTemplateResponseDto = new QuizTemplateResponseDto();
-                    quizTemplateResponseDto.setId(quizTemplate.getId());
-                    quizTemplateResponseDto.setTitle(quizTemplate.getTitle());
-                    quizTemplateResponseDto.setDescription(quizTemplate.getDescription());
-                    quizTemplateResponseDto.setActive(quizTemplate.getActive());
-                    quizTemplateResponseDto.setIsCompetition(quizTemplate.getIsCompetition());
-                    quizTemplateResponseDto.setPartnerId(partnerId);
+                    QuizTemplateResponseDto quizTemplateResponseDto = toDetailResponse(quizTemplate, true);
                     competitionResponseDto.setQuizTemplate(quizTemplateResponseDto);
                     responses.add(competitionResponseDto);
-
                 }
             }
         });
@@ -252,6 +251,39 @@ public class CompetitionServiceImp implements CompetitionService {
         }
         competitionRepository.delete(competition.get());
         return competitionMapper.toCompetitionResponse(competition.get());
+    }
+
+    private QuizTemplateResponseDto toDetailResponse(QuizTemplate t, boolean includeQuestions) {
+        return QuizTemplateResponseDto.builder()
+                .id(t.getId())
+                .title(t.getTitle())
+                .description(t.getDescription())
+                .questionCount(t.getQuestions() != null ? t.getQuestions().size() : 0)
+                .active(t.getActive())
+                .partnerId(t.getPartner() != null ? t.getPartner().getId() : null)
+                .partnerName(t.getPartner() != null ? t.getPartner().getOrganizationName() : null)
+                .isCompetition(t.getIsCompetition())
+                .questions(includeQuestions && t.getQuestions() != null ? t.getQuestions().stream()
+                        .map(q -> QuizTemplateResponseDto.QuestionResponseDto.builder()
+                                .id(q.getId())
+                                .text(q.getText())
+                                .options(parseOptions(q.getOptionsJson()))
+                                .correctAnswer(q.getCorrectAnswer())
+                                .explanation(q.getExplanation())
+                                .build())
+                        .collect(Collectors.toList()) : null)
+                .createdAt(t.getCreatedAt())
+                .updatedAt(t.getUpdatedAt())
+                .build();
+    }
+
+    private List<String> parseOptions(String json) {
+        if (json == null) return List.of();
+        try {
+            return objectMapper.readValue(json, new TypeReference<List<String>>() {});
+        } catch (JsonProcessingException e) {
+            return List.of();
+        }
     }
 
 }

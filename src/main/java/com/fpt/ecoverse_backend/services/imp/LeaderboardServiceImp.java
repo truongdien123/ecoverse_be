@@ -81,6 +81,7 @@ public class LeaderboardServiceImp implements LeaderboardService {
             dto.setGrade(item.getGrade());
             dto.setPoints(item.getPoints());
             dto.setMinDuration(item.getMinDuration());
+            dto.setAvatarUrl(item.getAvatarUrl());
             return dto;
         }).toList();
     }

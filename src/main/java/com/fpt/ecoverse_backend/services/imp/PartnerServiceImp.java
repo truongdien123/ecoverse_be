@@ -41,7 +41,7 @@ import java.util.regex.Pattern;
 public class PartnerServiceImp implements PartnerService {
 
     private static final Pattern EMAIL_REGEX =
-            Pattern.compile("^[A-Za-z0-9]+([._+-]?[A-Za-z0-9]+)*@[A-Za-z0-9-]+(\\\\.[A-Za-z0-9-]+)+$");
+            Pattern.compile("^[A-Za-z0-9]+([._+-]?[A-Za-z0-9]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)+$");
     private static final Pattern PHONE_REGEX =
             Pattern.compile("^\\+?[0-9]{9,11}$");
     private static final String CHARACTERS =
@@ -203,6 +203,11 @@ public class PartnerServiceImp implements PartnerService {
                 studentResults.add(RowResult.failed(rowNo, dto, "Student grade required"));
             }
             String studentCode = generateStudentCode(dto.getFullName(), dto.getGrade(), dto.getClassNumber());
+            Optional<Student> existingStudent = studentRepository.findByStudentCode(studentCode);
+            if (existingStudent.isPresent()) {
+                studentResults.add(RowResult.failed(rowNo, dto, "Student code already exists"));
+                continue;
+            }
             User user = new User();
             Student student = new Student();
             user.setFullName(dto.getFullName().trim());

@@ -1,6 +1,7 @@
 package com.fpt.ecoverse_backend.services;
 
 import com.fpt.ecoverse_backend.dtos.requests.StudentRequestDto;
+import com.fpt.ecoverse_backend.dtos.responses.CompetitionResponseDto;
 import com.fpt.ecoverse_backend.dtos.responses.StudentResponseDto;
 import com.fpt.ecoverse_backend.dtos.responses.WasteItemResponseDto;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,4 +14,5 @@ public interface StudentService {
     StudentResponseDto deleteStudent(String studentId);
     List<WasteItemResponseDto> getWasteItemByAI(String studentId);
     StudentResponseDto updateAvatar(String studentId, MultipartFile file);
+    List<CompetitionResponseDto> getCompetitionsForStudent(String studentId);
 }

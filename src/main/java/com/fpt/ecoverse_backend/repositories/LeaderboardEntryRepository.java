@@ -36,9 +36,10 @@ public interface LeaderboardEntryRepository extends JpaRepository<LeaderboardEnt
 SELECT
     le.student_id as studentId,
     u.full_name as studentName,
+    u.avatar_url as avatarUrl,
     s.grade as grade,
     le.points as points,
-    COALESCE(ga.total_game_duration, 0) + COALESCE(qa.total_quiz_duration, 0) as totalDuration
+    COALESCE(ga.total_game_duration, 0) + COALESCE(qa.total_quiz_duration, 0) as minDuration
 
 FROM leaderboard_entries le
 JOIN students s ON le.student_id = s.id
@@ -62,7 +63,7 @@ WHERE le.partner_id = :partnerId
     AND le.scope = :scope
     AND (:grade IS NULL OR s.grade = :grade)
 
-ORDER BY le.points DESC, totalDuration ASC
+ORDER BY le.points DESC, minDuration ASC
 """,
             countQuery = """
 SELECT COUNT(*)
