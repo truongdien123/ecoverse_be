@@ -166,7 +166,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/redemptions/parents/{parent_id}/students/{student_id}/reward-items/{rewardItem_id}").hasRole("PARENT")
 
                         // Leaderboard endpoints
-                        .requestMatchers(HttpMethod.GET, "/leaderboards/{partner_id}").hasRole("STUDENT")
+                        .requestMatchers(HttpMethod.GET, "/leaderboards/{partner_id}").hasAnyRole("STUDENT", "PARTNERSHIP", "PARENT")
                         .requestMatchers(HttpMethod.GET, "/leaderboards/partners/{partner_id}/students/{student_id}").hasAnyRole("STUDENT", "PARTNERSHIP", "PARENT")
 
                         // Competition endpoints
