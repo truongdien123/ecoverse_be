@@ -104,8 +104,9 @@ public class CompetitionServiceImp implements CompetitionService {
 
             competitionLinkRepository.save(competitionLink);
         }
-
-        return competitionMapper.toCompetitionResponse(competition);
+        CompetitionResponseDto responseDto = competitionMapper.toCompetitionResponse(competition);
+        responseDto.setScore(request.getLink().getScore() != null ? request.getLink().getScore() : 0);
+        return responseDto;
     }
 
     @Override
@@ -232,6 +233,7 @@ public class CompetitionServiceImp implements CompetitionService {
         }
         Competition updatedCompetition = competition.get();
         competitionMapper.updateCompetition(updatedCompetition, request);
+        updatedCompetition.setStatus(request.getStatus());
         competitionRepository.save(updatedCompetition);
         Optional<CompetitionLink> competitionLink = competitionLinkRepository.findByCompetitionId(updatedCompetition.getId());
         if (competitionLink.isEmpty()) {
@@ -241,6 +243,7 @@ public class CompetitionServiceImp implements CompetitionService {
         GameRoundResponseDto gameRoundResponseDto = gameRoundMapper.toGameRoundResponse(gameRound);
         CompetitionResponseDto response = competitionMapper.toCompetitionResponse(updatedCompetition);
         response.setGameRound(gameRoundResponseDto);
+        response.setScore(competitionLink.get().getScore());
         return response;
     }
 
@@ -252,6 +255,20 @@ public class CompetitionServiceImp implements CompetitionService {
         }
         competitionRepository.delete(competition.get());
         return competitionMapper.toCompetitionResponse(competition.get());
+    }
+
+    @Override
+    public CompetitionParticipantResponseDto checkParticipant(String studentId, String competitionId) {
+        Optional<Student> student = studentRepository.findById(studentId);
+        if (student.isEmpty()) {
+            throw new NotFoundException("Not found student");
+        }
+        Optional<Competition> competition = competitionRepository.findById(competitionId);
+        if (competition.isEmpty()) {
+            throw new NotFoundException("Not found competition");
+        }
+        Optional<CompetitionParticipant> competitionParticipant = competitionParticipantRepository.findByCompetitionAndStudent(competitionId, studentId);
+        return competitionParticipant.map(competitionParticipantMapper::toResponse).orElse(null);
     }
 
     private QuizTemplateResponseDto toDetailResponse(QuizTemplate t, boolean includeQuestions) {

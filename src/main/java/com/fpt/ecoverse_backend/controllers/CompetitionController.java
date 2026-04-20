@@ -60,4 +60,10 @@ public class CompetitionController {
     public ResponseEntity<?> deleteCompetition(@PathVariable("competition_id") String competitionId) {
         return ResponseUtil.success("Delete competition successfully", competitionService.deleteCompetition(competitionId));
     }
+
+    @GetMapping("/{competition_id}/students/{student_id}")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<?> checkParticipant(@PathVariable("competition_id") String competitionId, @PathVariable("student_id") String studentId) {
+        return ResponseUtil.success("Check participant competition successfully", competitionService.checkParticipant(studentId, competitionId));
+    }
 }
