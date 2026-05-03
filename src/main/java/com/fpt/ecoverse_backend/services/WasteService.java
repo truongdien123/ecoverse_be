@@ -13,6 +13,7 @@ public interface WasteService {
     WasteItemResponseDto createWasteItem(String userId, WasteItemRequestDto request);
     WasteBinResponseDto createWasteBin(String adminId, WasteBinRequestDto request);
     List<WasteBinResponseDto> getWasteBins();
+    List<WasteItemResponseDto> getAllWasteItems();
     List<WasteItemResponseDto> getWasteItems(String userId, String gameRoundId);
     WasteItemResponseDto updateWasteItem(String userId, String wasteItemId, WasteItemRequestDto request);
     WasteBinResponseDto updateWasteBin(String adminId, String wasteBinId, WasteBinRequestDto request);

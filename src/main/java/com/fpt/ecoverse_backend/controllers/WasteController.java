@@ -44,6 +44,12 @@ public class WasteController {
         return ResponseUtil.success("Get waste bins successfully", wasteService.getWasteBins());
     }
 
+    @GetMapping("/items")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PARTNERSHIP')")
+    public ResponseEntity<?> getAllWasteItems() {
+        return ResponseUtil.success("Get all waste items successfully", wasteService.getAllWasteItems());
+    }
+
     @GetMapping("/items/users/{user_id}/game-rounds/{game_round_id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'PARTNERSHIP', 'STUDENT')")
     public ResponseEntity<?> getWasteItems(@PathVariable("user_id") String userId, @PathVariable("game_round_id") String gameRoundId) {
