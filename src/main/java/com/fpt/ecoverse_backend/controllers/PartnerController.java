@@ -102,5 +102,19 @@ public class PartnerController {
         List<ParentResponseDto> response = partnerService.createParents(partnerId, request);
         return ResponseUtil.success("Create parents successfully", response);
     }
+
+    @DeleteMapping("/{partnership_id}/students/{student_id}")
+    @PreAuthorize("hasAnyRole('PARTNERSHIP', 'ADMIN')")
+    public ResponseEntity<?> deleteStudent(@PathVariable("partnership_id") String partnerId, @PathVariable("student_id") String studentId) {
+        StudentResponseDto response = partnerService.deleteStudent(partnerId, studentId);
+        return ResponseUtil.success("Delete student successfully", response);
+    }
+
+    @DeleteMapping("/{partnership_id}/parents/{parent_id}")
+    @PreAuthorize("hasAnyRole('PARTNERSHIP', 'ADMIN')")
+    public ResponseEntity<?> deleteParent(@PathVariable("partnership_id") String partnerId, @PathVariable("parent_id") String parentId) {
+        ParentResponseDto response = partnerService.deleteParent(partnerId, parentId);
+        return ResponseUtil.success("Delete parent successfully", response);
+    }
 }
 

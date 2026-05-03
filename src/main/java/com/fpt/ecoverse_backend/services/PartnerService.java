@@ -17,4 +17,6 @@ public interface PartnerService {
     List<StudentResponseDto> createStudents(String partnerId, List<StudentRequestDto> studentRequestDtos);
     PartnerResponseDto deletePartner(String partnerId);
     List<ParentResponseDto> createParents(String partnerId, List<ParentRequestDto> request);
+    StudentResponseDto deleteStudent(String partnerId, String studentId);
+    ParentResponseDto deleteParent(String partnerId, String parentId);
 }
